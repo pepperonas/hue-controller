@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hue Controller Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2C2E3B;
+            color: #FFFFFF;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+       .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-weight: 300;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .power-display {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+            color: #FFFFFF;
+            font-size: 1rem;
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 5px 0;
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: scale(1.02);
+        }
+
+        .btn.danger {
+            background: #f44336;
+        }
+
+        .btn.danger:hover {
+            background: #da190b;
+        }
+
+        .btn.warning {
+            background: #FF9800;
+        }
+
+        .btn.warning:hover {
+            background: #F57C00;
+        }
+
+        .input-group {
+            margin: 10px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #E0E0E0;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            font-size: 1rem;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFFFFF;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-picker {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .global-controls {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .global-controls h3 {
+            margin-bottom: 15px;
+            color: #FFCDD2;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .status-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: #E0E0E0;
+            margin-top: 5px;
+        }
+
+        .effect-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .effect-controls .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .timer-list, .effect-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .timer-item, .effect-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timer-item:last-child, .effect-item:last-child {
+            border-bottom: none;
+        }
+
+        .scene-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .scene-btn {
+            padding: 15px 10px;
+            background: rgba(156, 39, 176, 0.2);
+            border: 1px solid rgba(156, 39, 176, 0.5);
+            border-radius: 8px;
+            color: #FFFFFF;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .scene-btn:hover {
+            background: rgba(156, 39, 176, 0.4);
+        }
+
+        .power-chart {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 300px;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #FFCDD2;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(244, 67, 54, 0.5);
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #C8E6C9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .effect-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Hue Controller Pro X</h1>
+            <div class="power-display">
+                <span id="current-power">Lade Stromverbrauch...</span>
+            </div>
+        </div>
+
+        <div id="messages"></div>
+
+        <div class="global-controls">
+            <h3>🚨 Globale Steuerung</h3>
+            <div class="effect-controls">
+                <button class="btn" onclick="globalControl('all-on')">Alles An</button>
+                <button class="btn danger" onclick="globalControl('all-off')">Alles Aus</button>
+                <button class="btn danger" onclick="globalControl('emergency-off')">Notaus</button>
+                <input type="color" class="color-picker" onchange="globalColorChange(this.value)" title="Globale Farbe">
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('lights')">Lichter</button>
+            <button class="tab" onclick="switchTab('groups')">Gruppen</button>
+            <button class="tab" onclick="switchTab('scenes')">Szenen</button>
+            <button class="tab" onclick="switchTab('effects')">Effekte</button>
+            <button class="tab" onclick="switchTab('timers')">Timer</button>
+            <button class="tab" onclick="switchTab('sensors')">Sensoren</button>
+            <button class="tab" onclick="switchTab('power')">Stromverbrauch</button>
+        </div>
+
+        <div id="lights-tab" class="tab-content active">
+            <div id="lights-container" class="controls-grid"></div>
+        </div>
+
+        <div id="groups-tab" class="tab-content">
+            <div id="groups-container" class="controls-grid"></div>
+        </div>
+
+        <div id="scenes-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">Verfügbare Szenen</div>
+                <div id="scenes-container" class="scene-grid"></div>
+            </div>
+        </div>
+
+        <div id="effects-tab" class="tab-content">
+            <div class="controls-grid">
+                <div class="card">
+                    <div class="card-title">Strobo Effekt</div>
+                    <div class="input-group">
+                        <label>Ziel wählen:</label>
+                        <select id="strobe-target-type">
+                            <option value="light">Einzelnes Licht</option>
+                            <option value="group">Gruppe</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>ID:</label>
+                        <input type="text" id="strobe-target-id" placeholder="z.B. 1">
+                    </div>
+                    <div class="input-group">
+                        <label>Dauer (Sekunden):</label>
+                        <input type="number" id="strobe-duration" value="10" min="1" max="300">
+                    </div>
+                    <div class="input-group">
+                        <label>Intervall (Sekunden):</label>
+                        <input type="number" id="strobe-interval" value="0.5" min="0.1" max="5" step="0.1">
+                    </div>
+                    <button class="btn warning" onclick="startStrobe()">Strobo Starten</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Farbschleife</div>
+                    <div class="input-group">
+                        <label>Ziel wählen:</label>
+                        <select id="colorloop-target-type">
+                            <option value="light">Einzelnes Licht</option>
+                            <option value="group">Gruppe</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>ID:</label>
+                        <input type="text" id="colorloop-target-id" placeholder="z.B. 1">
+                    </div>
+                    <div class="input-group">
+                        <label>Dauer (Sekunden):</label>
+                        <input type="number" id="colorloop-duration" value="30" min="5" max="600">
+                    </div>
+                    <button class="btn warning" onclick="startColorloop()">Farbschleife Starten</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Aktive Effekte</div>
+                    <div id="effects-list" class="effect-list">
+                        <div>Keine aktiven Effekte</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="timers-tab" class="tab-content">
+            <div class="controls-grid">
+                <div class="card">
+                    <div class="card-title">Timer erstellen</div>
+                    <div class="input-group">
+                        <label>Ziel wählen:</label>
+                        <select id="timer-target-type">
+                            <option value="light">Einzelnes Licht</option>
+                            <option value="group">Gruppe</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>ID:</label>
+                        <input type="text" id="timer-target-id" placeholder="z.B. 1">
+                    </div>
+                    <div class="input-group">
+                        <label>Verzögerung (Sekunden):</label>
+                        <input type="number" id="timer-delay" value="60" min="1" max="86400">
+                    </div>
+                    <div class="input-group">
+                        <label>Aktion:</label>
+                        <select id="timer-action">
+                            <option value="off">Ausschalten</option>
+                            <option value="on">Einschalten</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="createTimer()">Timer Erstellen</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Aktive Timer</div>
+                    <div id="timers-list" class="timer-list">
+                        <div>Keine aktiven Timer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sensors-tab" class="tab-content">
+            <div id="sensors-container" class="controls-grid"></div>
+        </div>
+
+        <div id="power-tab" class="tab-content">
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-value" id="current-watts">0W</div>
+                    <div class="status-label">Aktueller Verbrauch</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="active-lights-count">0</div>
+                    <div class="status-label">Aktive Lichter</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="monthly-estimate">0 kWh</div>
+                    <div class="status-label">Monatlicher Verbrauch</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="monthly-cost">0€</div>
+                    <div class="status-label">Monatliche Kosten</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">Licht-Details</div>
+                <div id="light-power-details"></div>
+            </div>
+
+            <div class="power-chart">
+                <div class="card-title">Verbrauchsverlauf (Coming Soon)</div>
+                <div style="text-align: center; padding: 50px; color: #888;">
+                    Chart wird geladen... Implementierung mit Chart.js folgt
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class HueControllerPro {
+            constructor() {
+                this.baseUrl = window.location.origin;
+                this.activeTab = 'lights';
+                this.init();
+                this.startPowerMonitoring();
+            }
+
+            async init() {
+                try {
+                    await this.loadLights();
+                    await this.loadGroups();
+                    await this.loadScenes();
+                    await this.loadSensors();
+                    await this.updateActiveEffects();
+                    await this.updateActiveTimers();
+                    await this.updatePowerStats();
+                } catch (error) {
+                    this.showMessage('Fehler beim Laden: ' + error.message, 'error');
+                }
+            }
+
+            switchTab(tabName) {
+                // Tab buttons
+                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                event.target.classList.add('active');
+                
+                // Tab content
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(tabName + '-tab').classList.add('active');
+                
+                this.activeTab = tabName;
+            }
+
+            async loadLights() {
+                const response = await fetch(`${this.baseUrl}/api/lights`);
+                const lights = await response.json();
+                this.renderLights(lights);
+            }
+
+            async loadGroups() {
+                const response = await fetch(`${this.baseUrl}/api/groups`);
+                const groups = await response.json();
+                this.renderGroups(groups);
+            }
+
+            async loadScenes() {
+                const response = await fetch(`${this.baseUrl}/api/scenes`);
+                const scenes = await response.json();
+                this.renderScenes(scenes);
+            }
+
+            async loadSensors() {
+                const response = await fetch(`${this.baseUrl}/api/sensors`);
+                const sensors = await response.json();
+                this.renderSensors(sensors);
+            }
+
+            renderLights(lights) {
+                const container = document.getElementById('lights-container');
+                container.innerHTML = '';
+
+                Object.entries(lights).forEach(([id, light]) => {
+                    const card = this.createLightCard(id, light, 'light');
+                    container.appendChild(card);
+                });
+            }
+
+            renderGroups(groups) {
+                const container = document.getElementById('groups-container');
+                container.innerHTML = '';
+
+                Object.entries(groups).forEach(([id, group]) => {
+                    if (group.name !== 'Lightset 0') {
+                        const card = this.createLightCard(id, group, 'group');
+                        container.appendChild(card);
+                    }
+                });
+            }
+
+            renderScenes(scenes) {
+                const container = document.getElementById('scenes-container');
+                container.innerHTML = '';
+
+                Object.entries(scenes).forEach(([id, scene]) => {
+                    const btn = document.createElement('div');
+                    btn.className = 'scene-btn';
+                    btn.innerHTML = scene.name;
+                    btn.onclick = () => this.activateScene(id, scene);
+                    container.appendChild(btn);
+                });
+            }
+
+            renderSensors(sensors) {
+                const container = document.getElementById('sensors-container');
+                container.innerHTML = '';
+
+                Object.entries(sensors).forEach(([id, sensor]) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-title">${sensor.name}</div>
+                        <div>Typ: ${sensor.type}</div>
+                        <div>Status: ${sensor.config?.on ? 'Aktiv' : 'Inaktiv'}</div>
+                        <div>Batterie: ${sensor.config?.battery || 'N/A'}%</div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            createLightCard(id, item, type) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                const state = type === 'light' ? item.state : item.action;
+                const isOn = state.on;
+
+                card.innerHTML = `
+                    <div class="card-title">${item.name}</div>
+                    <button class="btn ${isOn ? 'danger' : ''}" onclick="hue.toggle('${id}', ${!isOn}, '${type}')">
+                        ${isOn ? 'Ausschalten' : 'Einschalten'}
+                    </button>
+                    <div class="input-group">
+                        <label>Helligkeit: ${Math.round((state.bri || 0) / 254 * 100)}%</label>
+                        <input type="range" class="slider" min="1" max="254" value="${state.bri || 254}" 
+                               onchange="hue.setBrightness('${id}', this.value, '${type}')">
+                    </div>
+                    ${state.hue !== undefined ? `
+                    <div class="input-group">
+                        <label>Farbe</label>
+                        <input type="color" class="color-picker" value="${this.hueToHex(state.hue, state.sat)}" 
+                               onchange="hue.setColor('${id}', this.value, '${type}')">
+                    </div>` : ''}
+                    <div class="effect-controls">
+                        <button class="btn warning" onclick="hue.quickEffect('${id}', 'strobe', '${type}')">Strobo</button>
+                        <button class="btn warning" onclick="hue.quickEffect('${id}', 'colorloop', '${type}')">Farben</button>
+                        <button class="btn" onclick="hue.quickTimer('${id}', '${type}')">Timer 5min</button>
+                    </div>
+                `;
+
+                return card;
+            }
+
+            async toggle(id, state, type) {
+                const endpoint = type === 'light' ? `/api/lights/${id}/state` : `/api/groups/${id}/action`;
+                
+                try {
+                    await fetch(`${this.baseUrl}${endpoint}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ on: state })
+                    });
+                    this.init();
+                } catch (error) {
+                    this.showMessage('Fehler beim Schalten: ' + error.message, 'error');
+                }
+            }
+
+            async setBrightness(id, brightness, type) {
+                const endpoint = type === 'light' ? `/api/lights/${id}/state` : `/api/groups/${id}/action`;
+                
+                try {
+                    await fetch(`${this.baseUrl}${endpoint}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ bri: parseInt(brightness) })
+                    });
+                } catch (error) {
+                    this.showMessage('Fehler beim Dimmen: ' + error.message, 'error');
+                }
+            }
+
+            async setColor(id, hexColor, type) {
+                const endpoint = type === 'light' ? `/api/lights/${id}/state` : `/api/groups/${id}/action`;
+                const [hue, sat] = this.hexToHue(hexColor);
+
+                try {
+                    await fetch(`${this.baseUrl}${endpoint}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ hue, sat })
+                    });
+                } catch (error) {
+                    this.showMessage('Fehler beim Färben: ' + error.message, 'error');
+                }
+            }
+
+            async activateScene(sceneId, scene) {
+                try {
+                    await fetch(`${this.baseUrl}/api/scenes/${sceneId}/recall`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ group: '0' })
+                    });
+                    this.showMessage(`Szene "${scene.name}" aktiviert`, 'success');
+                    setTimeout(() => this.init(), 1000);
+                } catch (error) {
+                    this.showMessage('Fehler beim Aktivieren der Szene: ' + error.message, 'error');
+                }
+            }
+
+            async quickEffect(id, effect, type) {
+                const data = {
+                    type: type,
+                    id: id,
+                    duration: effect === 'strobe' ? 5 : 15
+                };
+
+                try {
+                    await fetch(`${this.baseUrl}/api/effects/${effect}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    this.showMessage(`${effect} Effekt gestartet`, 'success');
+                    setTimeout(() => this.updateActiveEffects(), 1000);
+                } catch (error) {
+                    this.showMessage('Fehler beim Starten des Effekts: ' + error.message, 'error');
+                }
+            }
+
+            async quickTimer(id, type) {
+                const data = {
+                    type: type,
+                    id: id,
+                    delay: 300, // 5 Minuten
+                    action: { on: false }
+                };
+
+                try {
+                    await fetch(`${this.baseUrl}/api/timer`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    this.showMessage('Timer erstellt (5 Minuten)', 'success');
+                    setTimeout(() => this.updateActiveTimers(), 1000);
+                } catch (error) {
+                    this.showMessage('Fehler beim Erstellen des Timers: ' + error.message, 'error');
+                }
+            }
+
+            async updateActiveEffects() {
+                try {
+                    const response = await fetch(`${this.baseUrl}/api/effects`);
+                    const data = await response.json();
+                    
+                    const container = document.getElementById('effects-list');
+                    if (data.active_effects.length === 0) {
+                        container.innerHTML = '<div>Keine aktiven Effekte</div>';
+                    } else {
+                        container.innerHTML = data.active_effects.map(effectId => `
+                            <div class="effect-item">
+                                <span>${effectId}</span>
+                                <button class="btn danger" onclick="hue.stopEffect('${effectId}')">Stoppen</button>
+                            </div>
+                        `).join('');
+                    }
+                } catch (error) {
+                    console.error('Fehler beim Laden der Effekte:', error);
+                }
+            }
+
+            async updateActiveTimers() {
+                try {
+                    const response = await fetch(`${this.baseUrl}/api/timers`);
+                    const data = await response.json();
+                    
+                    const container = document.getElementById('timers-list');
+                    const timers = Object.entries(data.active_timers);
+                    
+                    if (timers.length === 0) {
+                        container.innerHTML = '<div>Keine aktiven Timer</div>';
+                    } else {
+                        container.innerHTML = timers.map(([timerId, timer]) => `
+                            <div class="timer-item">
+                                <span>${timer.target_type} ${timer.target_id}</span>
+                                <button class="btn danger" onclick="hue.cancelTimer('${timerId}')">Abbrechen</button>
+                            </div>
+                        `).join('');
+                    }
+                } catch (error) {
+                    console.error('Fehler beim Laden der Timer:', error);
+                }
+            }
+
+            async updatePowerStats() {
+                try {
+                    const response = await fetch(`${this.baseUrl}/api/power/current`);
+                    const data = await response.json();
+                    
+                    document.getElementById('current-watts').textContent = data.total_watts + 'W';
+                    document.getElementById('active-lights-count').textContent = data.active_lights;
+                    document.getElementById('monthly-estimate').textContent = data.estimated_monthly_kwh + ' kWh';
+                    document.getElementById('monthly-cost').textContent = data.estimated_monthly_cost_eur + '€';
+                    
+                    document.getElementById('current-power').textContent = 
+                        `💡 ${data.active_lights} Lichter • ⚡ ${data.total_watts}W • 💰 ~${data.estimated_monthly_cost_eur}€/Monat`;
+
+                    // Light details
+                    const detailsContainer = document.getElementById('light-power-details');
+                    detailsContainer.innerHTML = data.light_details.map(light => `
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <span>${light.name}</span>
+                            <span>${light.watts}W (${Math.round(light.brightness/254*100)}%)</span>
+                        </div>
+                    `).join('');
+                    
+                } catch (error) {
+                    console.error('Fehler beim Laden der Power Stats:', error);
+                }
+            }
+
+            startPowerMonitoring() {
+                // Update power stats every 30 seconds
+                setInterval(() => {
+                    this.updatePowerStats();
+                }, 30000);
+            }
+
+            // Helper functions
+            hueToHex(hue, sat) {
+                const h = (hue || 0) / 65535 * 360;
+                const s = (sat || 0) / 254;
+                const v = 1;
+
+                const c = v * s;
+                const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+                const m = v - c;
+
+                let r, g, b;
+                if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+                else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
+                else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
+                else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
+                else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
+                else { r = c; g = 0; b = x; }
+
+                r = Math.round((r + m) * 255);
+                g = Math.round((g + m) * 255);
+                b = Math.round((b + m) * 255);
+
+                return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+            }
+
+            hexToHue(hex) {
+                const r = parseInt(hex.slice(1, 3), 16) / 255;
+                const g = parseInt(hex.slice(3, 5), 16) / 255;
+                const b = parseInt(hex.slice(5, 7), 16) / 255;
+
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                const diff = max - min;
+
+                let h = 0;
+                if (diff !== 0) {
+                    if (max === r) h = ((g - b) / diff) % 6;
+                    else if (max === g) h = (b - r) / diff + 2;
+                    else h = (r - g) / diff + 4;
+                }
+                h = Math.round(h * 60);
+                if (h < 0) h += 360;
+
+                const s = max === 0 ? 0 : diff / max;
+
+                return [Math.round(h / 360 * 65535), Math.round(s * 254)];
+            }
+
+            showMessage(message, type) {
+                const container = document.getElementById('messages');
+                const div = document.createElement('div');
+                div.className = type;
+                div.textContent = message;
+                container.appendChild(div);
+                
+                setTimeout(() => {
+                    container.removeChild(div);
+                }, 5000);
+            }
+
+            // Global functions for HTML onclick handlers
+            async stopEffect(effectId) {
+                try {
+                    await fetch(`${this.baseUrl}/api/effects/${effectId}/stop`, { method: 'DELETE' });
+                    this.showMessage('Effekt gestoppt', 'success');
+                    setTimeout(() => this.updateActiveEffects(), 500);
+                } catch (error) {
+                    this.showMessage('Fehler beim Stoppen: ' + error.message, 'error');
+                }
+            }
+
+            async cancelTimer(timerId) {
+                try {
+                    await fetch(`${this.baseUrl}/api/timer/${timerId}`, { method: 'DELETE' });
+                    this.showMessage('Timer abgebrochen', 'success');
+                    setTimeout(() => this.updateActiveTimers(), 500);
+                } catch (error) {
+                    this.showMessage('Fehler beim Abbrechen: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Global functions
+        const hue = new HueControllerPro();
+
+        function switchTab(tabName) {
+            hue.switchTab(tabName);
+        }
+
+        async function globalControl(action) {
+            try {
+                let endpoint, data;
+                
+                if (action === 'emergency-off') {
+                    endpoint = '/api/global/emergency-off';
+                    await fetch(`${hue.baseUrl}${endpoint}`, { method: 'POST' });
+                } else if (action === 'all-on') {
+                    endpoint = '/api/global/all-lights';
+                    data = { on: true };
+                } else if (action === 'all-off') {
+                    endpoint = '/api/global/all-lights';
+                    data = { on: false };
+                }
+                
+                if (data) {
+                    await fetch(`${hue.baseUrl}${endpoint}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                }
+                
+                hue.showMessage(`Globale Steuerung: ${action}`, 'success');
+                setTimeout(() => hue.init(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler bei globaler Steuerung: ' + error.message, 'error');
+            }
+        }
+
+        async function globalColorChange(hexColor) {
+            const [hue_val, sat] = hue.hexToHue(hexColor);
+            try {
+                await fetch(`${hue.baseUrl}/api/global/all-lights`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hue: hue_val, sat: sat })
+                });
+                hue.showMessage('Globale Farbe gesetzt', 'success');
+            } catch (error) {
+                hue.showMessage('Fehler beim Setzen der globalen Farbe: ' + error.message, 'error');
+            }
+        }
+
+        async function startStrobe() {
+            const type = document.getElementById('strobe-target-type').value;
+            const id = document.getElementById('strobe-target-id').value;
+            const duration = document.getElementById('strobe-duration').value;
+            const interval = document.getElementById('strobe-interval').value;
+            
+            if (!id) {
+                hue.showMessage('Bitte ID eingeben', 'error');
+                return;
+            }
+            
+            try {
+                await fetch(`${hue.baseUrl}/api/effects/strobe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, id, duration: parseInt(duration), interval: parseFloat(interval) })
+                });
+                hue.showMessage('Strobo gestartet', 'success');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Starten des Strobos: ' + error.message, 'error');
+            }
+        }
+
+        async function startColorloop() {
+            const type = document.getElementById('colorloop-target-type').value;
+            const id = document.getElementById('colorloop-target-id').value;
+            const duration = document.getElementById('colorloop-duration').value;
+            
+            if (!id) {
+                hue.showMessage('Bitte ID eingeben', 'error');
+                return;
+            }
+            
+            try {
+                await fetch(`${hue.baseUrl}/api/effects/colorloop`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, id, duration: parseInt(duration) })
+                });
+                hue.showMessage('Farbschleife gestartet', 'success');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Starten der Farbschleife: ' + error.message, 'error');
+            }
+        }
+
+        async function createTimer() {
+            const type = document.getElementById('timer-target-type').value;
+            const id = document.getElementById('timer-target-id').value;
+            const delay = document.getElementById('timer-delay').value;
+            const actionType = document.getElementById('timer-action').value;
+            
+            if (!id) {
+                hue.showMessage('Bitte ID eingeben', 'error');
+                return;
+            }
+            
+            const action = actionType === 'on' ? { on: true } : { on: false };
+            
+            try {
+                await fetch(`${hue.baseUrl}/api/timer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, id, delay: parseInt(delay), action })
+                });
+                hue.showMessage('Timer erstellt', 'success');
+                setTimeout(() => hue.updateActiveTimers(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Erstellen des Timers: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
