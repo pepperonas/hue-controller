@@ -599,7 +599,7 @@
 
         .emergency-controls {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 15px;
         }
@@ -1933,10 +1933,10 @@
                                 <span class="slider-value" id="ultra-duration-value">∞ Unbegrenzt</span>
                             </div>
                             <input type="range" class="slider" id="ultra-duration" 
-                                   min="0" max="60" value="0" 
+                                   min="0" max="300" value="0" 
                                    oninput="updateUltraDurationValue(this.value)">
                             <div class="duration-info">
-                                <small>0 = ∞ Unbegrenzt | 1-60 = Sekunden</small>
+                                <small>0 = ∞ Unbegrenzt | 1-300 = Sekunden</small>
                             </div>
                         </div>
 
@@ -1984,7 +1984,10 @@
                                 <span>Dauer</span>
                                 <span class="slider-value" id="colorloop-duration-value">30s</span>
                             </div>
-                            <input type="range" class="slider" id="colorloop-duration" min="5" max="600" value="30" oninput="updateSliderValue('colorloop-duration', this.value + 's')">
+                            <input type="range" class="slider" id="colorloop-duration" min="0" max="300" value="30" oninput="updateColorloopDurationValue(this.value)">
+                            <div class="duration-info">
+                                <small>0 = ∞ Unbegrenzt | 1-300 = Sekunden</small>
+                            </div>
                         </div>
                         <button class="btn warning" onclick="startCustomColorloop()">Farbschleife Starten</button>
                     </div>
@@ -2102,6 +2105,7 @@
                         <button class="btn" onclick="testLightCommand()">Licht Testen</button>
                         <button class="btn" onclick="testGroupCommand()">Gruppe Testen</button>
                         <button class="btn warning" onclick="sendTestStrobe()">Test-Strobo</button>
+                        <button class="btn" onclick="checkSystemHealth()">System-Gesundheit</button>
                     </div>
                 </div>
             </div>
@@ -3753,8 +3757,8 @@
             return '';
         }
         
-        // Periodische System-Health-Checks
-        setInterval(checkSystemHealth, 300000); // Alle 5 Minuten
+        // Periodische System-Health-Checks deaktiviert
+        // setInterval(checkSystemHealth, 300000); // Alle 5 Minuten
 
         // Debug-System Variablen
         let debugAutoScroll = true;
@@ -3921,6 +3925,15 @@
 
         function updateUltraDurationValue(value) {
             const display = document.getElementById('ultra-duration-value');
+            if (value == 0) {
+                display.textContent = '∞ Unbegrenzt';
+            } else {
+                display.textContent = value + 's';
+            }
+        }
+
+        function updateColorloopDurationValue(value) {
+            const display = document.getElementById('colorloop-duration-value');
             if (value == 0) {
                 display.textContent = '∞ Unbegrenzt';
             } else {

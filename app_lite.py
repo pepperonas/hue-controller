@@ -508,27 +508,50 @@ def onboarding():
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory('.', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory('templates', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/favicon-16x16.png')
 def favicon_16():
-    return send_from_directory('.', 'favicon-16x16.png', mimetype='image/png')
+    return send_from_directory('templates', 'favicon-16x16.png', mimetype='image/png')
 
 @app.route('/favicon-32x32.png')
 def favicon_32():
-    return send_from_directory('.', 'favicon-32x32.png', mimetype='image/png')
+    return send_from_directory('templates', 'favicon-32x32.png', mimetype='image/png')
 
 @app.route('/apple-touch-icon.png')
 def apple_touch_icon():
-    return send_from_directory('.', 'apple-touch-icon.png', mimetype='image/png')
+    return send_from_directory('templates', 'apple-touch-icon.png', mimetype='image/png')
 
 @app.route('/android-chrome-192x192.png')
 def android_chrome_192():
-    return send_from_directory('.', 'android-chrome-192x192.png', mimetype='image/png')
+    return send_from_directory('templates', 'android-chrome-192x192.png', mimetype='image/png')
 
 @app.route('/android-chrome-512x512.png')
 def android_chrome_512():
-    return send_from_directory('.', 'android-chrome-512x512.png', mimetype='image/png')
+    return send_from_directory('templates', 'android-chrome-512x512.png', mimetype='image/png')
+
+@app.route('/site.webmanifest')
+def site_webmanifest():
+    manifest = {
+        "name": "Hue Controller Pro X",
+        "short_name": "HueController",
+        "icons": [
+            {
+                "src": "/android-chrome-192x192.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "/android-chrome-512x512.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ],
+        "theme_color": "#4ECDC4",
+        "background_color": "#1a1a2e",
+        "display": "standalone"
+    }
+    return jsonify(manifest)
 
 @app.route('/api/lights', methods=['GET'])
 @smart_error_handler('lights_list')
