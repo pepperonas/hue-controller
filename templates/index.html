@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hue Controller Pro</title>
+    <title>Hue Controller Pro X - Intelligente Lichtsteuerung</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
     <style>
         * {
             margin: 0;
@@ -13,15 +18,32 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #2C2E3B;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             color: #FFFFFF;
             min-height: 100vh;
             padding: 20px;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="grad" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:rgba(255,255,255,0.1);stop-opacity:1" /><stop offset="100%" style="stop-color:rgba(255,255,255,0);stop-opacity:1" /></radialGradient></defs><circle cx="50" cy="50" r="50" fill="url(%23grad)" /></svg>') no-repeat center;
+            background-size: 800px 800px;
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: -1;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
        .header {
@@ -44,32 +66,109 @@
             text-align: center;
         }
 
-        .tabs {
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+            z-index: 1000;
             display: flex;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            margin-bottom: 20px;
-            overflow: hidden;
+            justify-content: space-around;
+            align-items: center;
         }
 
-        .tab {
-            flex: 1;
-            padding: 15px 20px;
-            text-align: center;
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: none;
-            background: transparent;
-            color: #FFFFFF;
-            font-size: 1rem;
+            padding: 8px 12px;
+            border-radius: 12px;
+            min-width: 64px;
         }
 
-        .tab.active {
-            background: rgba(255, 255, 255, 0.2);
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.15);
+        .nav-item.active {
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+        .nav-item.active .nav-icon {
+            color: #4ECDC4;
+            transform: scale(1.1);
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        /* Content area padding for bottom nav */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            padding-bottom: 100px; /* Space for bottom nav */
+        }
+
+        /* Hide old tabs on mobile */
+        .tabs {
+            display: none;
+        }
+
+        /* Desktop tabs for larger screens */
+        @media (min-width: 768px) {
+            .tabs {
+                display: flex;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                margin-bottom: 20px;
+                overflow: hidden;
+            }
+
+            .tab {
+                flex: 1;
+                padding: 15px 20px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: none;
+                background: transparent;
+                color: #FFFFFF;
+                font-size: 1rem;
+            }
+
+            .tab.active {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            .tab:hover {
+                background: rgba(255, 255, 255, 0.15);
+            }
+
+            .bottom-nav {
+                display: none;
+            }
+
+            .container {
+                padding-bottom: 20px;
+            }
         }
 
         .tab-content {
@@ -88,17 +187,30 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
         }
 
         .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.12);
         }
 
         .card-title {
@@ -108,38 +220,79 @@
         }
 
         .btn {
-            background: #4CAF50;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
+            padding: 14px 24px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 1rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             width: 100%;
-            margin: 5px 0;
+            margin: 6px 0;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover {
-            background: #45a049;
-            transform: scale(1.02);
+            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
         }
 
         .btn.danger {
-            background: #f44336;
+            background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
         }
 
         .btn.danger:hover {
-            background: #da190b;
+            background: linear-gradient(135deg, #da190b 0%, #c62828 100%);
+            box-shadow: 0 8px 25px rgba(244, 67, 54, 0.4);
         }
 
         .btn.warning {
-            background: #FF9800;
+            background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
         }
 
         .btn.warning:hover {
-            background: #F57C00;
+            background: linear-gradient(135deg, #F57C00 0%, #E65100 100%);
+            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.4);
+        }
+
+        .btn.accent {
+            background: linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%);
+        }
+
+        .btn.accent:hover {
+            background: linear-gradient(135deg, #7B1FA2 0%, #6A1B9A 100%);
+            box-shadow: 0 8px 25px rgba(156, 39, 176, 0.4);
+        }
+
+        .btn.premium {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+            color: #1a1a2e;
+        }
+
+        .btn.premium:hover {
+            background: linear-gradient(135deg, #FFA000 0%, #FF8F00 100%);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
         }
 
         .input-group {
@@ -193,6 +346,16 @@
             border-radius: 8px;
             cursor: pointer;
             background: transparent;
+        }
+
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            display: inline-block;
+            cursor: pointer;
         }
 
         .global-controls {
@@ -288,12 +451,610 @@
             background: rgba(156, 39, 176, 0.4);
         }
 
+        /* Debug Styles */
+        .debug-log-container {
+            margin-top: 15px;
+        }
+
+        .debug-log {
+            height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .debug-entry {
+            display: flex;
+            gap: 10px;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .debug-entry:last-child {
+            border-bottom: none;
+        }
+
+        .debug-time {
+            color: #888;
+            min-width: 60px;
+            font-size: 0.8rem;
+        }
+
+        .debug-type {
+            min-width: 60px;
+            font-weight: bold;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+
+        .debug-type.info {
+            background: rgba(33, 150, 243, 0.3);
+            color: #64B5F6;
+        }
+
+        .debug-type.success {
+            background: rgba(76, 175, 80, 0.3);
+            color: #81C784;
+        }
+
+        .debug-type.warning {
+            background: rgba(255, 152, 0, 0.3);
+            color: #FFB74D;
+        }
+
+        .debug-type.error {
+            background: rgba(244, 67, 54, 0.3);
+            color: #E57373;
+        }
+
+        .debug-message {
+            flex: 1;
+            word-break: break-all;
+        }
+
+        .debug-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .debug-controls label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .debug-controls select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            padding: 4px 8px;
+        }
+
+        .debug-test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Ultra-Strobo Styles */
+        .ultra-strobo-section {
+            border: 2px solid #ff4444;
+            border-radius: 12px;
+            background: rgba(255, 68, 68, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .warning-box {
+            background: rgba(255, 152, 0, 0.2);
+            border: 2px solid #ff9800;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            color: #ffcc02;
+            animation: warning-pulse 2s infinite;
+        }
+
+        @keyframes warning-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .ultra-strobo-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ultra-btn {
+            padding: 12px;
+            font-weight: bold;
+            border: 2px solid #ff4444;
+            animation: danger-glow 1.5s infinite;
+        }
+
+        @keyframes danger-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 68, 68, 0.8); }
+        }
+
+        .ultra-slider {
+            background: linear-gradient(90deg, #ff9800 0%, #ff4444 50%, #d32f2f 100%);
+        }
+
+        .emergency-controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn.emergency {
+            background: linear-gradient(45deg, #d32f2f, #f44336);
+            border: 2px solid #ff1744;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            animation: emergency-pulse 1s infinite;
+        }
+
+        @keyframes emergency-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .btn.emergency:hover {
+            background: linear-gradient(45deg, #b71c1c, #d32f2f);
+            transform: scale(1.1);
+        }
+
+        /* Strobo Color Selection Styles */
+        .color-selection-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .color-selection-section h5 {
+            margin-bottom: 12px;
+            color: #4ECDC4;
+            font-size: 1.1rem;
+        }
+
+        .strobo-color-presets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .color-preset-btn {
+            padding: 8px 12px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background-size: cover;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .color-preset-btn:hover {
+            transform: scale(1.05);
+            border-color: #4ECDC4;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+        }
+
+        .color-preset-btn.active {
+            border-color: #4ECDC4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.8);
+            transform: scale(1.1);
+        }
+
+        .color-values {
+            text-align: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .duration-info {
+            text-align: center;
+            margin-top: 8px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Guide Tab Styles */
+        .guide-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .guide-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+        }
+
+        .guide-nav-btn {
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .guide-nav-btn:hover {
+            background: rgba(78, 205, 196, 0.2);
+            border-color: #4ECDC4;
+        }
+
+        .guide-nav-btn.active {
+            background: rgba(78, 205, 196, 0.3);
+            border-color: #4ECDC4;
+            color: #4ECDC4;
+        }
+
+        .guide-section {
+            display: none;
+        }
+
+        .guide-section.active {
+            display: block;
+        }
+
+        .guide-content {
+            line-height: 1.6;
+        }
+
+        .guide-content h3 {
+            color: #4ECDC4;
+            margin: 20px 0 10px 0;
+            border-left: 3px solid #4ECDC4;
+            padding-left: 10px;
+        }
+
+        .guide-content ul, .guide-content ol {
+            margin: 10px 0 20px 20px;
+        }
+
+        .guide-content li {
+            margin: 8px 0;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .quick-action {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quick-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+        }
+
+        .quick-text {
+            flex: 1;
+        }
+
+        .shortcut-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .shortcut-item {
+            padding: 10px;
+            background: rgba(78, 205, 196, 0.1);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .effect-card {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .effect-name {
+            font-weight: bold;
+            color: #4ECDC4;
+            margin-bottom: 8px;
+        }
+
+        .effect-desc {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .color-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .color-method {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .problem-solution {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .problem {
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .solution {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+        }
+
+        .support-info {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin: 15px 0;
+        }
+
         .power-chart {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
             min-height: 300px;
+            max-height: 400px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Neue Klassen für erweiterte Funktionen */
+        .quick-scenes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quick-scene {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-scene:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .quick-scene .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .quick-scene .name {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .advanced-effects {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .effect-card {
+            background: linear-gradient(135deg, rgba(156, 39, 176, 0.2) 0%, rgba(103, 58, 183, 0.2) 100%);
+            border: 1px solid rgba(156, 39, 176, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .effect-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(156, 39, 176, 0.3);
+        }
+
+        .effect-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .effect-card .name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .effect-card .description {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+
+        .color-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.2);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .color-swatch.active {
+            border-color: #fff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .control-group h4 {
+            margin-bottom: 12px;
+            color: #E0E0E0;
+            font-size: 1rem;
+        }
+
+        .slider-container {
+            position: relative;
+            margin: 16px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .slider-value {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .floating-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+
+        .floating-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .glow-effect {
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(76, 175, 80, 0.4); }
+            to { box-shadow: 0 0 40px rgba(76, 175, 80, 0.8); }
         }
 
         .error {
@@ -315,19 +1076,531 @@
         }
 
         @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
             .tabs {
-                flex-direction: column;
+                flex-direction: row;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .tab {
+                min-width: 100px;
+                font-size: 0.9rem;
+                padding: 12px 16px;
             }
             
             .controls-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
             
             .effect-controls {
                 flex-direction: column;
             }
+
+            .quick-scenes {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .quick-scene {
+                padding: 12px;
+            }
+
+            .quick-scene .icon {
+                font-size: 1.5rem;
+            }
+
+            .advanced-effects {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .effect-card {
+                padding: 16px;
+            }
+
+            .effect-card .icon {
+                font-size: 2rem;
+            }
+
+            .floating-controls {
+                bottom: 15px;
+                right: 15px;
+                gap: 8px;
+            }
+
+            .floating-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .color-palette {
+                justify-content: center;
+            }
+
+            .color-swatch {
+                width: 36px;
+                height: 36px;
+            }
+
+            /* Touch-friendly buttons */
+            .btn {
+                padding: 16px 20px;
+                font-size: 1.1rem;
+                margin: 8px 0;
+            }
+
+            .slider {
+                height: 8px;
+            }
+
+            .slider::-webkit-slider-thumb {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .quick-scenes {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .advanced-effects {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                font-size: 0.8rem;
+            }
+
+            .tab {
+                min-width: 80px;
+                padding: 10px 12px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .floating-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Touch gestures */
+        .swipe-gesture {
+            touch-action: pan-y;
+        }
+
+        .card.swipe-left {
+            transform: translateX(-20px);
+            opacity: 0.8;
+        }
+
+        .card.swipe-right {
+            transform: translateX(20px);
+            opacity: 0.8;
+        }
+
+        /* Stimmungsszenen Styles */
+        .mood-category {
+            margin-bottom: 24px;
+        }
+
+        .mood-category-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mood-scenes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .mood-scene-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mood-scene-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.5s ease;
+        }
+
+        .mood-scene-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .mood-scene-card:hover {
+            transform: translateY(-4px) scale(1.05);
+            border-color: rgba(78, 205, 196, 0.6);
+            background: linear-gradient(135deg, rgba(78, 205, 196, 0.2) 0%, rgba(78, 205, 196, 0.1) 100%);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .mood-scene-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .mood-scene-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .mood-scene-category {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Audio Sync Status */
+        .audio-sync-active {
+            animation: audioSync 2s ease-in-out infinite;
+        }
+
+        @keyframes audioSync {
+            0% { border-color: rgba(78, 205, 196, 0.3); }
+            50% { border-color: rgba(78, 205, 196, 0.8); }
+            100% { border-color: rgba(78, 205, 196, 0.3); }
+        }
+
+        /* === SMART ERROR HANDLING STYLES === */
+        
+        .system-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            position: relative;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 600px;
+            max-height: 80vh;
+            width: 90%;
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .modal-header button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-header button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+        }
+        
+        .modal-body {
+            padding: 20px 24px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: right;
+        }
+        
+        .modal-footer button {
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-footer button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(68, 160, 141, 0.4);
+        }
+        
+        /* Health Status */
+        .health-status {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .health-status.healthy {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        
+        .health-status.degraded {
+            background: rgba(255, 152, 0, 0.1);
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .health-status.critical {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+        
+        .health-checks {
+            margin: 12px 0;
+        }
+        
+        .health-check {
+            padding: 8px 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .recommendations {
+            margin-top: 16px;
+        }
+        
+        .recommendations h5 {
+            margin-bottom: 8px;
+            color: #4ECDC4;
+        }
+        
+        .recommendations ul {
+            margin-left: 20px;
+        }
+        
+        .recommendations li {
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+        
+        /* Smart Error Display */
+        .smart-error {
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .smart-error h4 {
+            color: #FF6B6B;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+        
+        .error-message {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(244, 67, 54, 0.1);
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .error-solutions {
+            margin: 16px 0;
+        }
+        
+        .error-solutions h5 {
+            color: #4ECDC4;
+            margin-bottom: 8px;
+        }
+        
+        .error-solutions ul {
+            margin-left: 20px;
+        }
+        
+        .error-solutions li {
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 12px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+        
+        .error-actions .btn {
+            font-size: 0.9rem;
+            padding: 8px 16px;
+        }
+        
+        .technical-details {
+            margin-top: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .technical-details summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #4ECDC4;
+        }
+        
+        .technical-details p {
+            margin: 8px 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Diagnosis Result */
+        .diagnosis-result {
+            background: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        
+        .diagnosis-result h4 {
+            color: #2196F3;
+            margin-bottom: 16px;
+        }
+        
+        .diagnosis-tests {
+            margin: 16px 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        
+        .test-result {
+            margin-bottom: 8px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .test-result:last-child {
+            border-bottom: none;
+        }
+        
+        .test-result strong {
+            color: #4ECDC4;
+        }
+        
+        .solutions h5 {
+            color: #4ECDC4;
+            margin: 16px 0 8px;
+        }
+        
+        /* Responsive Modal */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                max-width: none;
+                margin: 20px;
+            }
+            
+            .modal-body {
+                max-height: 70vh;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+            }
+            
+            .error-actions .btn {
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -340,6 +1613,37 @@
 
         <div id="messages"></div>
 
+        <!-- Quick Scene Access -->
+        <div class="card">
+            <div class="card-title">⚡ Schnellzugriff</div>
+            <div class="quick-scenes">
+                <div class="quick-scene" onclick="activateQuickScene('relax')">
+                    <span class="icon">🛋️</span>
+                    <div class="name">Entspannung</div>
+                </div>
+                <div class="quick-scene" onclick="activateQuickScene('work')">
+                    <span class="icon">💼</span>
+                    <div class="name">Arbeit</div>
+                </div>
+                <div class="quick-scene" onclick="activateQuickScene('party')">
+                    <span class="icon">🎉</span>
+                    <div class="name">Party</div>
+                </div>
+                <div class="quick-scene" onclick="activateQuickScene('romantic')">
+                    <span class="icon">💕</span>
+                    <div class="name">Romantik</div>
+                </div>
+                <div class="quick-scene" onclick="activateQuickScene('reading')">
+                    <span class="icon">📖</span>
+                    <div class="name">Lesen</div>
+                </div>
+                <div class="quick-scene" onclick="activateQuickScene('gaming')">
+                    <span class="icon">🎮</span>
+                    <div class="name">Gaming</div>
+                </div>
+            </div>
+        </div>
+
         <div class="global-controls">
             <h3>🚨 Globale Steuerung</h3>
             <div class="effect-controls">
@@ -347,6 +1651,21 @@
                 <button class="btn danger" onclick="globalControl('all-off')">Alles Aus</button>
                 <button class="btn danger" onclick="globalControl('emergency-off')">Notaus</button>
                 <input type="color" class="color-picker" onchange="globalColorChange(this.value)" title="Globale Farbe">
+            </div>
+            
+            <!-- Farbpalette für schnelle Auswahl -->
+            <div class="control-group">
+                <h4>Beliebte Farben</h4>
+                <div class="color-palette">
+                    <div class="color-swatch" style="background: #FF6B6B;" onclick="setGlobalColor('#FF6B6B')" title="Rot"></div>
+                    <div class="color-swatch" style="background: #4ECDC4;" onclick="setGlobalColor('#4ECDC4')" title="Türkis"></div>
+                    <div class="color-swatch" style="background: #45B7D1;" onclick="setGlobalColor('#45B7D1')" title="Blau"></div>
+                    <div class="color-swatch" style="background: #96CEB4;" onclick="setGlobalColor('#96CEB4')" title="Grün"></div>
+                    <div class="color-swatch" style="background: #FFEAA7;" onclick="setGlobalColor('#FFEAA7')" title="Gelb"></div>
+                    <div class="color-swatch" style="background: #DDA0DD;" onclick="setGlobalColor('#DDA0DD')" title="Violett"></div>
+                    <div class="color-swatch" style="background: #FFB347;" onclick="setGlobalColor('#FFB347')" title="Orange"></div>
+                    <div class="color-swatch" style="background: #FFFFFF;" onclick="setGlobalColor('#FFFFFF')" title="Weiß"></div>
+                </div>
             </div>
         </div>
 
@@ -357,6 +1676,7 @@
             <button class="tab" onclick="switchTab('effects')">Effekte</button>
             <button class="tab" onclick="switchTab('timers')">Timer</button>
             <button class="tab" onclick="switchTab('sensors')">Sensoren</button>
+            <button class="tab" onclick="switchTab('debug')">Debug</button>
             <button class="tab" onclick="switchTab('power')">Stromverbrauch</button>
         </div>
 
@@ -369,63 +1689,313 @@
         </div>
 
         <div id="scenes-tab" class="tab-content">
+            <!-- Stimmungsszenen -->
             <div class="card">
-                <div class="card-title">Verfügbare Szenen</div>
+                <div class="card-title">🎭 Stimmungsszenen</div>
+                <div id="mood-scenes-container"></div>
+            </div>
+            
+            <!-- Klassische Hue Szenen -->
+            <div class="card">
+                <div class="card-title">💡 Hue Szenen</div>
                 <div id="scenes-container" class="scene-grid"></div>
+            </div>
+            
+            <!-- Musik-Synchronisation -->
+            <div class="card">
+                <div class="card-title">🎵 Musik-Synchronisation</div>
+                <div id="audio-sync-container">
+                    <div class="control-group">
+                        <h4>Audio-Gerät</h4>
+                        <select id="audio-device-select">
+                            <option value="">Audio-Geräte laden...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h4>Sync-Modus</h4>
+                        <select id="sync-mode-select">
+                            <option value="frequency">Frequenz-basiert</option>
+                            <option value="beat">Beat-Synchronisation</option>
+                            <option value="spectrum">Spektrum-Visualizer</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h4>Empfindlichkeit</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Reaktion</span>
+                                <span class="slider-value" id="audio-sensitivity-value">50%</span>
+                            </div>
+                            <input type="range" class="slider" id="audio-sensitivity" min="0.1" max="1.0" step="0.1" value="0.5" oninput="updateSliderValue('audio-sensitivity', Math.round(this.value * 100) + '%')">
+                        </div>
+                    </div>
+                    
+                    <div class="effect-controls">
+                        <button class="btn" id="start-audio-sync" onclick="startAudioSync()">Musik-Sync starten</button>
+                        <button class="btn danger" id="stop-audio-sync" onclick="stopAudioSync()" style="display: none;">Sync stoppen</button>
+                    </div>
+                    
+                    <div id="audio-status" class="message" style="display: none;"></div>
+                </div>
             </div>
         </div>
 
         <div id="effects-tab" class="tab-content">
+            <!-- Erweiterte Effekte -->
+            <div class="card">
+                <div class="card-title">🎨 Erweiterte Lichteffekte</div>
+                <div class="advanced-effects">
+                    <div class="effect-card" onclick="startAdvancedEffect('wave')">
+                        <span class="icon">🌊</span>
+                        <div class="name">Raumwelle</div>
+                        <div class="description">Farben laufen durch alle Räume</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('pulse')">
+                        <span class="icon">💓</span>
+                        <div class="name">Pulsieren</div>
+                        <div class="description">Rhythmisches Dimmen</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('rainbow')">
+                        <span class="icon">🌈</span>
+                        <div class="name">Regenbogen</div>
+                        <div class="description">Sanfte Farbübergänge</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('fire')">
+                        <span class="icon">🔥</span>
+                        <div class="name">Feuer</div>
+                        <div class="description">Warme, flackernde Farben</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('sunset')">
+                        <span class="icon">🌅</span>
+                        <div class="name">Sonnenuntergang</div>
+                        <div class="description">Automatische Farbtemperatur</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('lightning')">
+                        <span class="icon">⚡</span>
+                        <div class="name">Blitz</div>
+                        <div class="description">Zufällige Blitzeffekte</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('breathe')">
+                        <span class="icon">💨</span>
+                        <div class="name">Atmen</div>
+                        <div class="description">Sanftes Pulsieren</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('twinkle')">
+                        <span class="icon">✨</span>
+                        <div class="name">Funkeln</div>
+                        <div class="description">Zufällige Lichtfunken</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('disco')">
+                        <span class="icon">🪩</span>
+                        <div class="name">Disco</div>
+                        <div class="description">Bunte Partystimmung</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('aurora')">
+                        <span class="icon">🌌</span>
+                        <div class="name">Nordlicht</div>
+                        <div class="description">Sanfte Farbwellen</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('sparkle')">
+                        <span class="icon">🌟</span>
+                        <div class="name">Glitzer</div>
+                        <div class="description">Kurze Lichtblitze</div>
+                    </div>
+                    <div class="effect-card" onclick="startAdvancedEffect('comet')">
+                        <span class="icon">☄️</span>
+                        <div class="name">Komet</div>
+                        <div class="description">Wandernder Lichtschweif</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="controls-grid">
                 <div class="card">
-                    <div class="card-title">Strobo Effekt</div>
-                    <div class="input-group">
-                        <label>Ziel wählen:</label>
-                        <select id="strobe-target-type">
-                            <option value="light">Einzelnes Licht</option>
-                            <option value="group">Gruppe</option>
-                        </select>
+                    <div class="card-title">⚙️ Manuelle Effekte</div>
+                    
+                    <div class="control-group">
+                        <h4>Ziel auswählen</h4>
+                        <div class="input-group">
+                            <select id="effect-target-type">
+                                <option value="all">Alle Lichter</option>
+                                <option value="light">Einzelnes Licht</option>
+                                <option value="group">Gruppe</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="effect-target-id" placeholder="ID (falls nicht 'Alle')">
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>ID:</label>
-                        <input type="text" id="strobe-target-id" placeholder="z.B. 1">
+
+                    <div class="control-group">
+                        <h4>Strobo Einstellungen</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Dauer</span>
+                                <span class="slider-value" id="strobe-duration-value">∞ Unbegrenzt</span>
+                            </div>
+                            <input type="range" class="slider" id="strobe-duration" min="0" max="300" value="0" oninput="updateNormalStrobeDurationValue(this.value)">
+                            <div class="duration-info">
+                                <small>0 = ∞ Unbegrenzt | 1-300 = Sekunden</small>
+                            </div>
+                        </div>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Frequenz</span>
+                                <span class="slider-value" id="strobe-frequency-value">2Hz</span>
+                            </div>
+                            <input type="range" class="slider" id="strobe-frequency" min="1" max="10" step="0.5" value="2" oninput="updateSliderValue('strobe-frequency', this.value + 'Hz')">
+                        </div>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Helligkeit</span>
+                                <span class="slider-value" id="strobe-brightness-value">254</span>
+                            </div>
+                            <input type="range" class="slider" id="strobe-brightness" min="50" max="254" value="254" oninput="updateSliderValue('strobe-brightness', this.value)">
+                        </div>
+                        <div class="color-selection-section">
+                            <h5>🎨 Strobo-Farbe</h5>
+                            <div class="strobo-color-presets">
+                                <button class="color-preset-btn normal-strobe-color" data-color="white" style="background: white; color: black;" onclick="setNormalStroboColor('white')">
+                                    ⚪ Weiß
+                                </button>
+                                <button class="color-preset-btn normal-strobe-color" data-color="red" style="background: #ff0000;" onclick="setNormalStroboColor('red')">
+                                    🔴 Rot
+                                </button>
+                                <button class="color-preset-btn normal-strobe-color" data-color="blue" style="background: #0066ff;" onclick="setNormalStroboColor('blue')">
+                                    🔵 Blau
+                                </button>
+                                <button class="color-preset-btn normal-strobe-color" data-color="green" style="background: #00ff00; color: black;" onclick="setNormalStroboColor('green')">
+                                    🟢 Grün
+                                </button>
+                                <button class="color-preset-btn normal-strobe-color" data-color="purple" style="background: #8000ff;" onclick="setNormalStroboColor('purple')">
+                                    🟣 Lila
+                                </button>
+                                <button class="color-preset-btn normal-strobe-color" data-color="orange" style="background: #ff8000;" onclick="setNormalStroboColor('orange')">
+                                    🟠 Orange
+                                </button>
+                            </div>
+                            <div class="color-values" id="normal-strobo-color-display">
+                                <span>Aktuelle Farbe: <strong id="current-normal-strobo-color">Weiß</strong></span>
+                            </div>
+                            <!-- Hidden inputs for backward compatibility -->
+                            <input type="hidden" id="strobe-hue" value="0">
+                            <input type="hidden" id="strobe-sat" value="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Modus:</label>
+                            <select id="strobe-mode">
+                                <option value="single">Einzelfarbe</option>
+                                <option value="rainbow">Regenbogen</option>
+                                <option value="multi">Mehrfarbig</option>
+                            </select>
+                        </div>
+                        <button class="btn warning" onclick="startAdvancedStrobe()">Strobo Starten</button>
                     </div>
-                    <div class="input-group">
-                        <label>Dauer (Sekunden):</label>
-                        <input type="number" id="strobe-duration" value="10" min="1" max="300">
+
+                    <div class="control-group ultra-strobo-section">
+                        <h4>🔥 ULTRA-BLITZ STROBO</h4>
+                        <div class="warning-box">
+                            ⚠️ <strong>EPILEPSIE-WARNUNG!</strong><br>
+                            Ultra-Strobo kann bei photosensitiven Personen Anfälle auslösen!<br>
+                            Frequenzen über 15Hz sind besonders gefährlich.
+                        </div>
+                        
+                        <div class="ultra-strobo-presets">
+                            <button class="btn danger ultra-btn" onclick="startUltraStrobo('ultra', 15)">
+                                ⚡ ULTRA (15Hz)
+                            </button>
+                            <button class="btn danger ultra-btn" onclick="startUltraStrobo('burst', 10)">
+                                💥 BURST
+                            </button>
+                            <button class="btn danger ultra-btn" onclick="startUltraStrobo('police', 8)">
+                                🚔 POLIZEI
+                            </button>
+                            <button class="btn danger ultra-btn" onclick="startUltraStrobo('disco_flash', 12)">
+                                🪩 DISCO
+                            </button>
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Ultra Frequenz (GEFAHR!)</span>
+                                <span class="slider-value" id="ultra-frequency-value">15Hz</span>
+                            </div>
+                            <input type="range" class="slider ultra-slider" id="ultra-frequency" 
+                                   min="10" max="25" step="1" value="15" 
+                                   oninput="updateSliderValue('ultra-frequency', this.value + 'Hz'); checkEpilepsyWarning(this.value)">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Ultra Dauer</span>
+                                <span class="slider-value" id="ultra-duration-value">∞ Unbegrenzt</span>
+                            </div>
+                            <input type="range" class="slider" id="ultra-duration" 
+                                   min="0" max="60" value="0" 
+                                   oninput="updateUltraDurationValue(this.value)">
+                            <div class="duration-info">
+                                <small>0 = ∞ Unbegrenzt | 1-60 = Sekunden</small>
+                            </div>
+                        </div>
+
+                        <div class="color-selection-section">
+                            <h5>🎨 Strobo-Farbe</h5>
+                            <div class="strobo-color-presets">
+                                <button class="color-preset-btn" data-color="white" style="background: white; color: black;" onclick="setStroboColor('white')">
+                                    ⚪ Weiß
+                                </button>
+                                <button class="color-preset-btn" data-color="red" style="background: #ff0000;" onclick="setStroboColor('red')">
+                                    🔴 Rot
+                                </button>
+                                <button class="color-preset-btn" data-color="blue" style="background: #0066ff;" onclick="setStroboColor('blue')">
+                                    🔵 Blau
+                                </button>
+                                <button class="color-preset-btn" data-color="green" style="background: #00ff00; color: black;" onclick="setStroboColor('green')">
+                                    🟢 Grün
+                                </button>
+                                <button class="color-preset-btn" data-color="purple" style="background: #8000ff;" onclick="setStroboColor('purple')">
+                                    🟣 Lila
+                                </button>
+                                <button class="color-preset-btn" data-color="orange" style="background: #ff8000;" onclick="setStroboColor('orange')">
+                                    🟠 Orange
+                                </button>
+                            </div>
+                            <div class="color-values" id="strobo-color-display">
+                                <span>Aktuelle Farbe: <strong id="current-strobo-color">Weiß</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="emergency-controls">
+                            <button class="btn emergency" onclick="emergencyStroboStop()">
+                                🚨 NOTFALL-STOPP
+                            </button>
+                            <button class="btn warning" onclick="startCustomUltraStrobo()">
+                                🔥 Custom Ultra
+                            </button>
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <label>Intervall (Sekunden):</label>
-                        <input type="number" id="strobe-interval" value="0.5" min="0.1" max="5" step="0.1">
+
+                    <div class="control-group">
+                        <h4>Farbschleife</h4>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Dauer</span>
+                                <span class="slider-value" id="colorloop-duration-value">30s</span>
+                            </div>
+                            <input type="range" class="slider" id="colorloop-duration" min="5" max="600" value="30" oninput="updateSliderValue('colorloop-duration', this.value + 's')">
+                        </div>
+                        <button class="btn warning" onclick="startCustomColorloop()">Farbschleife Starten</button>
                     </div>
-                    <button class="btn warning" onclick="startStrobe()">Strobo Starten</button>
                 </div>
 
                 <div class="card">
-                    <div class="card-title">Farbschleife</div>
-                    <div class="input-group">
-                        <label>Ziel wählen:</label>
-                        <select id="colorloop-target-type">
-                            <option value="light">Einzelnes Licht</option>
-                            <option value="group">Gruppe</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>ID:</label>
-                        <input type="text" id="colorloop-target-id" placeholder="z.B. 1">
-                    </div>
-                    <div class="input-group">
-                        <label>Dauer (Sekunden):</label>
-                        <input type="number" id="colorloop-duration" value="30" min="5" max="600">
-                    </div>
-                    <button class="btn warning" onclick="startColorloop()">Farbschleife Starten</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">Aktive Effekte</div>
+                    <div class="card-title">🎯 Aktive Effekte</div>
                     <div id="effects-list" class="effect-list">
                         <div>Keine aktiven Effekte</div>
                     </div>
+                    <button class="btn danger" onclick="stopAllEffects()" style="margin-top: 12px;">Alle Effekte Stoppen</button>
                 </div>
             </div>
         </div>
@@ -472,6 +2042,71 @@
             <div id="sensors-container" class="controls-grid"></div>
         </div>
 
+        <div id="debug-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">🐛 Live Debug Monitor</div>
+                
+                <div class="control-group">
+                    <h4>Hue Bridge Kommunikation</h4>
+                    <div class="debug-controls">
+                        <button class="btn" onclick="clearDebugLog()">Log Löschen</button>
+                        <button class="btn" onclick="toggleDebugAutoScroll()">Auto-Scroll: <span id="autoscroll-status">AN</span></button>
+                        <label>
+                            Max Entries: 
+                            <select id="max-log-entries" onchange="updateMaxLogEntries()">
+                                <option value="50">50</option>
+                                <option value="100" selected>100</option>
+                                <option value="200">200</option>
+                                <option value="500">500</option>
+                            </select>
+                        </label>
+                    </div>
+                    
+                    <div class="debug-log-container">
+                        <div id="debug-log" class="debug-log">
+                            <div class="debug-entry info">
+                                <span class="debug-time">--:--:--</span>
+                                <span class="debug-type">INFO</span>
+                                <span class="debug-message">Debug Monitor gestartet</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h4>Bridge Status</h4>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <div class="status-value" id="debug-bridge-status">🔍</div>
+                            <div class="status-label">Bridge Verbindung</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="debug-last-request">--</div>
+                            <div class="status-label">Letzte Anfrage</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="debug-request-count">0</div>
+                            <div class="status-label">Anfragen (heute)</div>
+                        </div>
+                        <div class="status-item">
+                            <div class="status-value" id="debug-error-count">0</div>
+                            <div class="status-label">Fehler</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h4>Test-Befehle</h4>
+                    <div class="debug-test-grid">
+                        <button class="btn" onclick="testHueConnection()">Bridge Testen</button>
+                        <button class="btn" onclick="testLightCommand()">Licht Testen</button>
+                        <button class="btn" onclick="testGroupCommand()">Gruppe Testen</button>
+                        <button class="btn warning" onclick="sendTestStrobe()">Test-Strobo</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="power-tab" class="tab-content">
             <div class="status-grid">
                 <div class="status-item">
@@ -498,21 +2133,371 @@
             </div>
 
             <div class="power-chart">
-                <div class="card-title">Verbrauchsverlauf (Coming Soon)</div>
-                <div style="text-align: center; padding: 50px; color: #888;">
-                    Chart wird geladen... Implementierung mit Chart.js folgt
+                <div class="card-title">Verbrauchsverlauf</div>
+                <canvas id="powerChart"></canvas>
+            </div>
+            
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-title">Top Verbraucher heute</div>
+                <div id="top-consumers"></div>
+            </div>
+        </div>
+
+        <div id="guide-tab" class="tab-content">
+            <div class="guide-container">
+                <div class="card">
+                    <div class="card-title">📚 Hue Controller Pro X - Vollständige Anleitung</div>
+                    <div class="guide-nav">
+                        <button class="guide-nav-btn active" onclick="showGuideSection('overview')">🏠 Übersicht</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('quickstart')">⚡ Schnellstart</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('lights')">💡 Lichtsteuerung</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('colors')">🎨 Farben & Szenen</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('effects')">🔥 Effekte</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('monitoring')">📊 Monitoring</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('advanced')">🛠️ Erweitert</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('troubleshooting')">❓ Hilfe</button>
+                    </div>
+                </div>
+
+                <!-- Übersicht Section -->
+                <div id="guide-overview" class="guide-section active">
+                    <div class="card">
+                        <div class="card-title">🏠 Was kann der Hue Controller Pro X?</div>
+                        <div class="guide-content">
+                            <h3>✨ Hauptfunktionen:</h3>
+                            <ul>
+                                <li><strong>💡 Intelligente Lichtsteuerung</strong> - Ein/Aus, Helligkeit, Farben für alle Hue-Geräte</li>
+                                <li><strong>🎨 Kreative Szenen</strong> - Vordefinierte Stimmungen und eigene Kreationen</li>
+                                <li><strong>🔥 Spektakuläre Effekte</strong> - Strobo, Colorloop, Ultra-Blitz und mehr</li>
+                                <li><strong>📊 Power Monitoring</strong> - Echter Stromverbrauch und Kostenkontrolle</li>
+                                <li><strong>🏠 Gruppen-Management</strong> - Raumweise Steuerung aller Lichter</li>
+                                <li><strong>⏰ Timer & Automation</strong> - Zeitgesteuerte Aktionen</li>
+                            </ul>
+                            
+                            <h3>🚀 Performance Features:</h3>
+                            <ul>
+                                <li><strong>⚡ Ultra-schnelle Reaktion</strong> - Optimierte API-Calls mit Smart Caching</li>
+                                <li><strong>🎯 Debouncing-System</strong> - Keine Verzögerungen bei Slider-Bewegungen</li>
+                                <li><strong>📱 Mobile-Optimiert</strong> - Touch-freundliche Bedienung</li>
+                                <li><strong>🌐 Offline-Fähig</strong> - Progressive Web App Technology</li>
+                            </ul>
+
+                            <div class="warning-box">
+                                <strong>⚠️ Sicherheitshinweis:</strong><br>
+                                Die Strobo-Effekte können bei photosensitiven Personen epileptische Anfälle auslösen. 
+                                Verwenden Sie hohe Frequenzen (>15Hz) nur mit äußerster Vorsicht!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schnellstart Section -->
+                <div id="guide-quickstart" class="guide-section">
+                    <div class="card">
+                        <div class="card-title">⚡ In 3 Minuten einsatzbereit</div>
+                        <div class="guide-content">
+                            <h3>🔧 Setup (einmalig):</h3>
+                            <ol>
+                                <li><strong>Hue Bridge finden:</strong> App automatisch erkennt Bridge im Netzwerk</li>
+                                <li><strong>Bridge-Button drücken:</strong> Physischen Button an der Bridge drücken</li>
+                                <li><strong>Verbindung bestätigen:</strong> App erhält automatisch Zugriff</li>
+                            </ol>
+
+                            <h3>🚀 Sofort loslegen:</h3>
+                            <div class="quick-actions">
+                                <div class="quick-action">
+                                    <div class="quick-icon">💡</div>
+                                    <div class="quick-text">
+                                        <strong>Home Tab</strong><br>
+                                        Alle Lichter sehen und einzeln steuern
+                                    </div>
+                                </div>
+                                <div class="quick-action">
+                                    <div class="quick-icon">🎨</div>
+                                    <div class="quick-text">
+                                        <strong>Szenen Tab</strong><br>
+                                        Voreingestellte Stimmungen aktivieren
+                                    </div>
+                                </div>
+                                <div class="quick-action">
+                                    <div class="quick-icon">✨</div>
+                                    <div class="quick-text">
+                                        <strong>Effekte Tab</strong><br>
+                                        Spektakuläre Lichtshows starten
+                                    </div>
+                                </div>
+                                <div class="quick-action">
+                                    <div class="quick-icon">🏠</div>
+                                    <div class="quick-text">
+                                        <strong>Räume Tab</strong><br>
+                                        Ganze Zimmer auf einmal steuern
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3>⚡ Sofort-Aktionen:</h3>
+                            <div class="shortcut-grid">
+                                <div class="shortcut-item">🌟 Alles An</div>
+                                <div class="shortcut-item">💡 Alles Aus</div>
+                                <div class="shortcut-item">🚨 Notfall-Stopp</div>
+                                <div class="shortcut-item">🎨 Schnell-Szenen</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weitere Sections werden hier eingefügt... -->
+                <div id="guide-lights" class="guide-section">
+                    <div class="card">
+                        <div class="card-title">💡 Lichtsteuerung Meistern</div>
+                        <div class="guide-content">
+                            <h3>🔧 Grundsteuerung:</h3>
+                            <ul>
+                                <li><strong>Ein/Aus:</strong> Großer Button - sofortige Reaktion</li>
+                                <li><strong>Helligkeit:</strong> Slider bewegen - optimistische Updates</li>
+                                <li><strong>Farbe:</strong> Color Picker oder Farbpalette verwenden</li>
+                            </ul>
+
+                            <h3>🎨 Farbauswahl:</h3>
+                            <div class="color-demo">
+                                <div class="color-method">
+                                    <strong>1. Color Picker</strong><br>
+                                    Präzise Farbwahl mit Hex-Werten
+                                </div>
+                                <div class="color-method">
+                                    <strong>2. Farbpalette</strong><br>
+                                    6 beliebte Farben per Klick
+                                </div>
+                                <div class="color-method">
+                                    <strong>3. Voreinstellungen</strong><br>
+                                    Strobo: Weiß, Rot, Blau, Grün, Lila, Orange
+                                </div>
+                            </div>
+
+                            <h3>⚡ Performance-Tipps:</h3>
+                            <ul>
+                                <li><strong>Slider:</strong> Bewegen Sie ruhig schnell - Debouncing verhindert Spam</li>
+                                <li><strong>Gruppen:</strong> Verwenden Sie Räume für bessere Performance</li>
+                                <li><strong>Transitions:</strong> Sanfte Übergänge für professionelle Effekte</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Effects Guide -->
+                <div id="guide-effects" class="guide-section">
+                    <div class="card">
+                        <div class="card-title">🔥 Effekte & Strobo-Modi</div>
+                        <div class="guide-content">
+                            <h3>💫 Standard-Effekte:</h3>
+                            <div class="effects-grid">
+                                <div class="effect-card">
+                                    <div class="effect-name">🌈 Colorloop</div>
+                                    <div class="effect-desc">Sanfter Farbverlauf durch das gesamte Spektrum</div>
+                                </div>
+                                <div class="effect-card">
+                                    <div class="effect-name">⚡ Normaler Strobo</div>
+                                    <div class="effect-desc">1-10Hz, konfigurierbare Farben, unbegrenzte Dauer</div>
+                                </div>
+                                <div class="effect-card">
+                                    <div class="effect-name">🔥 Ultra-Strobo</div>
+                                    <div class="effect-desc">10-25Hz, extrem aggressive Blitze</div>
+                                </div>
+                            </div>
+
+                            <h3>🚨 Ultra-Strobo Modi:</h3>
+                            <ul>
+                                <li><strong>⚡ ULTRA (15Hz):</strong> Kontinuierliche Blitze mit extremer Geschwindigkeit</li>
+                                <li><strong>💥 BURST:</strong> 4-5 schnelle Blitze, dann Pause</li>
+                                <li><strong>🚔 POLIZEI:</strong> Rot-Blau Wechsel mit Sirenen-Feeling</li>
+                                <li><strong>🪩 DISCO:</strong> Zufällige Farben und Frequenzen</li>
+                            </ul>
+
+                            <div class="warning-box">
+                                <strong>🚨 EPILEPSIE-WARNUNG!</strong><br>
+                                • Frequenzen >15Hz sind besonders gefährlich<br>
+                                • Sofortiger Notfall-Stopp verfügbar<br>
+                                • Unbegrenzte Dauer: 0 = ∞, sonst Sekunden<br>
+                                • Bei Problemen: Notfall-Stopp oder Browser schließen
+                            </div>
+
+                            <h3>🎯 Strobo-Konfiguration:</h3>
+                            <ul>
+                                <li><strong>Frequenz:</strong> 1-25Hz (Vorsicht bei >15Hz!)</li>
+                                <li><strong>Dauer:</strong> 0 = Unbegrenzt, 1-300 Sekunden</li>
+                                <li><strong>Farben:</strong> 6 Presets oder eigene Auswahl</li>
+                                <li><strong>Ziele:</strong> Einzelne Lichter, Gruppen oder alle</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Troubleshooting -->
+                <div id="guide-troubleshooting" class="guide-section">
+                    <div class="card">
+                        <div class="card-title">❓ Probleme lösen</div>
+                        <div class="guide-content">
+                            <h3>🐛 Häufige Probleme:</h3>
+                            
+                            <div class="problem-solution">
+                                <div class="problem">❌ Lichter reagieren nicht</div>
+                                <div class="solution">
+                                    • Bridge-Verbindung prüfen (Debug-Tab)<br>
+                                    • WLAN-Verbindung der Bridge überprüfen<br>
+                                    • Bridge neustarten (Stromkabel ziehen)
+                                </div>
+                            </div>
+
+                            <div class="problem-solution">
+                                <div class="problem">🐌 App reagiert langsam</div>
+                                <div class="solution">
+                                    • Browser-Cache leeren<br>
+                                    • Andere Tabs schließen<br>
+                                    • WLAN-Qualität prüfen<br>
+                                    • Performance-Features sind aktiv (Debouncing)
+                                </div>
+                            </div>
+
+                            <div class="problem-solution">
+                                <div class="problem">⚡ Strobo stoppt nicht</div>
+                                <div class="solution">
+                                    • <strong>NOTFALL-STOPP</strong> Button verwenden<br>
+                                    • Browser-Tab schließen<br>
+                                    • Bridge-Stromkabel ziehen<br>
+                                    • Hue-App als Backup verwenden
+                                </div>
+                            </div>
+
+                            <h3>🔧 Debug-Tools verwenden:</h3>
+                            <ul>
+                                <li><strong>Debug-Tab:</strong> Live API-Requests verfolgen</li>
+                                <li><strong>Test-Funktionen:</strong> Bridge-Verbindung testen</li>
+                                <li><strong>Performance-Metriken:</strong> Antwortzeiten prüfen</li>
+                                <li><strong>Error-Logs:</strong> Fehlerdetails einsehen</li>
+                            </ul>
+
+                            <h3>📞 Support-Informationen:</h3>
+                            <div class="support-info">
+                                <strong>System-Informationen:</strong><br>
+                                • App: Hue Controller Pro X<br>
+                                • Version: 2.0 Performance Edition<br>
+                                • Features: Smart Caching, Debouncing, Ultra-Strobo<br>
+                                • Browser: Chrome/Firefox/Safari empfohlen
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weitere Sections placeholder -->
+                <div id="guide-colors" class="guide-section">
+                    <div class="card">
+                        <div class="card-title">🎨 Farben & Szenen</div>
+                        <div class="guide-content">
+                            <p>Detaillierte Anleitung zu Farben und Szenen kommt hier...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="guide-monitoring" class="guide-section">
+                    <div class="card">
+                        <div class="card-title">📊 Power Monitoring</div>
+                        <div class="guide-content">
+                            <p>Stromverbrauch-Monitoring Anleitung kommt hier...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="guide-advanced" class="guide-section">
+                    <div class="card">
+                        <div class="card-title">🛠️ Erweiterte Features</div>
+                        <div class="guide-content">
+                            <p>Profi-Features und API-Zugriff kommt hier...</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Schwebende Steuerungselemente -->
+        <div class="floating-controls">
+            <button class="floating-btn" onclick="globalControl('emergency-off')" title="Notaus">🚨</button>
+            <button class="floating-btn" onclick="globalControl('all-off')" title="Alles Aus" style="background: linear-gradient(135deg, #f44336 0%, #da190b 100%);">💡</button>
+            <button class="floating-btn" onclick="globalControl('all-on')" title="Alles An" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">🌟</button>
+        </div>
     </div>
 
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('lights')" data-tab="lights">
+            <div class="nav-icon">💡</div>
+            <div class="nav-label">Home</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('scenes')" data-tab="scenes">
+            <div class="nav-icon">🎨</div>
+            <div class="nav-label">Szenen</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('effects')" data-tab="effects">
+            <div class="nav-icon">✨</div>
+            <div class="nav-label">Effekte</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('groups')" data-tab="groups">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label">Räume</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('debug')" data-tab="debug">
+            <div class="nav-icon">🐛</div>
+            <div class="nav-label">Debug</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('power')" data-tab="power">
+            <div class="nav-icon">⚡</div>
+            <div class="nav-label">Verbrauch</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('guide')" data-tab="guide">
+            <div class="nav-icon">📚</div>
+            <div class="nav-label">Anleitung</div>
+        </div>
+    </nav>
+
     <script>
+        // Smart Debouncing System für Performance
+        class SmartDebouncer {
+            constructor() {
+                this.timers = new Map();
+                this.pendingRequests = new Map();
+            }
+
+            debounce(key, func, delay = 300) {
+                if (this.timers.has(key)) {
+                    clearTimeout(this.timers.get(key));
+                }
+                
+                this.timers.set(key, setTimeout(() => {
+                    func();
+                    this.timers.delete(key);
+                }, delay));
+            }
+
+            immediate(key, func) {
+                // Sofortiger UI-Update für Responsiveness
+                func();
+            }
+        }
+
+        // Globaler Debouncer
+        const debouncer = new SmartDebouncer();
+
         class HueControllerPro {
             constructor() {
                 this.baseUrl = window.location.origin;
                 this.activeTab = 'lights';
+                this.updateInterval = null;
+                this.effectsUpdateInterval = null;
+                this.powerChart = null;
+                this.requestCache = new Map();
+                this.lastRequests = new Map();
                 this.init();
                 this.startPowerMonitoring();
+                this.startLiveUpdates();
             }
 
             async init() {
@@ -520,6 +2505,8 @@
                     await this.loadLights();
                     await this.loadGroups();
                     await this.loadScenes();
+                    await this.loadMoodScenes();
+                    await this.loadAudioDevices();
                     await this.loadSensors();
                     await this.updateActiveEffects();
                     await this.updateActiveTimers();
@@ -530,15 +2517,29 @@
             }
 
             switchTab(tabName) {
-                // Tab buttons
+                // Desktop tab buttons
                 document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-                event.target.classList.add('active');
+                if (event && event.target.classList.contains('tab')) {
+                    event.target.classList.add('active');
+                }
+                
+                // Bottom navigation items
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                const activeNavItem = document.querySelector(`[data-tab="${tabName}"]`);
+                if (activeNavItem) {
+                    activeNavItem.classList.add('active');
+                }
                 
                 // Tab content
                 document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
                 document.getElementById(tabName + '-tab').classList.add('active');
                 
                 this.activeTab = tabName;
+                
+                // Update charts when switching to power tab
+                if (tabName === 'power') {
+                    setTimeout(() => this.updatePowerCharts(), 500);
+                }
             }
 
             async loadLights() {
@@ -565,12 +2566,40 @@
                 this.renderSensors(sensors);
             }
 
+            async loadMoodScenes() {
+                try {
+                    const response = await fetch(`${this.baseUrl}/api/mood-scenes`);
+                    const data = await response.json();
+                    if (data.success) {
+                        this.renderMoodScenes(data.scenes);
+                    }
+                } catch (error) {
+                    console.error('Fehler beim Laden der Stimmungsszenen:', error);
+                }
+            }
+
+            async loadAudioDevices() {
+                try {
+                    const response = await fetch(`${this.baseUrl}/api/audio/devices`);
+                    const data = await response.json();
+                    if (data.success) {
+                        this.renderAudioDevices(data.devices);
+                    } else {
+                        document.getElementById('audio-device-select').innerHTML = 
+                            '<option value="">Audio nicht verfügbar</option>';
+                    }
+                } catch (error) {
+                    console.error('Fehler beim Laden der Audio-Geräte:', error);
+                }
+            }
+
             renderLights(lights) {
                 const container = document.getElementById('lights-container');
                 container.innerHTML = '';
 
                 Object.entries(lights).forEach(([id, light]) => {
                     const card = this.createLightCard(id, light, 'light');
+                    this.addCardAnimation(card);
                     container.appendChild(card);
                 });
             }
@@ -582,6 +2611,7 @@
                 Object.entries(groups).forEach(([id, group]) => {
                     if (group.name !== 'Lightset 0') {
                         const card = this.createLightCard(id, group, 'group');
+                        this.addCardAnimation(card);
                         container.appendChild(card);
                     }
                 });
@@ -617,33 +2647,107 @@
                 });
             }
 
+            renderMoodScenes(scenes) {
+                const container = document.getElementById('mood-scenes-container');
+                container.innerHTML = '';
+
+                const categories = {
+                    natural: 'Natürliche Szenen',
+                    emotional: 'Emotionale Szenen', 
+                    activity: 'Aktivitäts-Szenen'
+                };
+
+                Object.entries(categories).forEach(([categoryKey, categoryName]) => {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mood-category';
+                    
+                    const title = document.createElement('div');
+                    title.className = 'mood-category-title';
+                    title.innerHTML = `<span>${categoryName}</span>`;
+                    categoryDiv.appendChild(title);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'mood-scenes-grid';
+
+                    scenes[categoryKey]?.forEach(scene => {
+                        const card = document.createElement('div');
+                        card.className = 'mood-scene-card';
+                        card.onclick = () => this.activateMoodScene(scene.id);
+                        
+                        card.innerHTML = `
+                            <div class="mood-scene-icon">${scene.icon}</div>
+                            <div class="mood-scene-name">${scene.name}</div>
+                            <div class="mood-scene-category">${scene.category}</div>
+                        `;
+                        
+                        grid.appendChild(card);
+                    });
+
+                    categoryDiv.appendChild(grid);
+                    container.appendChild(categoryDiv);
+                });
+            }
+
+            renderAudioDevices(devices) {
+                const select = document.getElementById('audio-device-select');
+                select.innerHTML = '<option value="">Gerät auswählen</option>';
+                
+                devices.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.index;
+                    option.textContent = `${device.name} (${device.channels} Kanäle)`;
+                    select.appendChild(option);
+                });
+            }
+
             createLightCard(id, item, type) {
                 const card = document.createElement('div');
                 card.className = 'card';
                 
                 const state = type === 'light' ? item.state : item.action;
                 const isOn = state.on;
+                const brightness = Math.round((state.bri || 0) / 254 * 100);
 
                 card.innerHTML = `
-                    <div class="card-title">${item.name}</div>
-                    <button class="btn ${isOn ? 'danger' : ''}" onclick="hue.toggle('${id}', ${!isOn}, '${type}')">
-                        ${isOn ? 'Ausschalten' : 'Einschalten'}
+                    <div class="card-title">${item.name} ${isOn ? '💡' : '🔆'}</div>
+                    <button class="btn ${isOn ? 'danger' : 'premium'}" onclick="hue.toggle('${id}', ${!isOn}, '${type}')">
+                        ${isOn ? '🔴 Ausschalten' : '🟢 Einschalten'}
                     </button>
-                    <div class="input-group">
-                        <label>Helligkeit: ${Math.round((state.bri || 0) / 254 * 100)}%</label>
-                        <input type="range" class="slider" min="1" max="254" value="${state.bri || 254}" 
-                               onchange="hue.setBrightness('${id}', this.value, '${type}')">
+                    
+                    <div class="control-group">
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>Helligkeit</span>
+                                <span class="slider-value">${brightness}%</span>
+                            </div>
+                            <input type="range" class="slider" min="1" max="254" value="${state.bri || 254}" 
+                                   oninput="this.nextElementSibling.textContent = Math.round(this.value / 254 * 100) + '%'; hue.setBrightness('${id}', this.value, '${type}')">
+                            <div style="display: none;"></div>
+                        </div>
                     </div>
+                    
                     ${state.hue !== undefined ? `
-                    <div class="input-group">
-                        <label>Farbe</label>
+                    <div class="control-group">
+                        <h4>Farbe</h4>
                         <input type="color" class="color-picker" value="${this.hueToHex(state.hue, state.sat)}" 
                                onchange="hue.setColor('${id}', this.value, '${type}')">
+                        <div class="color-palette">
+                            <div class="color-swatch" style="background: #FF6B6B;" onclick="hue.setColor('${id}', '#FF6B6B', '${type}')"></div>
+                            <div class="color-swatch" style="background: #4ECDC4;" onclick="hue.setColor('${id}', '#4ECDC4', '${type}')"></div>
+                            <div class="color-swatch" style="background: #45B7D1;" onclick="hue.setColor('${id}', '#45B7D1', '${type}')"></div>
+                            <div class="color-swatch" style="background: #96CEB4;" onclick="hue.setColor('${id}', '#96CEB4', '${type}')"></div>
+                            <div class="color-swatch" style="background: #FFEAA7;" onclick="hue.setColor('${id}', '#FFEAA7', '${type}')"></div>
+                            <div class="color-swatch" style="background: #DDA0DD;" onclick="hue.setColor('${id}', '#DDA0DD', '${type}')"></div>
+                        </div>
                     </div>` : ''}
-                    <div class="effect-controls">
-                        <button class="btn warning" onclick="hue.quickEffect('${id}', 'strobe', '${type}')">Strobo</button>
-                        <button class="btn warning" onclick="hue.quickEffect('${id}', 'colorloop', '${type}')">Farben</button>
-                        <button class="btn" onclick="hue.quickTimer('${id}', '${type}')">Timer 5min</button>
+                    
+                    <div class="control-group">
+                        <h4>Schnellaktionen</h4>
+                        <div class="effect-controls">
+                            <button class="btn warning" onclick="hue.quickEffect('${id}', 'strobe', '${type}')">⚡ Strobo</button>
+                            <button class="btn accent" onclick="hue.quickEffect('${id}', 'colorloop', '${type}')">🌈 Farben</button>
+                            <button class="btn" onclick="hue.quickTimer('${id}', '${type}')">⏰ Timer</button>
+                        </div>
                     </div>
                 `;
 
@@ -665,33 +2769,42 @@
                 }
             }
 
-            async setBrightness(id, brightness, type) {
-                const endpoint = type === 'light' ? `/api/lights/${id}/state` : `/api/groups/${id}/action`;
+            setBrightness(id, brightness, type) {
+                // Sofortiges UI-Update für bessere Responsiveness
+                const key = `brightness_${id}_${type}`;
                 
-                try {
-                    await fetch(`${this.baseUrl}${endpoint}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ bri: parseInt(brightness) })
-                    });
-                } catch (error) {
-                    this.showMessage('Fehler beim Dimmen: ' + error.message, 'error');
-                }
+                debouncer.debounce(key, async () => {
+                    const endpoint = type === 'light' ? `/api/lights/${id}/state` : `/api/groups/${id}/action`;
+                    
+                    try {
+                        await fetch(`${this.baseUrl}${endpoint}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ bri: parseInt(brightness), transitiontime: 2 })
+                        });
+                    } catch (error) {
+                        this.showMessage('Fehler beim Dimmen: ' + error.message, 'error');
+                    }
+                }, 250); // 250ms Debounce für Slider
             }
 
-            async setColor(id, hexColor, type) {
-                const endpoint = type === 'light' ? `/api/lights/${id}/state` : `/api/groups/${id}/action`;
-                const [hue, sat] = this.hexToHue(hexColor);
+            setColor(id, hexColor, type) {
+                const key = `color_${id}_${type}`;
+                
+                debouncer.debounce(key, async () => {
+                    const endpoint = type === 'light' ? `/api/lights/${id}/state` : `/api/groups/${id}/action`;
+                    const [hue, sat] = this.hexToHue(hexColor);
 
-                try {
-                    await fetch(`${this.baseUrl}${endpoint}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ hue, sat })
-                    });
-                } catch (error) {
-                    this.showMessage('Fehler beim Färben: ' + error.message, 'error');
-                }
+                    try {
+                        await fetch(`${this.baseUrl}${endpoint}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ hue, sat, transitiontime: 3 })
+                        });
+                    } catch (error) {
+                        this.showMessage('Fehler beim Färben: ' + error.message, 'error');
+                    }
+                }, 200); // 200ms Debounce für Farben
             }
 
             async activateScene(sceneId, scene) {
@@ -815,9 +2928,117 @@
                         </div>
                     `).join('');
                     
+                    // Load history data for charts
+                    if (this.activeTab === 'power') {
+                        await this.updatePowerCharts();
+                    }
+                    
                 } catch (error) {
                     console.error('Fehler beim Laden der Power Stats:', error);
                 }
+            }
+
+            async updatePowerCharts() {
+                try {
+                    const response = await fetch(`${this.baseUrl}/api/power/history`);
+                    const data = await response.json();
+                    
+                    if (data.database_active && data.today_hourly && data.today_hourly.length > 0) {
+                        this.renderPowerChart(data.today_hourly);
+                    }
+                    
+                    if (data.top_consumers) {
+                        this.renderTopConsumers(data.top_consumers);
+                    }
+                    
+                } catch (error) {
+                    console.error('Fehler beim Laden der Historie:', error);
+                }
+            }
+
+            renderPowerChart(hourlyData) {
+                const ctx = document.getElementById('powerChart').getContext('2d');
+                
+                if (this.powerChart) {
+                    this.powerChart.destroy();
+                }
+                
+                const labels = hourlyData.map(d => `${d.hour}:00`);
+                const avgWatts = hourlyData.map(d => parseFloat(d.avg_watts) || 0);
+                const maxWatts = hourlyData.map(d => parseFloat(d.max_watts) || 0);
+                
+                this.powerChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Durchschnitt (W)',
+                            data: avgWatts,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1
+                        }, {
+                            label: 'Maximum (W)',
+                            data: maxWatts,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            intersect: false
+                        },
+                        elements: {
+                            point: {
+                                radius: 3
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#FFFFFF'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: '#FFFFFF'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#FFFFFF'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderTopConsumers(consumers) {
+                const container = document.getElementById('top-consumers');
+                if (!consumers || consumers.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #888;">Noch keine Daten vorhanden</div>';
+                    return;
+                }
+                
+                container.innerHTML = consumers.map(consumer => `
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>${consumer.light_name}</span>
+                        <span>${parseFloat(consumer.total_kwh).toFixed(3)} kWh (⌀ ${parseFloat(consumer.avg_watts).toFixed(1)}W)</span>
+                    </div>
+                `).join('');
             }
 
             startPowerMonitoring() {
@@ -825,6 +3046,43 @@
                 setInterval(() => {
                     this.updatePowerStats();
                 }, 30000);
+            }
+
+            startLiveUpdates() {
+                // Update effects and timers every 10 seconds
+                this.effectsUpdateInterval = setInterval(() => {
+                    this.updateActiveEffects();
+                    this.updateActiveTimers();
+                }, 10000);
+
+                // Update light states every 15 seconds if on lights or groups tab
+                this.updateInterval = setInterval(() => {
+                    if (this.activeTab === 'lights' || this.activeTab === 'groups') {
+                        this.refreshCurrentTab();
+                    }
+                }, 15000);
+            }
+
+            async refreshCurrentTab() {
+                try {
+                    if (this.activeTab === 'lights') {
+                        await this.loadLights();
+                    } else if (this.activeTab === 'groups') {
+                        await this.loadGroups();
+                    }
+                } catch (error) {
+                    console.error('Error refreshing tab:', error);
+                }
+            }
+
+            addCardAnimation(card) {
+                card.addEventListener('mouseenter', () => {
+                    card.classList.add('glow-effect');
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.classList.remove('glow-effect');
+                });
             }
 
             // Helper functions
@@ -907,6 +3165,25 @@
                     this.showMessage('Fehler beim Abbrechen: ' + error.message, 'error');
                 }
             }
+
+            async activateMoodScene(sceneType) {
+                try {
+                    const response = await fetch(`${this.baseUrl}/api/mood-scenes/${sceneType}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ lights: 'all' })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        this.showMessage(data.message, 'success');
+                    } else {
+                        this.showMessage('Fehler: ' + data.error, 'error');
+                    }
+                } catch (error) {
+                    this.showMessage('Fehler beim Aktivieren der Szene: ' + error.message, 'error');
+                }
+            }
         }
 
         // Global functions
@@ -914,6 +3191,191 @@
 
         function switchTab(tabName) {
             hue.switchTab(tabName);
+        }
+
+        // Neue erweiterte Funktionen
+        function updateSliderValue(sliderId, value) {
+            document.getElementById(sliderId + '-value').textContent = value;
+        }
+
+        function setGlobalColor(hexColor) {
+            globalColorChange(hexColor);
+        }
+
+        async function activateQuickScene(sceneType) {
+            const scenes = {
+                'relax': { hue: 14000, sat: 140, bri: 150 },
+                'work': { hue: 0, sat: 0, bri: 254 },
+                'party': { hue: 25000, sat: 254, bri: 254 },
+                'romantic': { hue: 65000, sat: 254, bri: 100 },
+                'reading': { hue: 0, sat: 0, bri: 200 },
+                'gaming': { hue: 46000, sat: 254, bri: 200 }
+            };
+
+            const scene = scenes[sceneType];
+            if (!scene) return;
+
+            try {
+                await fetch(`${hue.baseUrl}/api/global/all-lights`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ on: true, ...scene })
+                });
+                hue.showMessage(`Szene "${sceneType}" aktiviert`, 'success');
+            } catch (error) {
+                hue.showMessage('Fehler beim Aktivieren der Szene: ' + error.message, 'error');
+            }
+        }
+
+        async function startAdvancedEffect(effectType) {
+            const effectData = {
+                'wave': { duration: 60, speed: 2 },
+                'pulse': { duration: 30, speed: 1 },
+                'rainbow': { duration: 120, speed: 0.5 },
+                'fire': { duration: 300, speed: 3 },
+                'sunset': { duration: 1800, speed: 0.1 },
+                'lightning': { duration: 45, speed: 5 }
+            };
+
+            const data = effectData[effectType];
+            if (!data) return;
+
+            try {
+                await fetch(`${hue.baseUrl}/api/effects/advanced/${effectType}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'all', ...data })
+                });
+                hue.showMessage(`${effectType} Effekt gestartet`, 'success');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Starten des Effekts: ' + error.message, 'error');
+            }
+        }
+
+        async function startCustomStrobe() {
+            const targetType = document.getElementById('effect-target-type').value;
+            const targetId = document.getElementById('effect-target-id').value;
+            const duration = document.getElementById('strobe-duration').value;
+            const speed = document.getElementById('strobe-speed').value;
+
+            if (targetType !== 'all' && !targetId) {
+                hue.showMessage('Bitte Target-ID eingeben', 'error');
+                return;
+            }
+
+            try {
+                await fetch(`${hue.baseUrl}/api/effects/strobe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        type: targetType, 
+                        id: targetId, 
+                        duration: parseInt(duration), 
+                        interval: parseFloat(speed) 
+                    })
+                });
+                hue.showMessage('Strobo gestartet', 'success');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Starten: ' + error.message, 'error');
+            }
+        }
+
+        async function startCustomColorloop() {
+            const targetType = document.getElementById('effect-target-type').value;
+            const targetId = document.getElementById('effect-target-id').value;
+            const duration = document.getElementById('colorloop-duration').value;
+
+            if (targetType !== 'all' && !targetId) {
+                hue.showMessage('Bitte Target-ID eingeben', 'error');
+                return;
+            }
+
+            try {
+                await fetch(`${hue.baseUrl}/api/effects/colorloop`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        type: targetType, 
+                        id: targetId, 
+                        duration: parseInt(duration) 
+                    })
+                });
+                hue.showMessage('Farbschleife gestartet', 'success');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Starten: ' + error.message, 'error');
+            }
+        }
+
+        async function startAdvancedStrobe() {
+            const targetType = document.getElementById('effect-target-type').value;
+            const targetId = document.getElementById('effect-target-id').value;
+            const duration = document.getElementById('strobe-duration').value;
+            const frequency = document.getElementById('strobe-frequency').value;
+            const briVal = document.getElementById('strobe-brightness').value;
+            
+            // Verwende die gewählte Normal-Strobo-Farbe
+            const hueVal = currentNormalStroboColor.hue;
+            const satVal = currentNormalStroboColor.sat;
+            const mode = document.getElementById('strobe-mode').value;
+
+            if (targetType !== 'all' && !targetId) {
+                hue.showMessage('Bitte Target-ID eingeben', 'error');
+                return;
+            }
+
+            try {
+                await fetch(`${hue.baseUrl}/api/effects/strobe/advanced`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        target_type: targetType, 
+                        target_id: targetId, 
+                        duration: parseInt(duration), 
+                        frequency: parseFloat(frequency),
+                        hue: parseInt(hueVal),
+                        sat: parseInt(satVal),
+                        bri: parseInt(briVal),
+                        mode: mode
+                    })
+                });
+                const durationText = duration == 0 ? '∞ UNBEGRENZT' : `${duration}s`;
+                hue.showMessage(`${mode.charAt(0).toUpperCase() + mode.slice(1)}-Strobo gestartet (${frequency}Hz) - ${durationText} - ${currentNormalStroboColor.name}`, 'success');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Starten: ' + error.message, 'error');
+            }
+        }
+
+        function updateStrobeColorPreview() {
+            const hue = document.getElementById('strobe-hue').value;
+            const sat = document.getElementById('strobe-sat').value;
+            const preview = document.getElementById('strobe-color-preview');
+            
+            // Convert Hue range (0-65535) to CSS hue (0-360)
+            const cssHue = Math.round((hue / 65535) * 360);
+            // Convert saturation (0-254) to CSS saturation (0-100%)
+            const cssSat = Math.round((sat / 254) * 100);
+            
+            preview.style.backgroundColor = `hsl(${cssHue}, ${cssSat}%, 50%)`;
+        }
+
+        async function stopAllEffects() {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/effects`);
+                const data = await response.json();
+                
+                for (const effectId of data.active_effects) {
+                    await fetch(`${hue.baseUrl}/api/effects/${effectId}/stop`, { method: 'DELETE' });
+                }
+                
+                hue.showMessage('Alle Effekte gestoppt', 'success');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Stoppen der Effekte: ' + error.message, 'error');
+            }
         }
 
         async function globalControl(action) {
@@ -1032,6 +3494,664 @@
                 hue.showMessage('Fehler beim Erstellen des Timers: ' + error.message, 'error');
             }
         }
+
+        // Audio-Sync Funktionen
+        async function startAudioSync() {
+            const deviceIndex = document.getElementById('audio-device-select').value;
+            const syncMode = document.getElementById('sync-mode-select').value;
+            const sensitivity = parseFloat(document.getElementById('audio-sensitivity').value);
+            
+            if (!deviceIndex) {
+                hue.showMessage('Bitte Audio-Gerät auswählen', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/audio/start-sync`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        device_index: parseInt(deviceIndex),
+                        mode: syncMode,
+                        sensitivity: sensitivity
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('start-audio-sync').style.display = 'none';
+                    document.getElementById('stop-audio-sync').style.display = 'block';
+                    document.getElementById('audio-sync-container').classList.add('audio-sync-active');
+                    showAudioStatus(data.message, 'success');
+                } else {
+                    showAudioStatus(data.error || 'Fehler beim Starten', 'error');
+                }
+            } catch (error) {
+                showAudioStatus('Verbindungsfehler: ' + error.message, 'error');
+            }
+        }
+
+        async function stopAudioSync() {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/audio/stop-sync`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('start-audio-sync').style.display = 'block';
+                    document.getElementById('stop-audio-sync').style.display = 'none';
+                    document.getElementById('audio-sync-container').classList.remove('audio-sync-active');
+                    showAudioStatus(data.message, 'success');
+                } else {
+                    showAudioStatus('Fehler beim Stoppen', 'error');
+                }
+            } catch (error) {
+                showAudioStatus('Verbindungsfehler: ' + error.message, 'error');
+            }
+        }
+
+        function showAudioStatus(message, type) {
+            const statusDiv = document.getElementById('audio-status');
+            statusDiv.className = `message ${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // === SMART ERROR HANDLING ===
+        
+        async function checkSystemHealth() {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/system/health`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayHealthStatus(data.health);
+                }
+            } catch (error) {
+                console.error('Health check failed:', error);
+            }
+        }
+        
+        function displayHealthStatus(health) {
+            let healthHtml = `
+                <div class="health-status ${health.status}">
+                    <h4>🔧 System-Status: ${health.status.toUpperCase()}</h4>
+                    <div class="health-checks">
+            `;
+            
+            for (const [check, status] of Object.entries(health.checks)) {
+                const icon = status === 'ok' ? '✅' : '❌';
+                healthHtml += `<div class="health-check">${icon} ${check}: ${status}</div>`;
+            }
+            
+            healthHtml += '</div>';
+            
+            if (health.recommendations && health.recommendations.length > 0) {
+                healthHtml += '<div class="recommendations"><h5>🔍 Empfehlungen:</h5><ul>';
+                health.recommendations.forEach(rec => {
+                    healthHtml += `<li>${rec}</li>`;
+                });
+                healthHtml += '</ul></div>';
+            }
+            
+            healthHtml += '</div>';
+            
+            // Show in status section or create modal
+            showSystemModal('System-Gesundheit', healthHtml);
+        }
+        
+        async function diagnoseIssue(issueType) {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/system/diagnose`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: issueType })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    displayDiagnosis(data.diagnosis);
+                }
+            } catch (error) {
+                hue.showMessage('Diagnose fehlgeschlagen: ' + error.message, 'error');
+            }
+        }
+        
+        function displayDiagnosis(diagnosis) {
+            let diagnosisHtml = `
+                <div class="diagnosis-result">
+                    <h4>🔍 Diagnose: ${diagnosis.issue_type}</h4>
+                    <div class="diagnosis-tests">
+            `;
+            
+            for (const [test, result] of Object.entries(diagnosis.tests)) {
+                diagnosisHtml += `<div class="test-result"><strong>${test}:</strong> ${result}</div>`;
+            }
+            
+            diagnosisHtml += '</div>';
+            
+            if (diagnosis.solutions && diagnosis.solutions.length > 0) {
+                diagnosisHtml += '<div class="solutions"><h5>💡 Lösungsvorschläge:</h5><ul>';
+                diagnosis.solutions.forEach(solution => {
+                    diagnosisHtml += `<li>${solution}</li>`;
+                });
+                diagnosisHtml += '</ul></div>';
+            }
+            
+            diagnosisHtml += '</div>';
+            showSystemModal('Diagnose-Ergebnis', diagnosisHtml);
+        }
+        
+        async function performRecovery(action) {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/system/recovery`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    hue.showMessage(data.recovery.message, 'success');
+                } else {
+                    hue.showMessage('Recovery fehlgeschlagen: ' + data.recovery.message, 'error');
+                }
+            } catch (error) {
+                hue.showMessage('Recovery-Aktion fehlgeschlagen: ' + error.message, 'error');
+            }
+        }
+        
+        function showSystemModal(title, content) {
+            // Simple modal implementation
+            const modal = document.createElement('div');
+            modal.className = 'system-modal';
+            modal.innerHTML = `
+                <div class="modal-backdrop" onclick="this.parentElement.remove()"></div>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>${title}</h3>
+                        <button onclick="this.closest('.system-modal').remove()">×</button>
+                    </div>
+                    <div class="modal-body">${content}</div>
+                    <div class="modal-footer">
+                        <button onclick="this.closest('.system-modal').remove()">Schließen</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        // Enhanced error handling for API calls
+        async function smartFetch(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                
+                if (!response.ok || !data.success) {
+                    if (data.error) {
+                        // Smart error with solutions
+                        showSmartError(data.error);
+                    } else {
+                        throw new Error(data.message || 'Unbekannter Fehler');
+                    }
+                    return null;
+                }
+                
+                return data;
+            } catch (error) {
+                hue.showMessage('Netzwerkfehler: ' + error.message, 'error');
+                return null;
+            }
+        }
+        
+        function showSmartError(errorInfo) {
+            const errorHtml = `
+                <div class="smart-error">
+                    <h4>❌ ${errorInfo.title}</h4>
+                    <p class="error-message">${errorInfo.message}</p>
+                    <div class="error-solutions">
+                        <h5>💡 Lösungsvorschläge:</h5>
+                        <ul>
+                            ${errorInfo.solutions.map(solution => `<li>${solution}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="error-actions">
+                        <button onclick="diagnoseIssue('${errorInfo.category}')" class="btn secondary">
+                            🔍 Diagnose starten
+                        </button>
+                        ${getRecoveryButton(errorInfo.category)}
+                    </div>
+                    <details class="technical-details">
+                        <summary>Technische Details</summary>
+                        <p>${errorInfo.technical_details}</p>
+                        <p>Error ID: ${errorInfo.error_id}</p>
+                    </details>
+                </div>
+            `;
+            showSystemModal('Intelligente Fehlerbehandlung', errorHtml);
+        }
+        
+        function getRecoveryButton(category) {
+            const recoveryActions = {
+                'effect_system': 'restart_effects',
+                'database_connection': 'reset_database_pool',
+                'hue_bridge_connection': 'test_bridge',
+                'audio_system': 'stop_audio'
+            };
+            
+            const action = recoveryActions[category];
+            if (action) {
+                return `<button onclick="performRecovery('${action}')" class="btn danger">
+                    🔧 Auto-Recovery
+                </button>`;
+            }
+            return '';
+        }
+        
+        // Periodische System-Health-Checks
+        setInterval(checkSystemHealth, 300000); // Alle 5 Minuten
+
+        // Debug-System Variablen
+        let debugAutoScroll = true;
+        let debugUpdateInterval = null;
+
+        // Debug-Funktionen
+        async function updateDebugData() {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/debug/logs`);
+                const data = await response.json();
+                
+                // Logs aktualisieren
+                const debugLog = document.getElementById('debug-log');
+                debugLog.innerHTML = data.logs.map(log => `
+                    <div class="debug-entry ${log.type}">
+                        <span class="debug-time">${log.timestamp}</span>
+                        <span class="debug-type ${log.type}">${log.type.toUpperCase()}</span>
+                        <span class="debug-message">${log.message}</span>
+                    </div>
+                `).join('');
+                
+                // Auto-scroll wenn aktiviert
+                if (debugAutoScroll) {
+                    debugLog.scrollTop = debugLog.scrollHeight;
+                }
+                
+                // Stats aktualisieren
+                document.getElementById('debug-bridge-status').textContent = 
+                    data.stats.bridge_status === 'connected' ? '✅' : 
+                    data.stats.bridge_status === 'error' ? '❌' : '🔍';
+                document.getElementById('debug-last-request').textContent = 
+                    data.stats.last_request || '--';
+                document.getElementById('debug-request-count').textContent = 
+                    data.stats.total_requests;
+                document.getElementById('debug-error-count').textContent = 
+                    data.stats.error_count;
+                    
+            } catch (error) {
+                console.error('Debug update error:', error);
+            }
+        }
+
+        function clearDebugLog() {
+            fetch(`${hue.baseUrl}/api/debug/clear`, { method: 'POST' });
+            setTimeout(updateDebugData, 100);
+        }
+
+        function toggleDebugAutoScroll() {
+            debugAutoScroll = !debugAutoScroll;
+            document.getElementById('autoscroll-status').textContent = debugAutoScroll ? 'AN' : 'AUS';
+        }
+
+        function updateMaxLogEntries() {
+            // Placeholder für zukünftige Implementierung
+        }
+
+        async function testHueConnection() {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/debug/test/connection`, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    hue.showMessage(`Bridge-Test erfolgreich: ${data.bridge_name}`, 'success');
+                } else {
+                    hue.showMessage(`Bridge-Test fehlgeschlagen: ${data.error}`, 'error');
+                }
+                setTimeout(updateDebugData, 500);
+            } catch (error) {
+                hue.showMessage('Fehler beim Bridge-Test', 'error');
+            }
+        }
+
+        async function testLightCommand() {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/debug/test/light`, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    hue.showMessage(`Licht ${data.light_id} Test-Blink gesendet`, 'success');
+                } else {
+                    hue.showMessage(`Licht-Test fehlgeschlagen: ${data.error}`, 'error');
+                }
+                setTimeout(updateDebugData, 500);
+            } catch (error) {
+                hue.showMessage('Fehler beim Licht-Test', 'error');
+            }
+        }
+
+        async function testGroupCommand() {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/debug/test/group`, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    hue.showMessage('Gruppen-Test erfolgreich', 'success');
+                } else {
+                    hue.showMessage(`Gruppen-Test fehlgeschlagen: ${data.error}`, 'error');
+                }
+                setTimeout(updateDebugData, 500);
+            } catch (error) {
+                hue.showMessage('Fehler beim Gruppen-Test', 'error');
+            }
+        }
+
+        async function sendTestStrobe() {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/debug/test/strobe`, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    hue.showMessage('Test-Strobo gestartet (3s)', 'success');
+                } else {
+                    hue.showMessage(`Test-Strobo fehlgeschlagen: ${data.error}`, 'error');
+                }
+                setTimeout(updateDebugData, 500);
+            } catch (error) {
+                hue.showMessage('Fehler beim Test-Strobo', 'error');
+            }
+        }
+
+        // Ultra-Strobo Funktionen
+        async function startUltraStrobo(mode, frequency) {
+            // Sicherheitswarnung bei hohen Frequenzen
+            if (frequency > 15) {
+                const confirmed = confirm(`⚠️ WARNUNG: ${frequency}Hz kann bei photosensitiven Personen Anfälle auslösen!\n\nWirklich fortfahren?`);
+                if (!confirmed) return;
+            }
+
+            const targetType = document.getElementById('effect-target-type').value;
+            const targetId = document.getElementById('effect-target-id').value;
+            const duration = 0; // Unbegrenzt für Presets
+
+            if (targetType !== 'all' && !targetId) {
+                hue.showMessage('Bitte Target-ID eingeben', 'error');
+                return;
+            }
+
+            try {
+                await fetch(`${hue.baseUrl}/api/effects/strobe/ultra`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        target_type: targetType, 
+                        target_id: targetId, 
+                        duration: duration,
+                        frequency: frequency,
+                        mode: mode,
+                        hue: currentStroboColor.hue,
+                        sat: currentStroboColor.sat,
+                        bri: currentStroboColor.bri,
+                        intensity: 1.0
+                    })
+                });
+                hue.showMessage(`🔥 ${mode.toUpperCase()}-STROBO gestartet (${frequency}Hz) - ∞ UNBEGRENZT`, 'success');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Ultra-Strobo: ' + error.message, 'error');
+            }
+        }
+
+        // Globale Variable für Strobo-Farbe
+        let currentStroboColor = {
+            name: 'Weiß',
+            hue: 0,
+            sat: 0,
+            bri: 254
+        };
+
+        function updateUltraDurationValue(value) {
+            const display = document.getElementById('ultra-duration-value');
+            if (value == 0) {
+                display.textContent = '∞ Unbegrenzt';
+            } else {
+                display.textContent = value + 's';
+            }
+        }
+
+        function setStroboColor(colorName) {
+            // Entferne active Klasse von allen Buttons
+            document.querySelectorAll('.color-preset-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Aktiviere aktuellen Button
+            document.querySelector(`[data-color="${colorName}"]`).classList.add('active');
+            
+            // Setze Farbwerte
+            const colors = {
+                'white': { name: 'Weiß', hue: 0, sat: 0, bri: 254 },
+                'red': { name: 'Rot', hue: 0, sat: 254, bri: 254 },
+                'blue': { name: 'Blau', hue: 46000, sat: 254, bri: 254 },
+                'green': { name: 'Grün', hue: 25000, sat: 254, bri: 254 },
+                'purple': { name: 'Lila', hue: 56000, sat: 254, bri: 254 },
+                'orange': { name: 'Orange', hue: 8000, sat: 254, bri: 254 }
+            };
+            
+            currentStroboColor = colors[colorName];
+            document.getElementById('current-strobo-color').textContent = currentStroboColor.name;
+            
+            // Update hidden inputs falls vorhanden
+            const hueInput = document.getElementById('strobe-hue');
+            const satInput = document.getElementById('strobe-sat');
+            const briInput = document.getElementById('strobe-brightness');
+            
+            if (hueInput) hueInput.value = currentStroboColor.hue;
+            if (satInput) satInput.value = currentStroboColor.sat;
+            if (briInput) briInput.value = currentStroboColor.bri;
+        }
+
+        // Globale Variable für Normal-Strobo-Farbe
+        let currentNormalStroboColor = {
+            name: 'Weiß',
+            hue: 0,
+            sat: 0,
+            bri: 254
+        };
+
+        function updateNormalStrobeDurationValue(value) {
+            const display = document.getElementById('strobe-duration-value');
+            if (value == 0) {
+                display.textContent = '∞ Unbegrenzt';
+            } else {
+                display.textContent = value + 's';
+            }
+        }
+
+        function setNormalStroboColor(colorName) {
+            // Entferne active Klasse von allen Normal-Strobo Buttons
+            document.querySelectorAll('.normal-strobe-color').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Aktiviere aktuellen Button
+            document.querySelector(`.normal-strobe-color[data-color="${colorName}"]`).classList.add('active');
+            
+            // Setze Farbwerte
+            const colors = {
+                'white': { name: 'Weiß', hue: 0, sat: 0, bri: 254 },
+                'red': { name: 'Rot', hue: 0, sat: 254, bri: 254 },
+                'blue': { name: 'Blau', hue: 46000, sat: 254, bri: 254 },
+                'green': { name: 'Grün', hue: 25000, sat: 254, bri: 254 },
+                'purple': { name: 'Lila', hue: 56000, sat: 254, bri: 254 },
+                'orange': { name: 'Orange', hue: 8000, sat: 254, bri: 254 }
+            };
+            
+            currentNormalStroboColor = colors[colorName];
+            document.getElementById('current-normal-strobo-color').textContent = currentNormalStroboColor.name;
+            
+            // Update hidden inputs
+            const hueInput = document.getElementById('strobe-hue');
+            const satInput = document.getElementById('strobe-sat');
+            
+            if (hueInput) hueInput.value = currentNormalStroboColor.hue;
+            if (satInput) satInput.value = currentNormalStroboColor.sat;
+        }
+
+        // Initialize default color on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setStroboColor('white');
+            setNormalStroboColor('white');
+        });
+
+        async function startCustomUltraStrobo() {
+            const targetType = document.getElementById('effect-target-type').value;
+            const targetId = document.getElementById('effect-target-id').value;
+            const frequency = document.getElementById('ultra-frequency').value;
+            const duration = document.getElementById('ultra-duration').value;
+            
+            // Verwende die gewählte Strobo-Farbe
+            const hueVal = currentStroboColor.hue;
+            const satVal = currentStroboColor.sat;
+            const briVal = currentStroboColor.bri;
+
+            // Extra Sicherheitswarnung
+            if (frequency > 20) {
+                const confirmed = confirm(`🚨 EXTREME WARNUNG: ${frequency}Hz ist SEHR GEFÄHRLICH!\n\nKann schwere epileptische Anfälle auslösen!\n\nNur für Tests unter kontrollierten Bedingungen!\n\nFortfahren?`);
+                if (!confirmed) return;
+            } else if (frequency > 15) {
+                const confirmed = confirm(`⚠️ WARNUNG: ${frequency}Hz kann bei photosensitiven Personen Anfälle auslösen!\n\nWirklich fortfahren?`);
+                if (!confirmed) return;
+            }
+
+            if (targetType !== 'all' && !targetId) {
+                hue.showMessage('Bitte Target-ID eingeben', 'error');
+                return;
+            }
+
+            try {
+                await fetch(`${hue.baseUrl}/api/effects/strobe/ultra`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        target_type: targetType, 
+                        target_id: targetId, 
+                        duration: parseInt(duration),
+                        frequency: parseFloat(frequency),
+                        mode: 'ultra',
+                        hue: parseInt(hueVal),
+                        sat: parseInt(satVal),
+                        bri: parseInt(briVal),
+                        intensity: 1.0
+                    })
+                });
+                const durationText = duration == 0 ? '∞ UNBEGRENZT' : `${duration}s`;
+                hue.showMessage(`🔥 CUSTOM ULTRA-STROBO gestartet (${frequency}Hz) - ${durationText} - ${currentStroboColor.name}`, 'warning');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Custom Ultra-Strobo: ' + error.message, 'error');
+            }
+        }
+
+        async function emergencyStroboStop() {
+            try {
+                await fetch(`${hue.baseUrl}/api/effects/strobe/emergency-stop`, { method: 'POST' });
+                hue.showMessage('🚨 NOTFALL-STOPP ausgeführt - Alle Strobo-Effekte gestoppt', 'success');
+                setTimeout(() => hue.updateActiveEffects(), 1000);
+            } catch (error) {
+                hue.showMessage('Fehler beim Notfall-Stopp: ' + error.message, 'error');
+            }
+        }
+
+        function checkEpilepsyWarning(frequency) {
+            const freq = parseFloat(frequency);
+            const warningBox = document.querySelector('.warning-box');
+            
+            if (freq > 20) {
+                warningBox.style.background = 'rgba(211, 47, 47, 0.3)';
+                warningBox.style.borderColor = '#d32f2f';
+                warningBox.innerHTML = '🚨 <strong>EXTREME GEFAHR!</strong><br>Frequenz über 20Hz kann schwere epileptische Anfälle auslösen!<br>NUR für kontrollierte Tests!';
+            } else if (freq > 15) {
+                warningBox.style.background = 'rgba(255, 68, 68, 0.3)';
+                warningBox.style.borderColor = '#ff4444';
+                warningBox.innerHTML = '⚠️ <strong>HOHE GEFAHR!</strong><br>Frequenz über 15Hz kann epileptische Anfälle auslösen!<br>Extreme Vorsicht geboten!';
+            } else {
+                warningBox.style.background = 'rgba(255, 152, 0, 0.2)';
+                warningBox.style.borderColor = '#ff9800';
+                warningBox.innerHTML = '⚠️ <strong>EPILEPSIE-WARNUNG!</strong><br>Ultra-Strobo kann bei photosensitiven Personen Anfälle auslösen!<br>Frequenzen über 15Hz sind besonders gefährlich.';
+            }
+        }
+
+        // Guide Navigation Functions
+        function showGuideSection(sectionName) {
+            // Hide all guide sections
+            document.querySelectorAll('.guide-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.guide-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected section
+            const targetSection = document.getElementById(`guide-${sectionName}`);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Activate clicked nav button
+            event.target.classList.add('active');
+            
+            // Scroll to top of guide
+            document.getElementById('guide-tab').scrollTop = 0;
+        }
+
+        // Debug-spezifische switchTab Erweiterung
+        const originalSwitchTab = window.switchTab;
+        window.switchTab = function(tabName) {
+            // Ursprüngliche Funktion aufrufen
+            if (originalSwitchTab) {
+                originalSwitchTab(tabName);
+            } else {
+                // Fallback wenn ursprüngliche Funktion nicht existiert
+                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                const clickedTab = document.querySelector(`button[onclick*="${tabName}"]`);
+                if (clickedTab) clickedTab.classList.add('active');
+                
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                const activeNavItem = document.querySelector(`[data-tab="${tabName}"]`);
+                if (activeNavItem) {
+                    activeNavItem.classList.add('active');
+                }
+                
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                const tabContent = document.getElementById(tabName + '-tab');
+                if (tabContent) tabContent.classList.add('active');
+                
+                hue.activeTab = tabName;
+            }
+
+            // Debug-spezifische Aktionen
+            if (tabName === 'debug') {
+                updateDebugData();
+                debugUpdateInterval = setInterval(updateDebugData, 2000); // Alle 2 Sekunden
+            } else {
+                if (debugUpdateInterval) {
+                    clearInterval(debugUpdateInterval);
+                    debugUpdateInterval = null;
+                }
+            }
+        };
     </script>
 </body>
 </html>
