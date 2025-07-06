@@ -22,6 +22,8 @@ Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Light
 - **Feuereffekt**: Warme, flackernde Farben mit zufälligen Variationen
 - **Sonnenuntergang**: Automatische Farbtemperatur-Progression
 - **Blitzeffekt**: Zufällige Blitze auf ausgewählten Lichtern
+- **Audio-Sync**: Lichtsteuerung basierend auf Mikrofon-Input
+- **Effekt-Builder**: Benutzerdefinierte Effekte erstellen und speichern
 
 ### ⚡ Stromverbrauch-Monitoring
 - **Live-Tracking**: Echtzeit-Anzeige des aktuellen Verbrauchs
@@ -61,7 +63,9 @@ cd hue-controller
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+
+# Dependencies installieren (siehe packages.txt für vollständige Liste)
+pip install flask flask-cors requests mysql-connector-python python-dotenv schedule PyAudio
 ```
 
 ### 3. Datenbank einrichten
@@ -85,20 +89,20 @@ exit;
 
 ### 4. Umgebungsvariablen konfigurieren
 ```bash
-cp .env.example .env
+# .env Datei erstellen
 nano .env
 ```
 
 `.env` Datei bearbeiten:
 ```env
 # Hue Bridge Konfiguration
-HUE_BRIDGE_IP=192.168.1.100
+HUE_BRIDGE_IP=192.168.2.35
 HUE_USERNAME=your_hue_api_key_here
 
-# Datenbank Konfiguration
+# Datenbank Konfiguration (MySQL/MariaDB)
 DB_HOST=localhost
-DB_USER=hueuser
-DB_PASSWORD=password
+DB_USER=root
+DB_PASSWORD=
 DB_NAME=hue_monitoring
 
 # Flask Konfiguration
@@ -137,6 +141,15 @@ nohup venv/bin/python3 app_lite.py > /dev/null 2>&1 &
 ### Mit PM2 (empfohlen)
 ```bash
 npm install -g pm2
+
+# Mit PM2-Management-Script (empfohlen)
+./pm2-manage.sh start       # Anwendung starten
+./pm2-manage.sh status      # Status prüfen  
+./pm2-manage.sh logs        # Logs anzeigen
+./pm2-manage.sh restart     # Neustart
+./pm2-manage.sh stop        # Stoppen
+
+# Oder direkt mit PM2
 pm2 start ecosystem.config.js
 pm2 logs hue-controller
 ```
@@ -180,21 +193,34 @@ pm2 logs hue-controller
 ```
 hue-controller/
 ├── app_lite.py              # Haupt-Flask-Anwendung
-├── templates/
-│   └── index.html           # Frontend (SPA)
+├── app_lite_backup.py       # Backup der Anwendung
+├── effect_builder.py        # Erweiterte Effekt-Engine
+├── error_handler.py         # Intelligente Fehlerbehandlung
+├── audio_processor.py       # Audio-basierte Lichtsteuerung
 ├── test_db.py              # Datenbank-Tests
+├── templates/
+│   ├── index.html          # Haupt-Frontend (SPA)
+│   └── onboarding.html     # Setup-Assistent
+├── logs/                   # Log-Dateien
+│   ├── combined.log
+│   ├── error.log
+│   └── out.log
 ├── ecosystem.config.js     # PM2-Konfiguration
+├── pm2-manage.sh          # PM2-Management-Script
 ├── .env                    # Umgebungsvariablen
 ├── CLAUDE.md              # Entwickler-Dokumentation
-└── requirements.txt       # Python-Dependencies
+├── packages.txt           # Installierte Python-Pakete
+└── venv/                  # Virtual Environment
 ```
 
 ### Technologie-Stack
-- **Backend**: Flask mit CORS-Support
-- **Frontend**: Vanilla JavaScript, HTML5, CSS3
+- **Backend**: Flask mit CORS-Support und Smart Error Handling
+- **Frontend**: Vanilla JavaScript, HTML5, CSS3 mit Glassmorphism Design
 - **Datenbank**: MariaDB/MySQL mit Connection Pooling
 - **Charts**: Chart.js für Visualisierungen
 - **Threading**: Python Threads für Effekte und Timer
+- **Audio**: PyAudio für Mikrofon-basierte Lichtsteuerung
+- **Logging**: Strukturiertes Logging-System mit Rotation
 
 ### Logging
 - **Power-Monitoring**: Automatisch alle 5 Minuten
@@ -225,7 +251,14 @@ mysql -u hueuser -p -e "DELETE FROM hue_monitoring.power_log WHERE timestamp < D
 ```bash
 git pull origin main
 source venv/bin/activate
-pip install -r requirements.txt
+
+# Dependencies aktualisieren (falls neue hinzugefügt)
+pip install flask flask-cors requests mysql-connector-python python-dotenv schedule PyAudio
+
+# Mit PM2-Script neustarten
+./pm2-manage.sh restart
+
+# Oder direkt mit PM2
 pm2 restart hue-controller
 ```
 
