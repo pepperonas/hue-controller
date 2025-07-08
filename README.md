@@ -63,7 +63,7 @@ Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Light
 
 ### 1. Repository klonen
 ```bash
-git clone <repository-url>
+git clone https://github.com/pepperonas/hue-controller.git
 cd hue-controller
 ```
 
