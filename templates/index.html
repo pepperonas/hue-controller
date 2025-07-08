@@ -230,6 +230,18 @@
             box-shadow: var(--shadow-lg);
         }
 
+        /* Chart Container Fixes */
+        .card canvas {
+            max-height: 400px;
+            height: 400px !important;
+            width: 100% !important;
+        }
+
+        #weekdayChart, #monthlyChart, #seasonalPieChart, #seasonalHourlyChart {
+            max-height: 400px;
+            height: 400px !important;
+        }
+
         .card-title {
             font-size: 1.25rem;
             font-weight: 500;
@@ -496,6 +508,37 @@
             margin-top: var(--spacing-1);
         }
 
+        /* Erweiterte Status-Item Kategorien */
+        .status-item.highlight {
+            background: linear-gradient(135deg, rgba(104, 141, 177, 0.3) 0%, rgba(104, 141, 177, 0.1) 100%);
+            border: 1px solid var(--accent-blue);
+            box-shadow: 0 0 15px rgba(104, 141, 177, 0.3);
+        }
+
+        .status-item.highlight .status-value {
+            color: var(--accent-blue);
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px rgba(104, 141, 177, 0.5);
+        }
+
+        .status-item.eco {
+            background: linear-gradient(135deg, rgba(156, 182, 143, 0.3) 0%, rgba(156, 182, 143, 0.1) 100%);
+            border: 1px solid var(--accent-green);
+        }
+
+        .status-item.eco .status-value {
+            color: var(--accent-green);
+        }
+
+        .status-item.fun {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.3) 0%, rgba(255, 193, 7, 0.1) 100%);
+            border: 1px solid #fbbf24;
+        }
+
+        .status-item.fun .status-value {
+            color: #fbbf24;
+        }
+
         .effect-controls {
             display: flex;
             gap: var(--spacing-3);
@@ -505,6 +548,114 @@
         .effect-controls .btn {
             flex: 1;
             min-width: 120px;
+        }
+
+        /* Elegante intuitive Button-Styles */
+        .btn-on {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: #f7fafc;
+            border: 1px solid #4a5568;
+            box-shadow: 0 2px 8px rgba(74, 85, 104, 0.2);
+        }
+
+        .btn-on:hover {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 85, 104, 0.3);
+        }
+
+        .btn-off {
+            background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+            color: #f7fafc;
+            border: 1px solid #718096;
+            box-shadow: 0 2px 8px rgba(113, 128, 150, 0.2);
+        }
+
+        .btn-off:hover {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(113, 128, 150, 0.3);
+        }
+
+        .btn-disabled {
+            background: #7f8c8d;
+            color: #bdc3c7;
+            border: 1px solid #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .btn-disabled:hover {
+            background: #7f8c8d;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Unreachable Card Styles */
+        .card.unreachable {
+            opacity: 0.5;
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            border: 1px solid #7f8c8d;
+            filter: grayscale(0.8);
+        }
+
+        .unreachable-label {
+            font-size: 0.75rem;
+            color: #e74c3c;
+            font-weight: bold;
+            margin-left: 8px;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Light On Glow Effect */
+        .card.light-on {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 
+                        0 4px 6px -1px rgba(0, 0, 0, 0.3),
+                        0 2px 4px -1px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            animation: light-glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes light-glow {
+            0% { 
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 
+                           0 4px 6px -1px rgba(0, 0, 0, 0.3),
+                           0 2px 4px -1px rgba(0, 0, 0, 0.15);
+            }
+            100% { 
+                box-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 
+                           0 4px 6px -1px rgba(0, 0, 0, 0.3),
+                           0 2px 4px -1px rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        /* Color Quick Selection */
+        .color-quick-selection {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .color-btn {
+            width: 32px;
+            height: 32px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-btn:active {
+            transform: scale(0.95);
         }
 
         .timer-list, .effect-list {
@@ -702,29 +853,9 @@
 
         .emergency-controls {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: var(--spacing-3);
             margin-top: var(--spacing-4);
-        }
-
-        .btn.emergency {
-            background-color: var(--accent-red);
-            border: 2px solid #dc2626;
-            color: white;
-            font-weight: bold;
-            font-size: 1.1rem;
-            animation: emergency-pulse 1s infinite;
-        }
-
-        @keyframes emergency-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .btn.emergency:hover {
-            background-color: #dc2626;
-            transform: scale(1.1);
-            box-shadow: var(--shadow-lg);
         }
 
         /* Strobo Color Selection Styles */
@@ -969,9 +1100,14 @@
             padding: var(--spacing-6);
             margin-top: var(--spacing-6);
             min-height: 300px;
-            max-height: 400px;
+            max-height: 450px;
             overflow: hidden;
             position: relative;
+        }
+        
+        .power-chart canvas {
+            max-height: 350px !important;
+            height: 350px !important;
         }
 
         /* Neue Klassen für erweiterte Funktionen */
@@ -1082,8 +1218,8 @@
         .control-group {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
+            padding: 8px 16px;
+            margin-bottom: 8px;
         }
 
         .control-group h4 {
@@ -1770,22 +1906,17 @@
             <div class="effect-controls">
                 <button class="btn" onclick="globalControl('all-on')">Alles An</button>
                 <button class="btn danger" onclick="globalControl('all-off')">Alles Aus</button>
-                <button class="btn danger" onclick="globalControl('emergency-off')">Notaus</button>
-                <input type="color" class="color-picker" onchange="globalColorChange(this.value)" title="Globale Farbe">
             </div>
             
-            <!-- Farbpalette für schnelle Auswahl -->
-            <div class="control-group">
-                <h4>Beliebte Farben</h4>
-                <div class="color-palette">
-                    <div class="color-swatch" style="background: #FF6B6B;" onclick="setGlobalColor('#FF6B6B')" title="Rot"></div>
-                    <div class="color-swatch" style="background: #4ECDC4;" onclick="setGlobalColor('#4ECDC4')" title="Türkis"></div>
-                    <div class="color-swatch" style="background: #45B7D1;" onclick="setGlobalColor('#45B7D1')" title="Blau"></div>
-                    <div class="color-swatch" style="background: #96CEB4;" onclick="setGlobalColor('#96CEB4')" title="Grün"></div>
-                    <div class="color-swatch" style="background: #FFEAA7;" onclick="setGlobalColor('#FFEAA7')" title="Gelb"></div>
-                    <div class="color-swatch" style="background: #DDA0DD;" onclick="setGlobalColor('#DDA0DD')" title="Violett"></div>
-                    <div class="color-swatch" style="background: #FFB347;" onclick="setGlobalColor('#FFB347')" title="Orange"></div>
-                    <div class="color-swatch" style="background: #FFFFFF;" onclick="setGlobalColor('#FFFFFF')" title="Weiß"></div>
+            <!-- Globaler Helligkeitsregler -->
+            <div class="control-group" style="margin-top: 16px;">
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Helligkeit alle Lampen</span>
+                        <span class="slider-value" id="global-brightness-value">100%</span>
+                    </div>
+                    <input type="range" class="slider" id="global-brightness-slider" min="1" max="254" value="254" 
+                           oninput="document.getElementById('global-brightness-value').textContent = Math.round(this.value / 254 * 100) + '%'; globalBrightnessChange(this.value)">
                 </div>
             </div>
         </div>
@@ -2089,9 +2220,6 @@
                         </div>
 
                         <div class="emergency-controls">
-                            <button class="btn emergency" onclick="emergencyStroboStop()">
-                                🚨 NOTFALL-STOPP
-                            </button>
                             <button class="btn warning" onclick="startCustomUltraStrobo()">
                                 🔥 Custom Ultra
                             </button>
@@ -2271,19 +2399,19 @@
             </div>
             
             <!-- Wochentags-Analyse -->
-            <div class="card" id="weekday-analysis" style="display: none; margin-top: var(--spacing-6);">
+            <div class="card power-chart" id="weekday-analysis" style="display: none; margin-top: var(--spacing-6);">
                 <div class="card-title">Durchschnittlicher Verbrauch pro Wochentag</div>
                 <canvas id="weekdayChart"></canvas>
             </div>
             
             <!-- Monatsvergleich -->
-            <div class="card" id="monthly-comparison" style="display: none; margin-top: var(--spacing-6);">
+            <div class="card power-chart" id="monthly-comparison" style="display: none; margin-top: var(--spacing-6);">
                 <div class="card-title">Monatsvergleich (letzte 12 Monate)</div>
                 <canvas id="monthlyChart"></canvas>
             </div>
             
             <!-- Sommer/Winter Vergleich -->
-            <div class="card" id="seasonal-comparison" style="display: none; margin-top: var(--spacing-6);">
+            <div class="card power-chart" id="seasonal-comparison" style="display: none; margin-top: var(--spacing-6);">
                 <div class="card-title">Sommer vs. Winter Verbrauch</div>
                 <div class="controls-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: var(--spacing-4);">
                     <div>
@@ -2593,7 +2721,6 @@
 
         <!-- Schwebende Steuerungselemente -->
         <div class="floating-controls">
-            <button class="floating-btn" onclick="globalControl('emergency-off')" title="Notaus">🚨</button>
             <button class="floating-btn" onclick="globalControl('all-off')" title="Alles Aus" style="background: linear-gradient(135deg, #f44336 0%, #da190b 100%);">💡</button>
             <button class="floating-btn" onclick="globalControl('all-on')" title="Alles An" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">🌟</button>
         </div>
@@ -2879,56 +3006,82 @@
 
             createLightCard(id, item, type) {
                 const card = document.createElement('div');
-                card.className = 'card';
                 
                 const state = type === 'light' ? item.state : item.action;
                 const isOn = state.on;
+                const isReachable = type === 'light' ? (state.reachable !== false) : true; // Groups are always reachable
                 const brightness = Math.round((state.bri || 0) / 254 * 100);
+                const supportsColor = type === 'light' ? (item.capabilities?.control?.colorgamut !== undefined) : true;
+                
+                // Set card classes based on reachability and light state
+                let cardClasses = 'card';
+                if (!isReachable) {
+                    cardClasses += ' unreachable';
+                } else if (isOn) {
+                    cardClasses += ' light-on';
+                }
+                card.className = cardClasses;
 
                 card.innerHTML = `
-                    <div class="card-title">${item.name} ${isOn ? '💡' : '🔆'}</div>
-                    <button class="btn ${isOn ? 'danger' : 'premium'}" onclick="hue.toggle('${id}', ${!isOn}, '${type}')">
-                        ${isOn ? '🔴 Ausschalten' : '🟢 Einschalten'}
+                    <div class="card-title">
+                        ${item.name} 
+                        ${isReachable ? (isOn ? '💡' : '🔆') : '❌'}
+                    </div>
+                    
+                    <button class="btn ${this.getButtonClass(isOn, isReachable)}" 
+                            onclick="hue.toggle('${id}', ${!isOn}, '${type}')"
+                            ${!isReachable ? 'disabled' : ''}>
+                        ${this.getButtonText(isOn, isReachable)}
                     </button>
                     
-                    <div class="control-group">
+                    <div class="control-group" style="margin-top: 16px;">
                         <div class="slider-container">
                             <div class="slider-label">
                                 <span>Helligkeit</span>
                                 <span class="slider-value">${brightness}%</span>
                             </div>
                             <input type="range" class="slider" min="1" max="254" value="${state.bri || 254}" 
-                                   oninput="this.nextElementSibling.textContent = Math.round(this.value / 254 * 100) + '%'; hue.setBrightness('${id}', this.value, '${type}')">
+                                   oninput="this.nextElementSibling.textContent = Math.round(this.value / 254 * 100) + '%'; hue.setBrightness('${id}', this.value, '${type}')"
+                                   ${!isReachable ? 'disabled' : ''}>
                             <div style="display: none;"></div>
                         </div>
                     </div>
                     
-                    ${state.hue !== undefined ? `
+                    ${supportsColor && isReachable ? `
                     <div class="control-group">
-                        <h4>Farbe</h4>
-                        <input type="color" class="color-picker" value="${this.hueToHex(state.hue, state.sat)}" 
-                               onchange="hue.setColor('${id}', this.value, '${type}')">
-                        <div class="color-palette">
-                            <div class="color-swatch" style="background: #FF6B6B;" onclick="hue.setColor('${id}', '#FF6B6B', '${type}')"></div>
-                            <div class="color-swatch" style="background: #4ECDC4;" onclick="hue.setColor('${id}', '#4ECDC4', '${type}')"></div>
-                            <div class="color-swatch" style="background: #45B7D1;" onclick="hue.setColor('${id}', '#45B7D1', '${type}')"></div>
-                            <div class="color-swatch" style="background: #96CEB4;" onclick="hue.setColor('${id}', '#96CEB4', '${type}')"></div>
-                            <div class="color-swatch" style="background: #FFEAA7;" onclick="hue.setColor('${id}', '#FFEAA7', '${type}')"></div>
-                            <div class="color-swatch" style="background: #DDA0DD;" onclick="hue.setColor('${id}', '#DDA0DD', '${type}')"></div>
+                        <h4>Beliebte Farben</h4>
+                        <div class="color-quick-selection">
+                            <button class="color-btn" style="background: #ff0000;" onclick="hue.setColor('${id}', '#ff0000', '${type}')" title="Rot"></button>
+                            <button class="color-btn" style="background: #00ff00;" onclick="hue.setColor('${id}', '#00ff00', '${type}')" title="Grün"></button>
+                            <button class="color-btn" style="background: #0066ff;" onclick="hue.setColor('${id}', '#0066ff', '${type}')" title="Blau"></button>
+                            <button class="color-btn" style="background: #ffff00;" onclick="hue.setColor('${id}', '#ffff00', '${type}')" title="Gelb"></button>
+                            <button class="color-btn" style="background: #ff00ff;" onclick="hue.setColor('${id}', '#ff00ff', '${type}')" title="Magenta"></button>
+                            <button class="color-btn" style="background: #00ffff;" onclick="hue.setColor('${id}', '#00ffff', '${type}')" title="Cyan"></button>
+                            <button class="color-btn" style="background: #ff8000;" onclick="hue.setColor('${id}', '#ff8000', '${type}')" title="Orange"></button>
+                            <button class="color-btn" style="background: #8000ff;" onclick="hue.setColor('${id}', '#8000ff', '${type}')" title="Violett"></button>
                         </div>
-                    </div>` : ''}
+                    </div>
+                    ` : ''}
                     
                     <div class="control-group">
                         <h4>Schnellaktionen</h4>
                         <div class="effect-controls">
-                            <button class="btn warning" onclick="hue.quickEffect('${id}', 'strobe', '${type}')">⚡ Strobo</button>
-                            <button class="btn accent" onclick="hue.quickEffect('${id}', 'colorloop', '${type}')">🌈 Farben</button>
-                            <button class="btn" onclick="hue.quickTimer('${id}', '${type}')">⏰ Timer</button>
+                            <button class="btn warning" onclick="hue.quickEffect('${id}', 'strobe', '${type}')" ${!isReachable ? 'disabled' : ''}>⚡ Strobo</button>
                         </div>
                     </div>
                 `;
 
                 return card;
+            }
+            
+            getButtonClass(isOn, isReachable) {
+                if (!isReachable) return 'btn-disabled';
+                return isOn ? 'btn-on' : 'btn-off';
+            }
+            
+            getButtonText(isOn, isReachable) {
+                if (!isReachable) return '❌ Nicht verfügbar';
+                return isOn ? '⭕ Ausschalten' : '✅ Einschalten';
             }
 
             async toggle(id, state, type) {
@@ -3191,8 +3344,12 @@
                             },
                             y: {
                                 beginAtZero: true,
+                                // Dynamische Skalierung ohne feste Obergrenze
                                 ticks: {
-                                    color: '#FFFFFF'
+                                    color: '#FFFFFF',
+                                    callback: function(value) {
+                                        return value + 'W';
+                                    }
                                 },
                                 grid: {
                                     color: 'rgba(255, 255, 255, 0.1)'
@@ -3337,8 +3494,14 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
+                                // Dynamische Skalierung
                                 grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                ticks: { color: 'rgba(255, 255, 255, 0.8)' },
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    callback: function(value) {
+                                        return value + 'W';
+                                    }
+                                },
                                 title: {
                                     display: true,
                                     text: 'Leistung (W)',
@@ -3426,16 +3589,30 @@
                                 type: 'linear',
                                 display: true,
                                 position: 'left',
+                                beginAtZero: true,
+                                max: 100,
                                 grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                ticks: { color: 'rgba(255, 255, 255, 0.8)' },
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    callback: function(value) {
+                                        return value + 'W';
+                                    }
+                                },
                                 title: { display: true, text: 'Leistung (W)', color: 'rgba(255, 255, 255, 0.8)' }
                             },
                             y1: {
                                 type: 'linear',
                                 display: true,
                                 position: 'right',
+                                beginAtZero: true,
+                                max: 5,
                                 grid: { drawOnChartArea: false },
-                                ticks: { color: 'rgba(255, 255, 255, 0.8)' },
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    callback: function(value) {
+                                        return value + ' kWh';
+                                    }
+                                },
                                 title: { display: true, text: 'Energie (kWh)', color: 'rgba(255, 255, 255, 0.8)' }
                             },
                             x: {
@@ -3506,16 +3683,30 @@
                                 type: 'linear',
                                 display: true,
                                 position: 'left',
+                                beginAtZero: true,
+                                max: 100,
                                 grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                ticks: { color: 'rgba(255, 255, 255, 0.8)' },
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    callback: function(value) {
+                                        return value + ' kWh';
+                                    }
+                                },
                                 title: { display: true, text: 'Energie (kWh)', color: 'rgba(255, 255, 255, 0.8)' }
                             },
                             y1: {
                                 type: 'linear',
                                 display: true,
                                 position: 'right',
+                                beginAtZero: true,
+                                max: 50,
                                 grid: { drawOnChartArea: false },
-                                ticks: { color: 'rgba(255, 255, 255, 0.8)' },
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    callback: function(value) {
+                                        return value + ' €';
+                                    }
+                                },
                                 title: { display: true, text: 'Kosten (€)', color: 'rgba(255, 255, 255, 0.8)' }
                             },
                             x: {
@@ -3654,8 +3845,14 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
+                                // Dynamische Skalierung
                                 grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                ticks: { color: 'rgba(255, 255, 255, 0.8)' },
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    callback: function(value) {
+                                        return value + 'W';
+                                    }
+                                },
                                 title: { display: true, text: 'Leistung (W)', color: 'rgba(255, 255, 255, 0.8)' }
                             },
                             x: {
@@ -3683,11 +3880,27 @@
                     return;
                 }
                 
+                // Filter out zero values for more meaningful statistics
+                const nonZeroData = data.filter(item => parseFloat(item.avg_watts) > 0);
+                const activeReadings = nonZeroData.length;
+                
                 const totalReadings = data.length;
                 const avgWatts = data.reduce((sum, item) => sum + parseFloat(item.avg_watts), 0) / totalReadings;
                 const maxWatts = Math.max(...data.map(item => parseFloat(item.max_watts)));
                 const minWatts = Math.min(...data.map(item => parseFloat(item.min_watts)));
-                const totalKwh = data.reduce((sum, item) => sum + parseFloat(item.avg_watts), 0) / 60 / 1000;
+                
+                // Improved kWh calculation based on timeframe
+                let totalKwh = 0;
+                if (timeframe === 'today') {
+                    // For today: each data point represents 1 minute, so divide by 60 to get hours
+                    totalKwh = data.reduce((sum, item) => sum + parseFloat(item.avg_watts), 0) / 60 / 1000;
+                } else if (timeframe === 'week') {
+                    // For week: each data point represents 1 hour
+                    totalKwh = data.reduce((sum, item) => sum + parseFloat(item.avg_watts), 0) / 1000;
+                } else if (timeframe === 'month') {
+                    // For month: each data point represents 1 day (24 hours)
+                    totalKwh = data.reduce((sum, item) => sum + parseFloat(item.avg_watts), 0) * 24 / 1000;
+                }
                 
                 const labels = {
                     'today': 'heute',
@@ -3695,54 +3908,211 @@
                     'month': 'diesen Monat'
                 };
                 
+                const activePercentage = (activeReadings / totalReadings * 100);
+                const avgActiveWatts = activeReadings > 0 ? 
+                    nonZeroData.reduce((sum, item) => sum + parseFloat(item.avg_watts), 0) / activeReadings : 0;
+                
+                // Enhanced cost calculations with different rates
+                const costRates = {
+                    day: 0.32,    // Day rate (6:00-22:00)
+                    night: 0.25,  // Night rate (22:00-6:00)
+                    weekend: 0.28 // Weekend rate
+                };
+                
+                // Calculate costs based on actual consumption
+                const baseCost = totalKwh * 0.30; // Basic calculation
+                const premiumCost = totalKwh * costRates.day; // Premium rate
+                const economyCost = totalKwh * costRates.night; // Economy rate
+                
+                // Calculate cost projections
+                let costProjections = {};
+                if (timeframe === 'today') {
+                    costProjections = {
+                        week: baseCost * 7,
+                        month: baseCost * 30,
+                        year: baseCost * 365
+                    };
+                } else if (timeframe === 'week') {
+                    costProjections = {
+                        month: baseCost * 4.33, // Average weeks per month
+                        year: baseCost * 52
+                    };
+                } else if (timeframe === 'month') {
+                    costProjections = {
+                        year: baseCost * 12
+                    };
+                }
+                
+                // Erweiterte Berechnungen für coole Insights
+                const efficiency = maxWatts > 0 ? (avgWatts / maxWatts * 100) : 0;
+                const co2Savings = (9 - avgWatts) * totalReadings / 60 * 0.401; // 401g CO2/kWh Deutschland
+                const treesEquivalent = co2Savings / 22; // 22kg CO2 pro Baum/Jahr
+                const phoneCharges = totalKwh * 1000 / 15; // 15Wh pro Smartphone-Ladung
+                const ledBulbHours = totalKwh / 0.009; // 9W LED Glühbirne
+                
+                // Compare with typical household consumption
+                const typicalHouseholdDaily = 10; // kWh per day
+                const savingsVsTypical = timeframe === 'today' ? 
+                    ((typicalHouseholdDaily - totalKwh) / typicalHouseholdDaily * 100) : 
+                    timeframe === 'week' ? 
+                    ((typicalHouseholdDaily * 7 - totalKwh) / (typicalHouseholdDaily * 7) * 100) :
+                    ((typicalHouseholdDaily * 30 - totalKwh) / (typicalHouseholdDaily * 30) * 100);
+                
+                // Tageszeiten-Analyse
+                const hourlyData = {};
+                data.forEach(item => {
+                    const hour = parseInt(item.time.split(':')[0]);
+                    if (!hourlyData[hour]) hourlyData[hour] = [];
+                    hourlyData[hour].push(parseFloat(item.avg_watts));
+                });
+                
+                const peakHour = Object.keys(hourlyData).reduce((peak, hour) => {
+                    const avgHour = hourlyData[hour].reduce((sum, w) => sum + w, 0) / hourlyData[hour].length;
+                    const peakAvg = hourlyData[peak] ? hourlyData[peak].reduce((sum, w) => sum + w, 0) / hourlyData[peak].length : 0;
+                    return avgHour > peakAvg ? hour : peak;
+                }, '0');
+                
+                const peakHourAvg = hourlyData[peakHour] ? 
+                    (hourlyData[peakHour].reduce((sum, w) => sum + w, 0) / hourlyData[peakHour].length).toFixed(1) : '0.0';
+                
+                // Status-Emojis basierend auf Effizienz
+                const getEfficiencyEmoji = (eff) => {
+                    if (eff > 80) return '🔥';
+                    if (eff > 60) return '⚡';
+                    if (eff > 40) return '💡';
+                    if (eff > 20) return '🌱';
+                    return '💤';
+                };
+                
+                const getCostEmoji = (cost) => {
+                    if (cost < 1) return '💰';
+                    if (cost < 5) return '💳';
+                    if (cost < 10) return '💸';
+                    return '🔥💸';
+                };
+                
+                const getSavingsEmoji = (savings) => {
+                    if (savings > 80) return '🌟';
+                    if (savings > 60) return '🎯';
+                    if (savings > 40) return '👍';
+                    if (savings > 20) return '💚';
+                    return '⚠️';
+                };
+                
                 statsContainer.innerHTML = `
+                    <div class="status-item highlight">
+                        <div class="status-value">${getEfficiencyEmoji(efficiency)} ${efficiency.toFixed(1)}%</div>
+                        <div class="status-label">Effizienz-Score</div>
+                    </div>
                     <div class="status-item">
-                        <div class="status-value">${avgWatts.toFixed(1)}W</div>
+                        <div class="status-value">⚡ ${avgWatts.toFixed(1)}W</div>
                         <div class="status-label">Ø Verbrauch ${labels[timeframe] || ''}</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">${maxWatts.toFixed(1)}W</div>
+                        <div class="status-value">🔥 ${maxWatts.toFixed(1)}W</div>
                         <div class="status-label">Spitzenlast</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">${minWatts.toFixed(1)}W</div>
-                        <div class="status-label">Grundlast</div>
+                        <div class="status-value">💡 ${avgActiveWatts.toFixed(1)}W</div>
+                        <div class="status-label">Ø wenn aktiv</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">${totalKwh.toFixed(2)} kWh</div>
-                        <div class="status-label">Gesamtverbrauch</div>
+                        <div class="status-value">⚡ ${totalKwh.toFixed(3)} kWh</div>
+                        <div class="status-label">Gesamtverbrauch ${labels[timeframe] || ''}</div>
+                    </div>
+                    <div class="status-item highlight">
+                        <div class="status-value">${getCostEmoji(baseCost)} ${baseCost.toFixed(2)}€</div>
+                        <div class="status-label">Kosten ${labels[timeframe] || ''} (0,30€/kWh)</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">${(totalKwh * 0.30).toFixed(2)}€</div>
-                        <div class="status-label">Kosten (0,30€/kWh)</div>
+                        <div class="status-value">💰 ${economyCost.toFixed(2)}€</div>
+                        <div class="status-label">Nachttarif (0,25€/kWh)</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">${totalReadings}</div>
-                        <div class="status-label">Messwerte</div>
+                        <div class="status-value">💳 ${premiumCost.toFixed(2)}€</div>
+                        <div class="status-label">Tagtarif (0,32€/kWh)</div>
+                    </div>
+                    ${timeframe === 'today' ? `
+                    <div class="status-item eco">
+                        <div class="status-value">📈 ${costProjections.week.toFixed(2)}€</div>
+                        <div class="status-label">Hochrechnung Woche</div>
+                    </div>
+                    <div class="status-item eco">
+                        <div class="status-value">📈 ${costProjections.month.toFixed(2)}€</div>
+                        <div class="status-label">Hochrechnung Monat</div>
+                    </div>
+                    <div class="status-item eco">
+                        <div class="status-value">📈 ${costProjections.year.toFixed(2)}€</div>
+                        <div class="status-label">Hochrechnung Jahr</div>
+                    </div>
+                    ` : ''}
+                    ${timeframe === 'week' ? `
+                    <div class="status-item eco">
+                        <div class="status-value">📈 ${costProjections.month.toFixed(2)}€</div>
+                        <div class="status-label">Hochrechnung Monat</div>
+                    </div>
+                    <div class="status-item eco">
+                        <div class="status-value">📈 ${costProjections.year.toFixed(2)}€</div>
+                        <div class="status-label">Hochrechnung Jahr</div>
+                    </div>
+                    ` : ''}
+                    ${timeframe === 'month' ? `
+                    <div class="status-item eco">
+                        <div class="status-value">📈 ${costProjections.year.toFixed(2)}€</div>
+                        <div class="status-label">Hochrechnung Jahr</div>
+                    </div>
+                    ` : ''}
+                    <div class="status-item highlight">
+                        <div class="status-value">${getSavingsEmoji(savingsVsTypical)} ${savingsVsTypical.toFixed(1)}%</div>
+                        <div class="status-label">Einsparung vs. Ø Haushalt</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value">🕐 ${peakHour}:00</div>
+                        <div class="status-label">Peak-Zeit (${peakHourAvg}W)</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-value">📊 ${activePercentage.toFixed(1)}%</div>
+                        <div class="status-label">Aktivitätszeit</div>
+                    </div>
+                    <div class="status-item eco">
+                        <div class="status-value">🌱 ${co2Savings.toFixed(1)}g</div>
+                        <div class="status-label">CO₂ gespart vs. Halogen</div>
+                    </div>
+                    <div class="status-item eco">
+                        <div class="status-value">🌳 ${treesEquivalent.toFixed(2)}</div>
+                        <div class="status-label">Baum-Äquivalent</div>
+                    </div>
+                    <div class="status-item fun">
+                        <div class="status-value">📱 ${phoneCharges.toFixed(0)}x</div>
+                        <div class="status-label">Smartphone-Ladungen</div>
+                    </div>
+                    <div class="status-item fun">
+                        <div class="status-value">💡 ${ledBulbHours.toFixed(0)}h</div>
+                        <div class="status-label">LED-Brenndauer</div>
                     </div>
                 `;
             }
 
             startPowerMonitoring() {
-                // Update power stats every 30 seconds
+                // Update power stats every 1 minute
                 setInterval(() => {
                     this.updatePowerStats();
-                }, 30000);
+                }, 60000);
             }
 
             startLiveUpdates() {
-                // Update effects and timers every 10 seconds
+                // Update effects and timers every 1 minute
                 this.effectsUpdateInterval = setInterval(() => {
                     this.updateActiveEffects();
                     this.updateActiveTimers();
-                }, 10000);
+                }, 60000);
 
-                // Update light states every 15 seconds if on lights or groups tab
+                // Update light states every 1 minute if on lights or groups tab
                 this.updateInterval = setInterval(() => {
                     if (this.activeTab === 'lights' || this.activeTab === 'groups') {
                         this.refreshCurrentTab();
                     }
-                }, 15000);
+                }, 60000);
             }
 
             async refreshCurrentTab() {
@@ -3816,15 +4186,20 @@
             }
 
             showMessage(message, type) {
-                const container = document.getElementById('messages');
-                const div = document.createElement('div');
-                div.className = type;
-                div.textContent = message;
-                container.appendChild(div);
+                const toast = document.createElement('div');
+                toast.className = `message ${type} show`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
                 
+                // Auto-remove after 3 seconds
                 setTimeout(() => {
-                    container.removeChild(div);
-                }, 5000);
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300); // Wait for fade-out animation
+                }, 3000);
             }
 
             // Global functions for HTML onclick handlers
@@ -4064,15 +4439,13 @@
             try {
                 let endpoint, data;
                 
-                if (action === 'emergency-off') {
-                    endpoint = '/api/global/emergency-off';
-                    await fetch(`${hue.baseUrl}${endpoint}`, { method: 'POST' });
-                } else if (action === 'all-on') {
+                if (action === 'all-on') {
                     endpoint = '/api/global/all-lights';
                     data = { on: true };
                 } else if (action === 'all-off') {
-                    endpoint = '/api/global/all-lights';
-                    data = { on: false };
+                    // Use emergency-off API for better immediate shutdown
+                    endpoint = '/api/global/emergency-off';
+                    await fetch(`${hue.baseUrl}${endpoint}`, { method: 'POST' });
                 }
                 
                 if (data) {
@@ -4083,7 +4456,7 @@
                     });
                 }
                 
-                hue.showMessage(`Globale Steuerung: ${action}`, 'success');
+                // Message entfernt - keine störenden Banner mehr
                 setTimeout(() => hue.init(), 1000);
             } catch (error) {
                 hue.showMessage('Fehler bei globaler Steuerung: ' + error.message, 'error');
@@ -4098,9 +4471,22 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ hue: hue_val, sat: sat })
                 });
-                hue.showMessage('Globale Farbe gesetzt', 'success');
+                // Message entfernt - keine störenden Banner mehr
             } catch (error) {
                 hue.showMessage('Fehler beim Setzen der globalen Farbe: ' + error.message, 'error');
+            }
+        }
+
+        async function globalBrightnessChange(brightness) {
+            try {
+                await fetch(`${hue.baseUrl}/api/global/all-lights`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bri: parseInt(brightness), transitiontime: 4 })
+                });
+                // Keine störende Nachricht
+            } catch (error) {
+                hue.showMessage('Fehler beim Setzen der globalen Helligkeit: ' + error.message, 'error');
             }
         }
 
@@ -4760,15 +5146,6 @@
             }
         }
 
-        async function emergencyStroboStop() {
-            try {
-                await fetch(`${hue.baseUrl}/api/effects/strobe/emergency-stop`, { method: 'POST' });
-                hue.showMessage('🚨 NOTFALL-STOPP ausgeführt - Alle Strobo-Effekte gestoppt', 'success');
-                setTimeout(() => hue.updateActiveEffects(), 1000);
-            } catch (error) {
-                hue.showMessage('Fehler beim Notfall-Stopp: ' + error.message, 'error');
-            }
-        }
 
         function checkEpilepsyWarning(frequency) {
             const freq = parseFloat(frequency);
@@ -4842,7 +5219,7 @@
             // Debug-spezifische Aktionen
             if (tabName === 'debug') {
                 updateDebugData();
-                debugUpdateInterval = setInterval(updateDebugData, 2000); // Alle 2 Sekunden
+                debugUpdateInterval = setInterval(updateDebugData, 60000); // Alle 1 Minute
             } else {
                 if (debugUpdateInterval) {
                     clearInterval(debugUpdateInterval);

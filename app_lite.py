@@ -457,7 +457,8 @@ def log_power_consumption():
         
         # Einzelne Lichter loggen
         for light_id, light in lights.items():
-            if light.get('state', {}).get('on', False):
+            # Nur Lichter zählen die eingeschaltet UND erreichbar sind
+            if light.get('state', {}).get('on', False) and light.get('state', {}).get('reachable', True):
                 brightness = light.get('state', {}).get('bri', 254)
                 watts = (brightness / 254) * 9  # Max 9W pro LED
                 
@@ -2742,7 +2743,8 @@ def get_current_power():
     light_details = []
     
     for light_id, light in lights.items():
-        if light.get('state', {}).get('on', False):
+        # Nur Lichter zählen die eingeschaltet UND erreichbar sind
+        if light.get('state', {}).get('on', False) and light.get('state', {}).get('reachable', True):
             brightness = light.get('state', {}).get('bri', 254)
             estimated_watts = (brightness / 254) * 9  # Geschätzt: max 9W pro LED
             total_consumption += estimated_watts
