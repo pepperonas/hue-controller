@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Philips Hue smart lighting controller web application called "Hue Controller Pro X". It provides a comprehensive web interface for managing Hue lights, groups, scenes, effects, and power consumption monitoring.
+This is a Philips Hue smart lighting controller web application called "Hue by mrx3k1". It provides a comprehensive web interface for managing Hue lights, groups, scenes, effects, and power consumption monitoring.
 
 ## Commands
 

@@ -1,4 +1,4 @@
-# 🏠 Hue Controller Pro X
+# 🏠 Hue by mrx3k1
 
 Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Lighting mit erweiterten Effekten, Stromverbrauch-Monitoring und eleganter Benutzeroberfläche.
 

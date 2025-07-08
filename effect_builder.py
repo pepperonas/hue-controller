@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Effekt-Builder System für Hue Controller Pro X
+Effekt-Builder System für Hue by mrx3k1
 Drag & Drop Interface für Custom-Effekte
 """
 

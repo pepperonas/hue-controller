@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Smart Error Handling System für Hue Controller Pro X
+Smart Error Handling System für Hue by mrx3k1
 Zentrale Fehlerbehandlung mit intelligenten Lösungsvorschlägen
 """
 

@@ -485,14 +485,14 @@ def log_power_consumption():
         print(f"❌ Fehler beim Power-Logging: {e}")
 
 def power_logging_worker():
-    """Background Thread für periodisches Power Logging"""
+    """Background Thread für periodisches Power Logging - jede Minute"""
     while True:
         try:
             log_power_consumption()
-            time.sleep(300)  # 5 Minuten
+            time.sleep(60)  # 1 Minute für detaillierte Erfassung
         except Exception as e:
             print(f"Power logging error: {e}")
-            time.sleep(60)  # Bei Fehler nur 1 Minute warten
+            time.sleep(60)  # Bei Fehler auch 1 Minute warten
 
 # === BASIC ROUTES ===
 @app.route('/')
@@ -530,10 +530,11 @@ def android_chrome_192():
 def android_chrome_512():
     return send_from_directory('templates', 'android-chrome-512x512.png', mimetype='image/png')
 
+
 @app.route('/site.webmanifest')
 def site_webmanifest():
     manifest = {
-        "name": "Hue Controller Pro X",
+        "name": "Hue by mrx3k1",
         "short_name": "HueController",
         "icons": [
             {
@@ -2837,6 +2838,226 @@ def get_power_history():
             'daily_summary': [],
             'today_hourly': []
         })
+
+@app.route('/api/power/weekly', methods=['GET'])
+def get_power_weekly():
+    """Wochentags-Analyse des Stromverbrauchs"""
+    if not db_pool:
+        return jsonify({'error': 'Database not configured'})
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Durchschnittlicher Verbrauch pro Wochentag (letzte 30 Tage)
+        cursor.execute("""
+            SELECT 
+                DAYNAME(timestamp) as weekday,
+                DAYOFWEEK(timestamp) as day_num,
+                AVG(total_watts) as avg_watts,
+                MAX(total_watts) as max_watts,
+                MIN(total_watts) as min_watts,
+                SUM(total_watts / 60) / 1000 as total_kwh,
+                COUNT(DISTINCT DATE(timestamp)) as days_counted
+            FROM total_consumption
+            WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            GROUP BY DAYOFWEEK(timestamp), DAYNAME(timestamp)
+            ORDER BY DAYOFWEEK(timestamp)
+        """)
+        weekday_data = cursor.fetchall()
+        
+        # Stundenverteilung pro Wochentag
+        cursor.execute("""
+            SELECT 
+                DAYNAME(timestamp) as weekday,
+                HOUR(timestamp) as hour,
+                AVG(total_watts) as avg_watts
+            FROM total_consumption
+            WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            GROUP BY DAYOFWEEK(timestamp), HOUR(timestamp)
+            ORDER BY DAYOFWEEK(timestamp), HOUR(timestamp)
+        """)
+        weekday_hourly = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'weekday_summary': weekday_data,
+            'weekday_hourly': weekday_hourly
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/power/monthly', methods=['GET'])
+def get_power_monthly():
+    """Monatsansicht des Stromverbrauchs"""
+    if not db_pool:
+        return jsonify({'error': 'Database not configured'})
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Monatszusammenfassung (letzte 12 Monate)
+        cursor.execute("""
+            SELECT 
+                DATE_FORMAT(timestamp, '%Y-%m') as month,
+                AVG(total_watts) as avg_watts,
+                MAX(total_watts) as max_watts,
+                SUM(total_watts / 60) / 1000 as total_kwh,
+                AVG(active_lights) as avg_lights,
+                COUNT(DISTINCT DATE(timestamp)) as days_in_month
+            FROM total_consumption
+            WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+            GROUP BY DATE_FORMAT(timestamp, '%Y-%m')
+            ORDER BY month DESC
+        """)
+        monthly_data = cursor.fetchall()
+        
+        # Kostenberechnung pro Monat
+        for month in monthly_data:
+            month['cost_eur'] = round(month['total_kwh'] * 0.30, 2)
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'monthly_summary': monthly_data
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/power/seasonal', methods=['GET'])
+def get_power_seasonal():
+    """Sommer vs Winter Vergleich"""
+    if not db_pool:
+        return jsonify({'error': 'Database not configured'})
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Sommer (April - September) vs Winter (Oktober - März)
+        cursor.execute("""
+            SELECT 
+                CASE 
+                    WHEN MONTH(timestamp) BETWEEN 4 AND 9 THEN 'Sommer'
+                    ELSE 'Winter'
+                END as season,
+                AVG(total_watts) as avg_watts,
+                MAX(total_watts) as max_watts,
+                SUM(total_watts / 60) / 1000 as total_kwh,
+                AVG(active_lights) as avg_lights,
+                COUNT(DISTINCT DATE(timestamp)) as days_counted,
+                MIN(timestamp) as first_date,
+                MAX(timestamp) as last_date
+            FROM total_consumption
+            WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 365 DAY)
+            GROUP BY season
+        """)
+        seasonal_data = cursor.fetchall()
+        
+        # Stundenverteilung Sommer vs Winter
+        cursor.execute("""
+            SELECT 
+                CASE 
+                    WHEN MONTH(timestamp) BETWEEN 4 AND 9 THEN 'Sommer'
+                    ELSE 'Winter'
+                END as season,
+                HOUR(timestamp) as hour,
+                AVG(total_watts) as avg_watts
+            FROM total_consumption
+            WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 365 DAY)
+            GROUP BY season, HOUR(timestamp)
+            ORDER BY season, hour
+        """)
+        seasonal_hourly = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'seasonal_comparison': seasonal_data,
+            'seasonal_hourly': seasonal_hourly
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+@app.route('/api/power/detailed/<timeframe>', methods=['GET'])
+def get_power_detailed(timeframe):
+    """Detaillierte Ansicht für verschiedene Zeiträume"""
+    if not db_pool:
+        return jsonify({'error': 'Database not configured'})
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Zeitraum bestimmen
+        if timeframe == 'today':
+            time_filter = "DATE(timestamp) = CURDATE()"
+            group_by = "HOUR(timestamp), MINUTE(timestamp)"
+            select_time = "CONCAT(HOUR(timestamp), ':', LPAD(MINUTE(timestamp), 2, '0')) as time"
+        elif timeframe == 'week':
+            time_filter = "timestamp >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+            group_by = "DATE(timestamp), HOUR(timestamp)"
+            select_time = "CONCAT(DATE(timestamp), ' ', HOUR(timestamp), ':00') as time"
+        elif timeframe == 'month':
+            time_filter = "timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)"
+            group_by = "DATE(timestamp)"
+            select_time = "DATE(timestamp) as time"
+        else:
+            return jsonify({'error': 'Invalid timeframe'})
+        
+        # Detaillierte Daten abrufen
+        query = f"""
+            SELECT 
+                {select_time},
+                AVG(total_watts) as avg_watts,
+                MAX(total_watts) as max_watts,
+                MIN(total_watts) as min_watts,
+                AVG(active_lights) as avg_lights
+            FROM total_consumption
+            WHERE {time_filter}
+            GROUP BY {group_by}
+            ORDER BY timestamp DESC
+        """
+        
+        cursor.execute(query)
+        detailed_data = cursor.fetchall()
+        
+        # Top Verbraucher für den Zeitraum
+        cursor.execute(f"""
+            SELECT 
+                light_name,
+                SUM(watts / 60) / 1000 as total_kwh,
+                AVG(watts) as avg_watts,
+                MAX(watts) as max_watts,
+                COUNT(*) as measurements,
+                SUM(CASE WHEN brightness > 0 THEN 1 ELSE 0 END) / COUNT(*) * 100 as on_percentage
+            FROM power_log
+            WHERE {time_filter}
+            GROUP BY light_name
+            ORDER BY total_kwh DESC
+            LIMIT 20
+        """)
+        top_lights = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'timeframe': timeframe,
+            'detailed_data': detailed_data,
+            'top_lights': top_lights
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)})
 
 # === STATUS ===
 # === ONBOARDING API ===

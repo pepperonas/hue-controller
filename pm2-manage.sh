@@ -1,5 +1,5 @@
 #!/bin/bash
-# PM2 Management Script for Hue Controller Pro X
+# PM2 Management Script for Hue by mrx3k1
 
 cd /home/martin/hue-controller
 
@@ -90,7 +90,7 @@ case "$1" in
         netstat -ln | grep ":5000" > /dev/null && echo "✅ Port 5000 is listening" || echo "❌ Port 5000 not listening"
         ;;
     *)
-        echo "🎮 Hue Controller Pro X - PM2 Management"
+        echo "🎮 Hue by mrx3k1 - PM2 Management"
         echo ""
         echo "Usage: $0 {command}"
         echo ""
