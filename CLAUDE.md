@@ -73,10 +73,12 @@ pm2 save
 ## Architecture
 
 ### Application Structure
-- **app_lite.py**: Main Flask application (database-free version)
-- **templates/index.html**: Single-page web interface with embedded JavaScript
+- **app_lite.py**: Main Flask application with database support and power monitoring
+- **public/index.html**: Single-page web interface with embedded JavaScript
+- **public/onboarding.html**: Setup wizard for initial configuration
 - **.env**: Environment configuration (Hue Bridge IP, API key, Flask settings)
 - **ecosystem.config.js**: PM2 process manager configuration
+- **.gitignore**: Prevents core files and system files from being tracked
 
 ### Technology Stack
 - Backend: Flask (Python) with Flask-CORS
@@ -154,9 +156,10 @@ pm2 save
 ### Frontend Architecture
 
 1. **Single Page Application**:
-   - All UI logic in `templates/index.html`
+   - All UI logic in `public/index.html`
    - `HueControllerPro` class handles all interactions
    - Tab-based navigation without page reloads
+   - Onboarding wizard in `public/onboarding.html` for initial setup
 
 2. **Real-time Updates**:
    - Power monitoring: 30-second intervals
@@ -275,8 +278,18 @@ python3 test_db.py
 - Auto-refresh every 30 seconds when on power tab
 - Chart.js with dark theme styling
 
+## Recent Changes
+
+### 2025-07-09
+- Renamed `templates/` folder to `public/` for better naming convention
+- Updated Flask application configuration to use `template_folder='public'`
+- Updated all static file serving paths to use `public/` instead of `templates/`
+- Enhanced `.gitignore` to prevent core dumps and system files from being tracked
+- Application remains fully functional with new folder structure
+
 ## Security Notes
 
 - Hue API key stored in environment variables
 - No authentication on web interface (intended for local network use)
 - CORS enabled for all origins (adjust for production)
+- Core dumps and sensitive files excluded via `.gitignore`
