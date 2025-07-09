@@ -1,8 +1,75 @@
+# Core dumps and system files
+core
+core.*
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
 *.pyc
 *.pyo
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environment
 venv/
+env/
+ENV/
+
+# Environment variables
 .env
-*.log
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+nohup.out
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+tmp/
+
+# PM2
+.pm2/
+
+# Node.js
 node_modules/
