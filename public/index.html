@@ -1911,6 +1911,356 @@
                 text-align: center;
             }
         }
+
+        /* === POWER TAB STYLES === */
+        
+        /* Power view tab styling for all screen sizes */
+        #power-tab .tabs .tab {
+            background: var(--card-background);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            border-radius: var(--radius);
+            cursor: pointer;
+        }
+        
+        #power-tab .tabs .tab:hover {
+            background: rgba(104, 141, 177, 0.1);
+            border-color: var(--accent-blue);
+            transform: translateY(-1px);
+        }
+        
+        #power-tab .tabs .tab.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+            box-shadow: 0 2px 8px rgba(104, 141, 177, 0.3);
+        }
+
+        /* === MOBILE OPTIMIZATIONS === */
+        
+        /* Tablet and smaller (768px and below) */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--spacing-4);
+                padding-bottom: 80px;
+            }
+            
+            .header {
+                padding: var(--spacing-4);
+                margin-bottom: var(--spacing-4);
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                overflow-y: hidden;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding-bottom: var(--spacing-2);
+            }
+            
+            /* Power tabs should not scroll but wrap */
+            #power-tab .tabs {
+                overflow-x: visible;
+                white-space: normal;
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--spacing-1);
+            }
+            
+            .tabs::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .tab {
+                flex-shrink: 0;
+                min-width: 100px;
+                font-size: 0.875rem;
+                padding: var(--spacing-2) var(--spacing-3);
+            }
+            
+            .quick-scenes {
+                grid-template-columns: repeat(3, 1fr);
+                gap: var(--spacing-2);
+            }
+            
+            .quick-scene {
+                padding: var(--spacing-3);
+            }
+            
+            .quick-scene .icon {
+                font-size: 1.5rem;
+            }
+            
+            .quick-scene .name {
+                font-size: 0.8rem;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-3);
+            }
+            
+            .mood-scenes-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: var(--spacing-2);
+            }
+            
+            .floating-controls {
+                bottom: 15px;
+                right: 15px;
+            }
+            
+            .floating-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.25rem;
+            }
+            
+            /* Power view tabs on tablet */
+            #power-tab .tabs .tab {
+                min-width: auto;
+                flex: 1;
+                font-size: 0.8rem;
+                padding: var(--spacing-2);
+                text-align: center;
+                background: var(--card-background);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: var(--text-primary);
+                transition: all 0.3s ease;
+            }
+            
+            #power-tab .tabs .tab:hover {
+                background: rgba(104, 141, 177, 0.1);
+                border-color: var(--accent-blue);
+                transform: translateY(-1px);
+            }
+            
+            #power-tab .tabs .tab.active {
+                background: var(--accent-blue);
+                border-color: var(--accent-blue);
+                color: white;
+                box-shadow: 0 2px 8px rgba(104, 141, 177, 0.3);
+            }
+        }
+        
+        /* Mobile phones (480px and below) */
+        @media (max-width: 480px) {
+            body {
+                padding: var(--spacing-2);
+            }
+            
+            .container {
+                padding: var(--spacing-2);
+                padding-bottom: 70px;
+            }
+            
+            .header {
+                padding: var(--spacing-3);
+                margin-bottom: var(--spacing-3);
+            }
+            
+            .header h1 {
+                font-size: 1.25rem;
+                margin-bottom: var(--spacing-1);
+            }
+            
+            .power-display {
+                padding: var(--spacing-2);
+                margin-bottom: var(--spacing-2);
+                font-size: 0.875rem;
+            }
+            
+            .quick-scenes {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-2);
+            }
+            
+            .quick-scene {
+                padding: var(--spacing-2);
+            }
+            
+            .quick-scene .icon {
+                font-size: 1.25rem;
+                margin-bottom: var(--spacing-1);
+            }
+            
+            .quick-scene .name {
+                font-size: 0.75rem;
+            }
+            
+            .global-controls h3 {
+                font-size: 1rem;
+                margin-bottom: var(--spacing-2);
+            }
+            
+            .effect-controls {
+                gap: var(--spacing-2);
+            }
+            
+            .btn {
+                padding: var(--spacing-2) var(--spacing-3);
+                font-size: 0.875rem;
+                min-height: 44px; /* Touch-friendly minimum */
+            }
+            
+            .tab {
+                min-width: 80px;
+                padding: var(--spacing-2);
+                font-size: 0.8rem;
+                min-height: 44px;
+            }
+            
+            /* Power view tabs need special treatment on mobile */
+            #power-tab .tabs .tab {
+                min-width: auto;
+                flex: 1;
+                font-size: 0.75rem;
+                padding: var(--spacing-2) var(--spacing-1);
+                text-align: center;
+                background: var(--card-background);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: var(--text-primary);
+                transition: all 0.3s ease;
+                border-radius: var(--radius);
+            }
+            
+            #power-tab .tabs .tab:hover {
+                background: rgba(104, 141, 177, 0.1);
+                border-color: var(--accent-blue);
+                transform: translateY(-1px);
+            }
+            
+            #power-tab .tabs .tab.active {
+                background: var(--accent-blue);
+                border-color: var(--accent-blue);
+                color: white;
+                box-shadow: 0 2px 8px rgba(104, 141, 177, 0.3);
+            }
+            
+            .card {
+                padding: var(--spacing-3);
+                margin-bottom: var(--spacing-3);
+            }
+            
+            .card-title {
+                font-size: 1rem;
+                margin-bottom: var(--spacing-2);
+            }
+            
+            .control-group {
+                margin-bottom: var(--spacing-3);
+            }
+            
+            .input-group {
+                margin-bottom: var(--spacing-2);
+            }
+            
+            .slider-container {
+                margin-bottom: var(--spacing-2);
+            }
+            
+            .lamp-selection-grid {
+                grid-template-columns: 1fr;
+                max-height: 150px;
+            }
+            
+            .floating-controls {
+                bottom: 10px;
+                right: 10px;
+                gap: 8px;
+            }
+            
+            .floating-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+            
+            .message {
+                bottom: var(--spacing-3);
+                right: var(--spacing-3);
+                left: var(--spacing-3);
+                max-width: none;
+                font-size: 0.875rem;
+            }
+            
+            /* Kompaktere Power Charts auf Mobile */
+            .power-chart canvas {
+                max-height: 250px;
+            }
+            
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-2);
+            }
+            
+            .status-item {
+                padding: var(--spacing-2);
+            }
+            
+            .status-value {
+                font-size: 1rem;
+            }
+            
+            .status-label {
+                font-size: 0.75rem;
+            }
+        }
+        
+        /* Very small devices (360px and below) */
+        @media (max-width: 360px) {
+            .header h1 {
+                font-size: 1.1rem;
+            }
+            
+            .quick-scenes {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .tab {
+                min-width: 70px;
+                font-size: 0.75rem;
+                padding: var(--spacing-1) var(--spacing-2);
+            }
+            
+            /* Power view tabs for very small screens */
+            #power-tab .tabs .tab {
+                font-size: 0.7rem;
+                padding: var(--spacing-1);
+                min-width: auto;
+                flex: 1;
+                background: var(--card-background);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: var(--text-primary);
+                transition: all 0.3s ease;
+                border-radius: var(--radius);
+            }
+            
+            #power-tab .tabs .tab:hover {
+                background: rgba(104, 141, 177, 0.1);
+                border-color: var(--accent-blue);
+            }
+            
+            #power-tab .tabs .tab.active {
+                background: var(--accent-blue);
+                border-color: var(--accent-blue);
+                color: white;
+                box-shadow: 0 2px 8px rgba(104, 141, 177, 0.3);
+            }
+            
+            .floating-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
