@@ -3291,8 +3291,32 @@
             renderPowerChart(hourlyData) {
                 const ctx = document.getElementById('powerChart').getContext('2d');
                 
+                // Destroy existing charts from both systems
                 if (this.powerChart) {
-                    this.powerChart.destroy();
+                    console.log('🗑️ Destroying existing powerChart');
+                    try {
+                        this.powerChart.destroy();
+                    } catch (e) {
+                        console.warn('powerChart destroy failed:', e);
+                    }
+                    this.powerChart = null;
+                }
+                
+                if (this.powerCharts.main) {
+                    console.log('🗑️ Destroying existing powerCharts.main');
+                    try {
+                        this.powerCharts.main.destroy();
+                    } catch (e) {
+                        console.warn('powerCharts.main destroy failed:', e);
+                    }
+                    this.powerCharts.main = null;
+                }
+                
+                // Alternative: Check if Chart.js knows about a chart on this canvas
+                const existingChart = Chart.getChart('powerChart');
+                if (existingChart) {
+                    console.log('🗑️ Destroying existing Chart.js chart');
+                    existingChart.destroy();
                 }
                 
                 const labels = hourlyData.map(d => `${d.hour}:00`);
@@ -3463,15 +3487,26 @@
                 
                 const ctx = document.getElementById('powerChart').getContext('2d');
                 
-                // Destroy existing chart
+                // Destroy existing charts from both systems
                 if (this.powerCharts.main) {
-                    console.log('🗑️ Destroying existing chart');
+                    console.log('🗑️ Destroying existing powerCharts.main');
                     try {
                         this.powerCharts.main.destroy();
                     } catch (e) {
-                        console.warn('Chart destroy failed:', e);
+                        console.warn('powerCharts.main destroy failed:', e);
                     }
                     this.powerCharts.main = null;
+                }
+                
+                // Also destroy simple chart system
+                if (this.powerChart) {
+                    console.log('🗑️ Destroying existing powerChart');
+                    try {
+                        this.powerChart.destroy();
+                    } catch (e) {
+                        console.warn('powerChart destroy failed:', e);
+                    }
+                    this.powerChart = null;
                 }
                 
                 // Alternative: Check if Chart.js knows about a chart on this canvas
