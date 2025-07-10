@@ -15,6 +15,9 @@ Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Light
 ### Stromverbrauch-Monitoring
 ![Hue Controller - Stromverbrauch](hue-mockup-2.png)
 
+### Individuelle Lampen-Analyse
+![Hue Controller - Lampen-Analyse](hue-mockup-3.png)
+
 ## ✨ Features
 
 ### 🎮 Intelligente Lichtsteuerung
