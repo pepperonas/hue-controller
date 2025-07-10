@@ -2798,8 +2798,40 @@
                 this.requestCache = new Map();
                 this.lastRequests = new Map();
                 this.init();
-                this.startPowerMonitoring();
-                this.startLiveUpdates();
+            }
+
+            // Get CSS variable colors as actual values
+            getChartColors() {
+                const style = getComputedStyle(document.documentElement);
+                return {
+                    blue: style.getPropertyValue('--accent-blue').trim() || '#688db1',
+                    red: style.getPropertyValue('--accent-red').trim() || '#e16162',
+                    green: style.getPropertyValue('--accent-green').trim() || '#9cb68f',
+                    // Create rgba versions for backgrounds
+                    blueAlpha: (alpha = 0.1) => {
+                        const blue = style.getPropertyValue('--accent-blue').trim() || '#688db1';
+                        const rgb = blue.startsWith('#') ? this.hexToRgb(blue) : blue;
+                        return rgb.includes('rgb') ? rgb.replace('rgb', 'rgba').replace(')', `, ${alpha})`) : `rgba(104, 141, 177, ${alpha})`;
+                    },
+                    redAlpha: (alpha = 0.1) => {
+                        const red = style.getPropertyValue('--accent-red').trim() || '#e16162';
+                        const rgb = red.startsWith('#') ? this.hexToRgb(red) : red;
+                        return rgb.includes('rgb') ? rgb.replace('rgb', 'rgba').replace(')', `, ${alpha})`) : `rgba(225, 97, 98, ${alpha})`;
+                    },
+                    greenAlpha: (alpha = 0.1) => {
+                        const green = style.getPropertyValue('--accent-green').trim() || '#9cb68f';
+                        const rgb = green.startsWith('#') ? this.hexToRgb(green) : green;
+                        return rgb.includes('rgb') ? rgb.replace('rgb', 'rgba').replace(')', `, ${alpha})`) : `rgba(156, 182, 143, ${alpha})`;
+                    }
+                };
+            }
+
+            // Helper to convert hex to rgb
+            hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? 
+                    `rgb(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)})` :
+                    hex;
             }
 
             async init() {
@@ -3323,6 +3355,9 @@
                 const avgWatts = hourlyData.map(d => parseFloat(d.avg_watts) || 0);
                 const maxWatts = hourlyData.map(d => parseFloat(d.max_watts) || 0);
                 
+                // Get consistent colors
+                const colors = this.getChartColors();
+                
                 this.powerChart = new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -3330,14 +3365,14 @@
                         datasets: [{
                             label: 'Durchschnitt (W)',
                             data: avgWatts,
-                            borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: colors.blue,
+                            backgroundColor: colors.blueAlpha(0.2),
                             tension: 0.1
                         }, {
                             label: 'Maximum (W)',
                             data: maxWatts,
-                            borderColor: 'rgb(255, 99, 132)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: colors.red,
+                            backgroundColor: colors.redAlpha(0.2),
                             tension: 0.1
                         }]
                     },
@@ -3637,6 +3672,9 @@
                 const maxData = weekdayData.map(item => parseFloat(item.max_watts));
                 const kwhData = weekdayData.map(item => parseFloat(item.total_kwh));
                 
+                // Get consistent colors
+                const colors = this.getChartColors();
+                
                 this.powerCharts.weekday = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -3645,15 +3683,15 @@
                             {
                                 label: 'Durchschnitt (W)',
                                 data: avgData,
-                                backgroundColor: 'rgba(104, 141, 177, 0.8)',
+                                backgroundColor: colors.blueAlpha(0.8),
                                 yAxisID: 'y'
                             },
                             {
                                 label: 'Total kWh',
                                 data: kwhData,
                                 type: 'line',
-                                borderColor: 'var(--accent-green)',
-                                backgroundColor: 'var(--accent-green)',
+                                borderColor: colors.green,
+                                backgroundColor: colors.green,
                                 yAxisID: 'y1'
                             }
                         ]
@@ -3722,6 +3760,9 @@
                 const weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
                 const hours = Array.from({length: 24}, (_, i) => i);
                 
+                // Get consistent colors
+                const colors = this.getChartColors();
+                
                 // Create matrix data
                 const datasets = [{
                     label: 'Verbrauch (W)',
@@ -3733,9 +3774,11 @@
                     backgroundColor: function(context) {
                         const value = context.parsed.v;
                         const alpha = Math.min(value / 100, 1); // Normalize to 0-1 range
-                        return `rgba(104, 141, 177, ${alpha})`;
+                        // Use hardcoded color for context function, as closure doesn't work here
+                        const rgb = '104, 141, 177'; // --accent-blue equivalent
+                        return `rgba(${rgb}, ${alpha})`;
                     },
-                    borderColor: 'rgba(104, 141, 177, 0.8)',
+                    borderColor: colors.blueAlpha(0.8),
                     borderWidth: 1
                 }];
                 
@@ -3829,6 +3872,9 @@
                 const costData = monthlyData.map(item => parseFloat(item.cost_eur));
                 const avgWatts = monthlyData.map(item => parseFloat(item.avg_watts));
                 
+                // Get consistent colors
+                const colors = this.getChartColors();
+                
                 this.powerCharts.monthly = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -3837,15 +3883,15 @@
                             {
                                 label: 'Energie (kWh)',
                                 data: kwhData,
-                                backgroundColor: 'rgba(104, 141, 177, 0.8)',
+                                backgroundColor: colors.blueAlpha(0.8),
                                 yAxisID: 'y'
                             },
                             {
                                 label: 'Kosten (€)',
                                 data: costData,
                                 type: 'line',
-                                borderColor: 'var(--accent-red)',
-                                backgroundColor: 'var(--accent-red)',
+                                borderColor: colors.red,
+                                backgroundColor: colors.red,
                                 yAxisID: 'y1'
                             }
                         ]
@@ -3922,6 +3968,9 @@
                 const labels = seasonalData.map(item => item.season);
                 const kwhData = seasonalData.map(item => parseFloat(item.total_kwh));
                 
+                // Get consistent colors
+                const colors = this.getChartColors();
+                
                 this.powerCharts.seasonalPie = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
@@ -3929,12 +3978,12 @@
                         datasets: [{
                             data: kwhData,
                             backgroundColor: [
-                                'rgba(255, 193, 7, 0.8)',   // Sommer - gelb
-                                'rgba(104, 141, 177, 0.8)'  // Winter - blau
+                                colors.greenAlpha(0.8),   // Sommer - grün
+                                colors.blueAlpha(0.8)     // Winter - blau
                             ],
                             borderColor: [
-                                'rgba(255, 193, 7, 1)',
-                                'rgba(104, 141, 177, 1)'
+                                colors.green,
+                                colors.blue
                             ],
                             borderWidth: 2
                         }]
@@ -3983,6 +4032,9 @@
                 
                 const hours = Array.from({length: 24}, (_, i) => `${i}:00`);
                 
+                // Get consistent colors
+                const colors = this.getChartColors();
+                
                 this.powerCharts.seasonalHourly = new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -3995,8 +4047,8 @@
                                     const found = summerData.find(item => item.hour === h);
                                     return found ? parseFloat(found.avg_watts) : 0;
                                 }),
-                                borderColor: 'rgba(255, 193, 7, 1)',
-                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                borderColor: colors.green,
+                                backgroundColor: colors.greenAlpha(0.1),
                                 fill: false,
                                 tension: 0.3
                             },
@@ -4007,8 +4059,8 @@
                                     const found = winterData.find(item => item.hour === h);
                                     return found ? parseFloat(found.avg_watts) : 0;
                                 }),
-                                borderColor: 'rgba(104, 141, 177, 1)',
-                                backgroundColor: 'rgba(104, 141, 177, 0.1)',
+                                borderColor: colors.blue,
+                                backgroundColor: colors.blueAlpha(0.1),
                                 fill: false,
                                 tension: 0.3
                             }
