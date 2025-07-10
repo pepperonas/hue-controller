@@ -2402,6 +2402,8 @@
             <div class="card power-chart" id="weekday-analysis" style="display: none; margin-top: var(--spacing-6);">
                 <div class="card-title">Durchschnittlicher Verbrauch pro Wochentag</div>
                 <canvas id="weekdayChart"></canvas>
+                <div class="card-title" style="margin-top: var(--spacing-6);">Stündlicher Verbrauch - Heatmap</div>
+                <canvas id="weekdayHeatmap"></canvas>
             </div>
             
             <!-- Monatsvergleich -->
@@ -3464,7 +3466,19 @@
                 // Destroy existing chart
                 if (this.powerCharts.main) {
                     console.log('🗑️ Destroying existing chart');
-                    this.powerCharts.main.destroy();
+                    try {
+                        this.powerCharts.main.destroy();
+                    } catch (e) {
+                        console.warn('Chart destroy failed:', e);
+                    }
+                    this.powerCharts.main = null;
+                }
+                
+                // Alternative: Check if Chart.js knows about a chart on this canvas
+                const existingChart = Chart.getChart('powerChart');
+                if (existingChart) {
+                    console.log('🗑️ Destroying existing Chart.js chart');
+                    existingChart.destroy();
                 }
                 
                 // Data validation
@@ -3655,6 +3669,96 @@
                 });
             }
 
+            renderWeekdayHeatmap(weekdayHourlyData) {
+                const ctx = document.getElementById('weekdayHeatmap').getContext('2d');
+                
+                // Destroy existing chart
+                if (this.powerCharts.weekdayHeatmap) {
+                    this.powerCharts.weekdayHeatmap.destroy();
+                }
+                
+                // Data validation
+                if (!weekdayHourlyData || weekdayHourlyData.length === 0) {
+                    console.warn('⚠️ No weekday hourly data received for heatmap');
+                    return;
+                }
+                
+                // Transform data for heatmap
+                const weekdays = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+                const hours = Array.from({length: 24}, (_, i) => i);
+                
+                // Create matrix data
+                const datasets = [{
+                    label: 'Verbrauch (W)',
+                    data: weekdayHourlyData.map(item => ({
+                        x: item.hour,
+                        y: weekdays.indexOf(item.weekday),
+                        v: parseFloat(item.avg_watts)
+                    })),
+                    backgroundColor: function(context) {
+                        const value = context.parsed.v;
+                        const alpha = Math.min(value / 100, 1); // Normalize to 0-1 range
+                        return `rgba(104, 141, 177, ${alpha})`;
+                    },
+                    borderColor: 'rgba(104, 141, 177, 0.8)',
+                    borderWidth: 1
+                }];
+                
+                this.powerCharts.weekdayHeatmap = new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                position: 'bottom',
+                                min: 0,
+                                max: 23,
+                                ticks: {
+                                    stepSize: 1,
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    callback: function(value) {
+                                        return value + ':00';
+                                    }
+                                },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                title: { display: true, text: 'Stunde', color: 'rgba(255, 255, 255, 0.8)' }
+                            },
+                            y: {
+                                type: 'linear',
+                                min: -0.5,
+                                max: 6.5,
+                                ticks: {
+                                    stepSize: 1,
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    callback: function(value) {
+                                        return weekdays[value] || '';
+                                    }
+                                },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                title: { display: true, text: 'Wochentag', color: 'rgba(255, 255, 255, 0.8)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { labels: { color: 'rgba(255, 255, 255, 0.8)' } },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(context) {
+                                        const point = context[0];
+                                        return `${weekdays[point.parsed.y]} ${point.parsed.x}:00`;
+                                    },
+                                    label: function(context) {
+                                        return `Verbrauch: ${context.parsed.v.toFixed(1)}W`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
             async loadMonthlyComparison() {
                 document.getElementById('monthly-comparison').style.display = 'block';
                 document.getElementById('chart-title').textContent = 'Monatsvergleich';
@@ -3676,6 +3780,14 @@
                 if (this.powerCharts.monthly) {
                     this.powerCharts.monthly.destroy();
                 }
+                
+                // Data validation
+                if (!monthlyData || !Array.isArray(monthlyData) || monthlyData.length === 0) {
+                    console.warn('⚠️ No monthly data received for chart rendering');
+                    return;
+                }
+                
+                console.log('📊 Monthly data received:', monthlyData);
                 
                 const labels = monthlyData.map(item => item.month);
                 const kwhData = monthlyData.map(item => parseFloat(item.total_kwh));
