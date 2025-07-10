@@ -3416,8 +3416,20 @@
 
             async loadDetailedPowerData(timeframe) {
                 try {
+                    console.log('🔄 Loading detailed power data for:', timeframe);
                     const response = await fetch(`/api/power/detailed/${timeframe}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
                     const data = await response.json();
+                    console.log('📡 API response:', { 
+                        timeframe, 
+                        detailedDataLength: data.detailed_data?.length,
+                        topLightsLength: data.top_lights?.length,
+                        sample: data.detailed_data?.slice(0, 2)
+                    });
                     
                     // Update chart title
                     const titles = {
@@ -3445,17 +3457,33 @@
             }
 
             renderDetailedChart(data, timeframe) {
+                console.log('🔄 renderDetailedChart called with:', { timeframe, dataLength: data?.length, data: data?.slice(0, 3) });
+                
                 const ctx = document.getElementById('powerChart').getContext('2d');
                 
                 // Destroy existing chart
                 if (this.powerCharts.main) {
+                    console.log('🗑️ Destroying existing chart');
                     this.powerCharts.main.destroy();
+                }
+                
+                // Data validation
+                if (!data || data.length === 0) {
+                    console.warn('⚠️ No data received for chart rendering');
+                    return;
                 }
                 
                 const labels = data.map(item => item.time);
                 const avgData = data.map(item => parseFloat(item.avg_watts));
                 const maxData = data.map(item => parseFloat(item.max_watts));
                 const minData = data.map(item => parseFloat(item.min_watts));
+                
+                console.log('📊 Chart data processed:', { 
+                    labels: labels.slice(0, 5), 
+                    avgData: avgData.slice(0, 5),
+                    maxData: maxData.slice(0, 5),
+                    minData: minData.slice(0, 5)
+                });
                 
                 this.powerCharts.main = new Chart(ctx, {
                     type: 'line',

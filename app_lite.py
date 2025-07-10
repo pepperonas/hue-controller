@@ -3004,14 +3004,17 @@ def get_power_detailed(timeframe):
             time_filter = "DATE(timestamp) = CURDATE()"
             group_by = "HOUR(timestamp), MINUTE(timestamp)"
             select_time = "CONCAT(HOUR(timestamp), ':', LPAD(MINUTE(timestamp), 2, '0')) as time"
+            order_by = "HOUR(timestamp), MINUTE(timestamp)"
         elif timeframe == 'week':
             time_filter = "timestamp >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
             group_by = "DATE(timestamp), HOUR(timestamp)"
             select_time = "CONCAT(DATE(timestamp), ' ', HOUR(timestamp), ':00') as time"
+            order_by = "DATE(timestamp), HOUR(timestamp)"
         elif timeframe == 'month':
             time_filter = "timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)"
             group_by = "DATE(timestamp)"
             select_time = "DATE(timestamp) as time"
+            order_by = "DATE(timestamp)"
         else:
             return jsonify({'error': 'Invalid timeframe'})
         
@@ -3026,7 +3029,7 @@ def get_power_detailed(timeframe):
             FROM total_consumption
             WHERE {time_filter}
             GROUP BY {group_by}
-            ORDER BY timestamp DESC
+            ORDER BY {order_by} ASC
         """
         
         cursor.execute(query)
