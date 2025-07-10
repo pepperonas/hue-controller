@@ -846,6 +846,61 @@
             0%, 100% { box-shadow: 0 0 5px rgba(225, 97, 98, 0.5); }
             50% { box-shadow: 0 0 20px rgba(225, 97, 98, 0.8); }
         }
+        
+        /* Individual Lamp Selection Styles */
+        .lamp-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: var(--spacing-1);
+        }
+        
+        .lamp-selection-grid label:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius);
+        }
+        
+        /* Checkbox Styling */
+        .lamp-checkbox, .form-checkbox, input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .lamp-checkbox:hover, .form-checkbox:hover, input[type="checkbox"]:hover {
+            border-color: var(--accent-blue);
+            background: rgba(104, 141, 177, 0.1);
+            transform: scale(1.05);
+        }
+        
+        .lamp-checkbox:checked, .form-checkbox:checked, input[type="checkbox"]:checked {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(104, 141, 177, 0.3);
+        }
+        
+        .lamp-checkbox:checked::after, .form-checkbox:checked::after, input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .lamp-checkbox:focus, .form-checkbox:focus, input[type="checkbox"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(104, 141, 177, 0.2);
+        }
 
         .ultra-slider {
             background: linear-gradient(90deg, #fbbf24 0%, var(--accent-red) 50%, #dc2626 100%);
@@ -1959,14 +2014,14 @@
                 <div id="audio-sync-container">
                     <div class="control-group">
                         <h4>Audio-Gerät</h4>
-                        <select id="audio-device-select">
+                        <select id="audio-device-select" class="form-select">
                             <option value="">Audio-Geräte laden...</option>
                         </select>
                     </div>
                     
                     <div class="control-group">
                         <h4>Sync-Modus</h4>
-                        <select id="sync-mode-select">
+                        <select id="sync-mode-select" class="form-select">
                             <option value="frequency">Frequenz-basiert</option>
                             <option value="beat">Beat-Synchronisation</option>
                             <option value="spectrum">Spektrum-Visualizer</option>
@@ -2069,14 +2124,14 @@
                     <div class="control-group">
                         <h4>Ziel auswählen</h4>
                         <div class="input-group">
-                            <select id="effect-target-type">
+                            <select id="effect-target-type" class="form-select">
                                 <option value="all">Alle Lichter</option>
                                 <option value="light">Einzelnes Licht</option>
                                 <option value="group">Gruppe</option>
                             </select>
                         </div>
                         <div class="input-group">
-                            <input type="text" id="effect-target-id" placeholder="ID (falls nicht 'Alle')">
+                            <input type="text" id="effect-target-id" class="form-input" placeholder="ID (falls nicht 'Alle')">
                         </div>
                     </div>
 
@@ -2136,8 +2191,8 @@
                             <input type="hidden" id="strobe-sat" value="0">
                         </div>
                         <div class="input-group">
-                            <label>Modus:</label>
-                            <select id="strobe-mode">
+                            <label class="form-label">Modus:</label>
+                            <select id="strobe-mode" class="form-select">
                                 <option value="single">Einzelfarbe</option>
                                 <option value="rainbow">Regenbogen</option>
                                 <option value="multi">Mehrfarbig</option>
@@ -2257,23 +2312,23 @@
                 <div class="card">
                     <div class="card-title">Timer erstellen</div>
                     <div class="input-group">
-                        <label>Ziel wählen:</label>
-                        <select id="timer-target-type">
+                        <label class="form-label">Ziel wählen:</label>
+                        <select id="timer-target-type" class="form-select">
                             <option value="light">Einzelnes Licht</option>
                             <option value="group">Gruppe</option>
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>ID:</label>
-                        <input type="text" id="timer-target-id" placeholder="z.B. 1">
+                        <label class="form-label">ID:</label>
+                        <input type="text" id="timer-target-id" class="form-input" placeholder="z.B. 1">
                     </div>
                     <div class="input-group">
-                        <label>Verzögerung (Sekunden):</label>
-                        <input type="number" id="timer-delay" value="60" min="1" max="86400">
+                        <label class="form-label">Verzögerung (Sekunden):</label>
+                        <input type="number" id="timer-delay" class="form-input" value="60" min="1" max="86400">
                     </div>
                     <div class="input-group">
-                        <label>Aktion:</label>
-                        <select id="timer-action">
+                        <label class="form-label">Aktion:</label>
+                        <select id="timer-action" class="form-select">
                             <option value="off">Ausschalten</option>
                             <option value="on">Einschalten</option>
                         </select>
@@ -2303,9 +2358,9 @@
                     <div class="debug-controls">
                         <button class="btn" onclick="clearDebugLog()">Log Löschen</button>
                         <button class="btn" onclick="toggleDebugAutoScroll()">Auto-Scroll: <span id="autoscroll-status">AN</span></button>
-                        <label>
+                        <label class="form-label">
                             Max Entries: 
-                            <select id="max-log-entries" onchange="updateMaxLogEntries()">
+                            <select id="max-log-entries" class="form-select" onchange="updateMaxLogEntries()">
                                 <option value="50">50</option>
                                 <option value="100" selected>100</option>
                                 <option value="200">200</option>
@@ -2430,6 +2485,31 @@
                 <div class="card-title">Detaillierte Statistiken</div>
                 <div id="detailed-stats" class="status-grid">
                     <!-- Wird dynamisch gefüllt -->
+                </div>
+            </div>
+            
+            <!-- Individuelle Lampen-Analyse -->
+            <div class="card" style="margin-top: var(--spacing-6);">
+                <div class="card-title">Individuelle Lampen-Analyse</div>
+                <div class="controls-grid" style="margin-bottom: var(--spacing-4);">
+                    <div>
+                        <label class="form-label">Lampen auswählen:</label>
+                        <div id="lamp-selection" class="lamp-selection-grid" style="max-height: 200px; overflow-y: auto; padding: var(--spacing-2); background: rgba(255, 255, 255, 0.05); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <!-- Wird dynamisch mit Checkboxen gefüllt -->
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label">Zeitraum:</label>
+                        <select id="individual-lamp-timeframe" class="form-select" onchange="updateIndividualLampChart()">
+                            <option value="today">Heute</option>
+                            <option value="week">Diese Woche</option>
+                            <option value="month">Dieser Monat</option>
+                        </select>
+                        <button class="btn" style="margin-top: var(--spacing-2); width: 100%;" onclick="updateIndividualLampChart()">Chart aktualisieren</button>
+                    </div>
+                </div>
+                <div class="power-chart">
+                    <canvas id="individualLampChart"></canvas>
                 </div>
             </div>
             
@@ -3439,21 +3519,29 @@
             // Erweiterte Power Charts
             currentPowerView = 'today';
             powerCharts = {};
+            loadingStates = {}; // Track loading states to prevent concurrent requests
 
             async switchPowerView(view) {
+                // Prevent concurrent requests for the same view
+                if (this.loadingStates[view]) {
+                    console.log('🚫 Already loading data for view:', view);
+                    return;
+                }
+                
                 this.currentPowerView = view;
-                
-                // Update tab selection
-                document.querySelectorAll('[data-view]').forEach(tab => {
-                    tab.classList.toggle('active', tab.dataset.view === view);
-                });
-                
-                // Hide all special chart sections
-                document.getElementById('weekday-analysis').style.display = 'none';
-                document.getElementById('monthly-comparison').style.display = 'none';
-                document.getElementById('seasonal-comparison').style.display = 'none';
+                this.loadingStates[view] = true;
                 
                 try {
+                    // Update tab selection
+                    document.querySelectorAll('[data-view]').forEach(tab => {
+                        tab.classList.toggle('active', tab.dataset.view === view);
+                    });
+                    
+                    // Hide all special chart sections
+                    document.getElementById('weekday-analysis').style.display = 'none';
+                    document.getElementById('monthly-comparison').style.display = 'none';
+                    document.getElementById('seasonal-comparison').style.display = 'none';
+                    
                     switch (view) {
                         case 'today':
                         case 'week':
@@ -3472,25 +3560,59 @@
                     }
                 } catch (error) {
                     console.error('Error switching power view:', error);
+                } finally {
+                    // Always clear loading state
+                    this.loadingStates[view] = false;
                 }
             }
 
-            async loadDetailedPowerData(timeframe) {
+            async loadDetailedPowerData(timeframe, retryCount = 0) {
+                const maxRetries = 2;
+                
                 try {
-                    console.log('🔄 Loading detailed power data for:', timeframe);
-                    const response = await fetch(`/api/power/detailed/${timeframe}`);
+                    console.log('🔄 Loading detailed power data for:', timeframe, retryCount > 0 ? `(retry ${retryCount})` : '');
+                    
+                    const response = await fetch(`/api/power/detailed/${timeframe}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'Cache-Control': 'no-cache'
+                        }
+                    });
                     
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
                     
-                    const data = await response.json();
+                    const text = await response.text();
+                    let data;
+                    
+                    try {
+                        data = JSON.parse(text);
+                    } catch (parseError) {
+                        console.error('JSON parse error:', parseError, 'Raw response:', text.substring(0, 200));
+                        throw new Error('Invalid JSON response from server');
+                    }
+                    
                     console.log('📡 API response:', { 
                         timeframe, 
                         detailedDataLength: data.detailed_data?.length,
                         topLightsLength: data.top_lights?.length,
-                        sample: data.detailed_data?.slice(0, 2)
+                        sample: data.detailed_data?.slice(0, 2),
+                        hasDetailedData: !!data.detailed_data,
+                        hasTopLights: !!data.top_lights
                     });
+                    
+                    // Validate response structure
+                    if (!data || typeof data !== 'object') {
+                        throw new Error('Invalid data structure received from API');
+                    }
+                    
+                    // Check if we got incomplete data and should retry
+                    if ((!data.detailed_data || !Array.isArray(data.detailed_data)) && retryCount < maxRetries) {
+                        console.warn(`⚠️ Incomplete data received, retrying... (${retryCount + 1}/${maxRetries})`);
+                        await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
+                        return this.loadDetailedPowerData(timeframe, retryCount + 1);
+                    }
                     
                     // Update chart title
                     const titles = {
@@ -3500,20 +3622,40 @@
                     };
                     document.getElementById('chart-title').textContent = titles[timeframe];
                     
-                    // Render main chart
-                    this.renderDetailedChart(data.detailed_data, timeframe);
+                    // Render main chart with fallback
+                    if (data.detailed_data && Array.isArray(data.detailed_data) && data.detailed_data.length > 0) {
+                        this.renderDetailedChart(data.detailed_data, timeframe);
+                    } else {
+                        console.warn('⚠️ No detailed data available for chart');
+                        this.showNoDataMessage('powerChart', 'Keine Daten für diesen Zeitraum verfügbar');
+                    }
                     
-                    // Update top consumers
-                    this.renderTopConsumers(data.top_lights);
+                    // Update top consumers with fallback
+                    if (data.top_lights && Array.isArray(data.top_lights)) {
+                        this.renderTopConsumers(data.top_lights);
+                    } else {
+                        console.warn('⚠️ No top lights data available');
+                        document.getElementById('top-consumers').innerHTML = '<div class="status-item"><div class="status-label">Keine Verbraucher-Daten verfügbar</div></div>';
+                    }
+                    
                     document.getElementById('top-consumer-timeframe').textContent = 
                         timeframe === 'today' ? 'heute' : 
                         timeframe === 'week' ? 'diese Woche' : 'diesen Monat';
                     
-                    // Update detailed stats
-                    this.renderDetailedStats(data.detailed_data, timeframe);
+                    // Update detailed stats with fallback
+                    if (data.detailed_data && Array.isArray(data.detailed_data) && data.detailed_data.length > 0) {
+                        this.renderDetailedStats(data.detailed_data, timeframe);
+                    } else {
+                        document.getElementById('detailed-stats').innerHTML = '<div class="status-item"><div class="status-label">Keine Statistiken verfügbar</div></div>';
+                    }
                     
                 } catch (error) {
                     console.error('Error loading detailed power data:', error);
+                    
+                    // Show user-friendly error message
+                    this.showNoDataMessage('powerChart', `Fehler beim Laden der Daten: ${error.message}`);
+                    document.getElementById('top-consumers').innerHTML = '<div class="status-item error"><div class="status-label">Fehler beim Laden</div></div>';
+                    document.getElementById('detailed-stats').innerHTML = '<div class="status-item error"><div class="status-label">Fehler beim Laden</div></div>';
                 }
             }
 
@@ -3577,32 +3719,50 @@
                             {
                                 label: 'Durchschnitt',
                                 data: avgData,
-                                borderColor: 'var(--accent-blue)',
+                                borderColor: 'rgba(104, 141, 177, 1)',
                                 backgroundColor: 'rgba(104, 141, 177, 0.1)',
                                 fill: true,
-                                tension: 0.3
+                                tension: 0.3,
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                pointHoverRadius: 4
                             },
                             {
                                 label: 'Maximum',
                                 data: maxData,
-                                borderColor: 'var(--accent-red)',
+                                borderColor: 'rgba(225, 97, 98, 1)',
                                 backgroundColor: 'rgba(225, 97, 98, 0.1)',
                                 fill: false,
-                                tension: 0.3
+                                tension: 0.3,
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                pointHoverRadius: 4
                             },
                             {
                                 label: 'Minimum',
                                 data: minData,
-                                borderColor: 'var(--accent-green)',
+                                borderColor: 'rgba(156, 182, 143, 1)',
                                 backgroundColor: 'rgba(156, 182, 143, 0.1)',
                                 fill: '-1',
-                                tension: 0.3
+                                tension: 0.3,
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                pointHoverRadius: 4
                             }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        elements: {
+                            line: {
+                                borderColor: 'rgba(104, 141, 177, 1)' // Fallback line color
+                            },
+                            point: {
+                                borderColor: 'rgba(104, 141, 177, 1)',
+                                backgroundColor: 'rgba(104, 141, 177, 1)'
+                            }
+                        },
                         scales: {
                             y: {
                                 beginAtZero: true,
@@ -3652,8 +3812,17 @@
                     const response = await fetch('/api/power/weekly');
                     const data = await response.json();
                     
-                    this.renderWeekdayChart(data.weekday_summary);
-                    this.renderWeekdayHeatmap(data.weekday_hourly);
+                    if (data && data.weekday_summary) {
+                        this.renderWeekdayChart(data.weekday_summary);
+                    } else {
+                        console.warn('⚠️ No weekday_summary data received');
+                    }
+                    
+                    if (data && data.weekday_hourly) {
+                        this.renderWeekdayHeatmap(data.weekday_hourly);
+                    } else {
+                        console.warn('⚠️ No weekday_hourly data received');
+                    }
                     
                 } catch (error) {
                     console.error('Error loading weekday analysis:', error);
@@ -3665,6 +3834,12 @@
                 
                 if (this.powerCharts.weekday) {
                     this.powerCharts.weekday.destroy();
+                }
+                
+                // Data validation
+                if (!weekdayData || !Array.isArray(weekdayData) || weekdayData.length === 0) {
+                    console.warn('⚠️ No weekday data received for chart rendering');
+                    return;
                 }
                 
                 const labels = weekdayData.map(item => item.weekday);
@@ -3843,12 +4018,33 @@
                 
                 try {
                     const response = await fetch('/api/power/monthly');
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
                     const data = await response.json();
                     
-                    this.renderMonthlyChart(data.monthly_summary);
+                    if (data && data.monthly_summary) {
+                        this.renderMonthlyChart(data.monthly_summary);
+                    } else {
+                        console.warn('⚠️ No monthly_summary data received');
+                        // Show a message to user that monthly data is not available
+                        const ctx = document.getElementById('monthlyChart').getContext('2d');
+                        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        ctx.font = '16px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('Keine monatlichen Daten verfügbar', ctx.canvas.width/2, ctx.canvas.height/2);
+                    }
                     
                 } catch (error) {
                     console.error('Error loading monthly comparison:', error);
+                    // Show error message to user
+                    const ctx = document.getElementById('monthlyChart').getContext('2d');
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.font = '16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Fehler beim Laden der monatlichen Daten', ctx.canvas.width/2, ctx.canvas.height/2);
                 }
             }
 
@@ -4318,6 +4514,211 @@
                         <div class="status-label">LED-Brenndauer</div>
                     </div>
                 `;
+            }
+
+            getChartColors() {
+                return {
+                    blue: 'rgba(104, 141, 177, 1)',
+                    blueAlpha: (alpha) => `rgba(104, 141, 177, ${alpha})`,
+                    red: 'rgba(225, 97, 98, 1)',
+                    redAlpha: (alpha) => `rgba(225, 97, 98, ${alpha})`,
+                    green: 'rgba(156, 182, 143, 1)',
+                    greenAlpha: (alpha) => `rgba(156, 182, 143, ${alpha})`,
+                    yellow: 'rgba(255, 206, 84, 1)',
+                    yellowAlpha: (alpha) => `rgba(255, 206, 84, ${alpha})`,
+                    purple: 'rgba(153, 102, 255, 1)',
+                    purpleAlpha: (alpha) => `rgba(153, 102, 255, ${alpha})`,
+                    orange: 'rgba(255, 159, 64, 1)',
+                    orangeAlpha: (alpha) => `rgba(255, 159, 64, ${alpha})`
+                };
+            }
+            
+            showNoDataMessage(canvasId, message) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+            }
+
+            async loadLampSelection() {
+                try {
+                    const response = await fetch('/api/lights');
+                    const lightsObj = await response.json();
+                    
+                    console.log('📡 Raw lights response:', lightsObj);
+                    
+                    // Convert lights object to array - handle all lights regardless of status
+                    const lights = Object.entries(lightsObj)
+                        .map(([id, light]) => ({
+                            id: id,
+                            name: light.name || `Lampe ${id}`,
+                            state: light.state,
+                            type: light.type,
+                            modelid: light.modelid,
+                            reachable: light.state?.reachable !== false, // Include even unreachable lights
+                            ...light
+                        }))
+                        .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+                    
+                    console.log(`🔍 Found ${lights.length} lights for selection:`, lights.map(l => `${l.name} (ID: ${l.id}, reachable: ${l.reachable})`));
+                    
+                    const container = document.getElementById('lamp-selection');
+                    container.innerHTML = lights.map(light => {
+                        const isUnreachable = !light.reachable;
+                        const statusIcon = isUnreachable ? '⚠️' : '💡';
+                        const statusText = isUnreachable ? ' (nicht erreichbar)' : '';
+                        
+                        return `
+                            <label style="display: flex; align-items: center; padding: var(--spacing-2); cursor: pointer; ${isUnreachable ? 'opacity: 0.7;' : ''}">
+                                <input type="checkbox" 
+                                       class="lamp-checkbox" 
+                                       value="${light.id}" 
+                                       data-name="${light.name}"
+                                       style="margin-right: var(--spacing-2);">
+                                <span>${statusIcon} ${light.name}${statusText}</span>
+                            </label>
+                        `;
+                    }).join('');
+                    
+                    console.log(`✅ Lamp selection loaded with ${lights.length} lamps`);
+                    
+                } catch (error) {
+                    console.error('Error loading lamp selection:', error);
+                    document.getElementById('lamp-selection').innerHTML = '<div style="color: var(--accent-red); padding: var(--spacing-3);">Fehler beim Laden der Lampen</div>';
+                }
+            }
+
+            async updateIndividualLampChart() {
+                const checkboxes = document.querySelectorAll('.lamp-checkbox:checked');
+                const selectedLamps = Array.from(checkboxes).map(cb => ({
+                    id: cb.value,
+                    name: cb.dataset.name
+                }));
+                
+                if (selectedLamps.length === 0) {
+                    this.showNoDataMessage('individualLampChart', 'Bitte wählen Sie mindestens eine Lampe aus');
+                    return;
+                }
+                
+                const timeframe = document.getElementById('individual-lamp-timeframe').value;
+                
+                try {
+                    // Fetch data for selected lamps
+                    const promises = selectedLamps.map(lamp => 
+                        fetch(`/api/power/lamp/${lamp.id}/${timeframe}`)
+                            .then(res => res.json())
+                            .then(data => ({ ...lamp, data: data }))
+                            .catch(err => ({ ...lamp, data: null, error: err }))
+                    );
+                    
+                    const results = await Promise.all(promises);
+                    this.renderIndividualLampChart(results, timeframe);
+                    
+                } catch (error) {
+                    console.error('Error updating individual lamp chart:', error);
+                    this.showNoDataMessage('individualLampChart', 'Fehler beim Laden der Daten');
+                }
+            }
+
+            renderIndividualLampChart(lampData, timeframe) {
+                const ctx = document.getElementById('individualLampChart').getContext('2d');
+                
+                if (this.powerCharts.individual) {
+                    this.powerCharts.individual.destroy();
+                }
+                
+                // Filter out lamps with no data
+                const validLamps = lampData.filter(lamp => lamp.data && lamp.data.detailed_data);
+                
+                if (validLamps.length === 0) {
+                    this.showNoDataMessage('individualLampChart', 'Keine Daten für ausgewählte Lampen verfügbar');
+                    return;
+                }
+                
+                // Get colors for each lamp
+                const colors = this.getChartColors();
+                const colorKeys = Object.keys(colors).filter(key => !key.includes('Alpha'));
+                
+                // Prepare datasets
+                const datasets = validLamps.map((lamp, index) => {
+                    const color = colors[colorKeys[index % colorKeys.length]];
+                    const colorAlpha = colors[colorKeys[index % colorKeys.length] + 'Alpha'];
+                    
+                    return {
+                        label: lamp.name,
+                        data: lamp.data.detailed_data.map(item => ({
+                            x: item.time,
+                            y: parseFloat(item.avg_watts)
+                        })),
+                        borderColor: color,
+                        backgroundColor: colorAlpha ? colorAlpha(0.1) : color,
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 4
+                    };
+                });
+                
+                // Get labels from first lamp's data
+                const labels = validLamps[0].data.detailed_data.map(item => item.time);
+                
+                this.powerCharts.individual = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    callback: function(value) {
+                                        return value + 'W';
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Leistung (W)',
+                                    color: 'rgba(255, 255, 255, 0.8)'
+                                }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                ticks: { 
+                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    maxTicksLimit: timeframe === 'today' ? 24 : 20
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: 'rgba(255, 255, 255, 0.8)' }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}W`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
             }
 
             startPowerMonitoring() {
@@ -5418,6 +5819,13 @@
             document.getElementById('guide-tab').scrollTop = 0;
         }
 
+        // Global functions for individual lamp chart
+        function updateIndividualLampChart() {
+            if (hue) {
+                hue.updateIndividualLampChart();
+            }
+        }
+        
         // Debug-spezifische switchTab Erweiterung
         const originalSwitchTab = window.switchTab;
         window.switchTab = function(tabName) {
@@ -5443,7 +5851,7 @@
                 hue.activeTab = tabName;
             }
 
-            // Debug-spezifische Aktionen
+            // Tab-spezifische Aktionen
             if (tabName === 'debug') {
                 updateDebugData();
                 debugUpdateInterval = setInterval(updateDebugData, 60000); // Alle 1 Minute
@@ -5451,6 +5859,15 @@
                 if (debugUpdateInterval) {
                     clearInterval(debugUpdateInterval);
                     debugUpdateInterval = null;
+                }
+            }
+            
+            // Power-Tab spezifische Aktionen
+            if (tabName === 'power') {
+                // Lade Lampen-Auswahl beim ersten Mal
+                if (!hue.lampSelectionLoaded) {
+                    hue.loadLampSelection();
+                    hue.lampSelectionLoaded = true;
                 }
             }
         };

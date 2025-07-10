@@ -3064,6 +3064,76 @@ def get_power_detailed(timeframe):
     except Exception as e:
         return jsonify({'error': str(e)})
 
+@app.route('/api/power/lamp/<lamp_id>/<timeframe>', methods=['GET'])
+def get_power_lamp_data(lamp_id, timeframe):
+    """Detaillierte Daten für eine einzelne Lampe"""
+    if not db_pool:
+        return jsonify({'error': 'Database not configured'})
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Zeitraum bestimmen (gleiche Logik wie bei detailed endpoint)
+        if timeframe == 'today':
+            time_filter = "DATE(timestamp) = CURDATE()"
+            group_by = "HOUR(timestamp), MINUTE(timestamp)"
+            select_time = "CONCAT(HOUR(timestamp), ':', LPAD(MINUTE(timestamp), 2, '0')) as time"
+            order_by = "HOUR(timestamp), MINUTE(timestamp)"
+        elif timeframe == 'week':
+            time_filter = "timestamp >= DATE_SUB(NOW(), INTERVAL 7 DAY)"
+            group_by = "DATE(timestamp), HOUR(timestamp)"
+            select_time = "CONCAT(DATE(timestamp), ' ', HOUR(timestamp), ':00') as time"
+            order_by = "DATE(timestamp), HOUR(timestamp)"
+        elif timeframe == 'month':
+            time_filter = "timestamp >= DATE_SUB(NOW(), INTERVAL 30 DAY)"
+            group_by = "DATE(timestamp)"
+            select_time = "DATE(timestamp) as time"
+            order_by = "DATE(timestamp)"
+        else:
+            return jsonify({'error': 'Invalid timeframe'})
+        
+        # Daten für spezifische Lampe abrufen
+        query = f"""
+            SELECT 
+                {select_time},
+                AVG(watts) as avg_watts,
+                MAX(watts) as max_watts,
+                MIN(watts) as min_watts,
+                AVG(brightness) as avg_brightness
+            FROM power_log
+            WHERE light_id = %s AND {time_filter}
+            GROUP BY {group_by}
+            ORDER BY {order_by} ASC
+        """
+        
+        cursor.execute(query, (lamp_id,))
+        detailed_data = cursor.fetchall()
+        
+        # Lampenname abrufen
+        cursor.execute("""
+            SELECT DISTINCT light_name
+            FROM power_log
+            WHERE light_id = %s
+            ORDER BY timestamp DESC
+            LIMIT 1
+        """, (lamp_id,))
+        name_result = cursor.fetchone()
+        lamp_name = name_result['light_name'] if name_result else f"Lamp {lamp_id}"
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'lamp_id': lamp_id,
+            'lamp_name': lamp_name,
+            'timeframe': timeframe,
+            'detailed_data': detailed_data
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 # === STATUS ===
 # === ONBOARDING API ===
 @app.route('/api/onboarding/discover-bridge', methods=['GET'])
