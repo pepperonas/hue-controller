@@ -457,8 +457,9 @@ def log_power_consumption():
         
         # Einzelne Lichter loggen
         for light_id, light in lights.items():
-            # Nur Lichter zählen die eingeschaltet UND erreichbar sind
-            if light.get('state', {}).get('on', False) and light.get('state', {}).get('reachable', True):
+            # Nur Lichter zählen die eingeschaltet sind (unabhängig von reachable-Status)
+            # Hinweis: Unreachable Lichter verbrauchen auch Strom wenn sie "on" sind
+            if light.get('state', {}).get('on', False):
                 brightness = light.get('state', {}).get('bri', 254)
                 watts = (brightness / 254) * 9  # Max 9W pro LED
                 
@@ -558,7 +559,17 @@ def site_webmanifest():
 @app.route('/api/lights', methods=['GET'])
 @smart_error_handler('lights_list')
 def get_lights():
-    return jsonify(hue_request('lights'))
+    lights = hue_request('lights')
+    
+    # Unerreichbare Lichter als ausgeschaltet anzeigen (aber für Stromverbrauch weiter zählen)
+    for light_id, light in lights.items():
+        if not light.get('state', {}).get('reachable', True):
+            # Für UI als ausgeschaltet markieren, aber Original-Status behalten für Power-Berechnung
+            light['state']['on_display'] = False
+        else:
+            light['state']['on_display'] = light['state'].get('on', False)
+    
+    return jsonify(lights)
 
 @app.route('/api/lights/<light_id>/state', methods=['PUT'])
 @smart_error_handler('light_control')
@@ -2743,8 +2754,9 @@ def get_current_power():
     light_details = []
     
     for light_id, light in lights.items():
-        # Nur Lichter zählen die eingeschaltet UND erreichbar sind
-        if light.get('state', {}).get('on', False) and light.get('state', {}).get('reachable', True):
+        # Nur Lichter zählen die eingeschaltet sind (unabhängig von reachable-Status)
+        # Hinweis: Unreachable Lichter verbrauchen auch Strom wenn sie "on" sind
+        if light.get('state', {}).get('on', False):
             brightness = light.get('state', {}).get('bri', 254)
             estimated_watts = (brightness / 254) * 9  # Geschätzt: max 9W pro LED
             total_consumption += estimated_watts
@@ -2754,7 +2766,8 @@ def get_current_power():
                 'id': light_id,
                 'name': light['name'],
                 'watts': round(estimated_watts, 2),
-                'brightness': brightness
+                'brightness': brightness,
+                'reachable': light.get('state', {}).get('reachable', True)
             })
     
     return jsonify({

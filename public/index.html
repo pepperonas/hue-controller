@@ -968,6 +968,136 @@
             font-size: 0.9rem;
         }
 
+        /* === ERWEITERTE FARBPALETTEN STYLING === */
+        .color-palette-category {
+            margin-bottom: var(--spacing-4);
+        }
+
+        .color-palette-category h6 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-2);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .color-grid-4x4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-3);
+        }
+
+        /* Responsive Grid für mobile Geräte */
+        @media (max-width: 768px) {
+            .color-grid-4x4 {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-3);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .color-grid-4x4 {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--spacing-2);
+            }
+        }
+
+        /* Optimierte Color Preset Buttons für 4x4 Grid */
+        .color-grid-4x4 .color-preset-btn {
+            padding: var(--spacing-3) var(--spacing-2);
+            font-size: 0.8rem;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .color-grid-4x4 .color-preset-btn:hover {
+            transform: scale(1.03);
+        }
+
+        .color-grid-4x4 .color-preset-btn.active {
+            transform: scale(1.06);
+        }
+
+        /* Mobile Optimierungen */
+        @media (max-width: 768px) {
+            .color-grid-4x4 .color-preset-btn {
+                min-height: 60px;
+                font-size: 0.9rem;
+                padding: var(--spacing-3);
+            }
+        }
+
+        /* === KLAPPBARE CARDS === */
+        .collapsible-card {
+            margin-bottom: var(--spacing-4);
+        }
+
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: var(--spacing-3);
+            background: var(--card-background);
+            border-radius: var(--radius);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .collapsible-header:hover {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .collapsible-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .collapse-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .collapse-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background: var(--background-darker);
+            border-radius: 0 0 var(--radius) var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: none;
+        }
+
+        .collapsible-content.expanded {
+            padding: var(--spacing-4);
+            max-height: none;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            padding: 0 var(--spacing-4);
+        }
+
+        /* Spezielle Anpassungen für card-title in collapsible */
+        .card-title.collapsible-header {
+            margin-bottom: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
         .duration-info {
             text-align: center;
             margin-top: var(--spacing-2);
@@ -2276,52 +2406,81 @@
         <div id="messages"></div>
 
         <!-- Quick Scene Access -->
-        <div class="card">
-            <div class="card-title">⚡ Schnellzugriff</div>
-            <div class="quick-scenes">
-                <div class="quick-scene" onclick="activateQuickScene('relax')">
-                    <span class="icon">🛋️</span>
-                    <div class="name">Entspannung</div>
-                </div>
-                <div class="quick-scene" onclick="activateQuickScene('work')">
-                    <span class="icon">💼</span>
-                    <div class="name">Arbeit</div>
-                </div>
-                <div class="quick-scene" onclick="activateQuickScene('party')">
-                    <span class="icon">🎉</span>
-                    <div class="name">Party</div>
-                </div>
-                <div class="quick-scene" onclick="activateQuickScene('romantic')">
-                    <span class="icon">💕</span>
-                    <div class="name">Romantik</div>
-                </div>
-                <div class="quick-scene" onclick="activateQuickScene('reading')">
-                    <span class="icon">📖</span>
-                    <div class="name">Lesen</div>
-                </div>
-                <div class="quick-scene" onclick="activateQuickScene('gaming')">
-                    <span class="icon">🎮</span>
-                    <div class="name">Gaming</div>
+        <div class="card collapsible-card">
+            <div class="card-title collapsible-header" onclick="toggleCard('quickaccess')">
+                ⚡ Schnellzugriff
+                <span class="collapse-icon" id="quickaccess-icon">▼</span>
+            </div>
+            <div class="collapsible-content" id="quickaccess-content">
+                <div class="quick-scenes">
+                    <div class="quick-scene" onclick="activateQuickScene('relax')">
+                        <span class="icon">🛋️</span>
+                        <div class="name">Entspannung</div>
+                    </div>
+                    <div class="quick-scene" onclick="activateQuickScene('work')">
+                        <span class="icon">💼</span>
+                        <div class="name">Arbeit</div>
+                    </div>
+                    <div class="quick-scene" onclick="activateQuickScene('party')">
+                        <span class="icon">🎉</span>
+                        <div class="name">Party</div>
+                    </div>
+                    <div class="quick-scene" onclick="activateQuickScene('romantic')">
+                        <span class="icon">💕</span>
+                        <div class="name">Romantik</div>
+                    </div>
+                    <div class="quick-scene" onclick="activateQuickScene('reading')">
+                        <span class="icon">📖</span>
+                        <div class="name">Lesen</div>
+                    </div>
+                    <div class="quick-scene" onclick="activateQuickScene('gaming')">
+                        <span class="icon">🎮</span>
+                        <div class="name">Gaming</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="global-controls">
-            <h3>🚨 Globale Steuerung</h3>
-            <div class="effect-controls">
-                <button class="btn" onclick="globalControl('all-on')">Alles An</button>
-                <button class="btn danger" onclick="globalControl('all-off')">Alles Aus</button>
+        <div class="global-controls collapsible-card">
+            <div class="collapsible-header" onclick="toggleCard('globalcontrols')">
+                <h3>🚨 Globale Steuerung</h3>
+                <span class="collapse-icon" id="globalcontrols-icon">▼</span>
             </div>
-            
-            <!-- Globaler Helligkeitsregler -->
-            <div class="control-group" style="margin-top: 16px;">
-                <div class="slider-container">
-                    <div class="slider-label">
-                        <span>Helligkeit alle Lampen</span>
-                        <span class="slider-value" id="global-brightness-value">100%</span>
+            <div class="collapsible-content" id="globalcontrols-content">
+                <div class="effect-controls">
+                    <button class="btn" onclick="globalControl('all-on')">Alles An</button>
+                    <button class="btn danger" onclick="globalControl('all-off')">Alles Aus</button>
+                </div>
+                
+                <!-- Globaler Helligkeitsregler -->
+                <div class="control-group" style="margin-top: 16px;">
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Helligkeit alle Lampen</span>
+                            <span class="slider-value" id="global-brightness-value">100%</span>
+                        </div>
+                        <input type="range" class="slider" id="global-brightness-slider" min="1" max="254" value="254" 
+                               oninput="document.getElementById('global-brightness-value').textContent = Math.round(this.value / 254 * 100) + '%'; globalBrightnessChange(this.value)">
                     </div>
-                    <input type="range" class="slider" id="global-brightness-slider" min="1" max="254" value="254" 
-                           oninput="document.getElementById('global-brightness-value').textContent = Math.round(this.value / 254 * 100) + '%'; globalBrightnessChange(this.value)">
+                </div>
+
+                <!-- Globale Farbauswahl -->
+                <div class="control-group" style="margin-top: 20px;">
+                    <h4>Beliebte Farben</h4>
+                    <div class="color-quick-selection">
+                        <button class="color-btn" style="background: #ff0000;" onclick="setGlobalColorHex('#ff0000')" title="Rot"></button>
+                        <button class="color-btn" style="background: #00ff00;" onclick="setGlobalColorHex('#00ff00')" title="Grün"></button>
+                        <button class="color-btn" style="background: #0066ff;" onclick="setGlobalColorHex('#0066ff')" title="Blau"></button>
+                        <button class="color-btn" style="background: #ffff00;" onclick="setGlobalColorHex('#ffff00')" title="Gelb"></button>
+                        <button class="color-btn" style="background: #ff00ff;" onclick="setGlobalColorHex('#ff00ff')" title="Magenta"></button>
+                        <button class="color-btn" style="background: #00ffff;" onclick="setGlobalColorHex('#00ffff')" title="Cyan"></button>
+                        <button class="color-btn" style="background: #ff8000;" onclick="setGlobalColorHex('#ff8000')" title="Orange"></button>
+                        <button class="color-btn" style="background: #8000ff;" onclick="setGlobalColorHex('#8000ff')" title="Violett"></button>
+                        <button class="color-btn" style="background: #fff2cc; color: black;" onclick="setGlobalColorHex('#fff2cc')" title="Warmweiß"></button>
+                        <button class="color-btn" style="background: #ffffff; color: black;" onclick="setGlobalColorHex('#ffffff')" title="Kaltweiß"></button>
+                        <button class="color-btn" style="background: #f5f5f5; color: black;" onclick="setGlobalColorHex('#f5f5f5')" title="Neutralweiß"></button>
+                        <button class="color-btn" style="background: #fffacd; color: black;" onclick="setGlobalColorHex('#fffacd')" title="Tageslicht"></button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2513,28 +2672,23 @@
                         </div>
                         <div class="color-selection-section">
                             <h5>🎨 Strobo-Farbe</h5>
-                            <div class="strobo-color-presets">
-                                <button class="color-preset-btn normal-strobe-color" data-color="white" style="background: white; color: black;" onclick="setNormalStroboColor('white')">
-                                    ⚪ Weiß
-                                </button>
-                                <button class="color-preset-btn normal-strobe-color" data-color="red" style="background: #ff0000;" onclick="setNormalStroboColor('red')">
-                                    🔴 Rot
-                                </button>
-                                <button class="color-preset-btn normal-strobe-color" data-color="blue" style="background: #0066ff;" onclick="setNormalStroboColor('blue')">
-                                    🔵 Blau
-                                </button>
-                                <button class="color-preset-btn normal-strobe-color" data-color="green" style="background: #00ff00; color: black;" onclick="setNormalStroboColor('green')">
-                                    🟢 Grün
-                                </button>
-                                <button class="color-preset-btn normal-strobe-color" data-color="purple" style="background: #8000ff;" onclick="setNormalStroboColor('purple')">
-                                    🟣 Lila
-                                </button>
-                                <button class="color-preset-btn normal-strobe-color" data-color="orange" style="background: #ff8000;" onclick="setNormalStroboColor('orange')">
-                                    🟠 Orange
-                                </button>
+                            <div class="color-quick-selection">
+                                <button class="color-btn" style="background: #ff0000;" onclick="setNormalStroboColorHex('#ff0000')" title="Rot"></button>
+                                <button class="color-btn" style="background: #00ff00;" onclick="setNormalStroboColorHex('#00ff00')" title="Grün"></button>
+                                <button class="color-btn" style="background: #0066ff;" onclick="setNormalStroboColorHex('#0066ff')" title="Blau"></button>
+                                <button class="color-btn" style="background: #ffff00;" onclick="setNormalStroboColorHex('#ffff00')" title="Gelb"></button>
+                                <button class="color-btn" style="background: #ff00ff;" onclick="setNormalStroboColorHex('#ff00ff')" title="Magenta"></button>
+                                <button class="color-btn" style="background: #00ffff;" onclick="setNormalStroboColorHex('#00ffff')" title="Cyan"></button>
+                                <button class="color-btn" style="background: #ff8000;" onclick="setNormalStroboColorHex('#ff8000')" title="Orange"></button>
+                                <button class="color-btn" style="background: #8000ff;" onclick="setNormalStroboColorHex('#8000ff')" title="Violett"></button>
+                                <button class="color-btn" style="background: #fff2cc; color: black;" onclick="setNormalStroboColorHex('#fff2cc')" title="Warmweiß"></button>
+                                <button class="color-btn" style="background: #ffffff; color: black;" onclick="setNormalStroboColorHex('#ffffff')" title="Kaltweiß"></button>
+                                <button class="color-btn" style="background: #f5f5f5; color: black;" onclick="setNormalStroboColorHex('#f5f5f5')" title="Neutralweiß"></button>
+                                <button class="color-btn" style="background: #fffacd; color: black;" onclick="setNormalStroboColorHex('#fffacd')" title="Tageslicht"></button>
                             </div>
+                            
                             <div class="color-values" id="normal-strobo-color-display">
-                                <span>Aktuelle Farbe: <strong id="current-normal-strobo-color">Weiß</strong></span>
+                                <span>Aktuelle Farbe: <strong id="current-normal-strobo-color">Rot</strong></span>
                             </div>
                             <!-- Hidden inputs for backward compatibility -->
                             <input type="hidden" id="strobe-hue" value="0">
@@ -2551,85 +2705,6 @@
                         <button class="btn warning" onclick="startAdvancedStrobe()">Strobo Starten</button>
                     </div>
 
-                    <div class="control-group ultra-strobo-section">
-                        <h4>🔥 ULTRA-BLITZ STROBO</h4>
-                        <div class="warning-box">
-                            ⚠️ <strong>EPILEPSIE-WARNUNG!</strong><br>
-                            Ultra-Strobo kann bei photosensitiven Personen Anfälle auslösen!<br>
-                            Frequenzen über 15Hz sind besonders gefährlich.
-                        </div>
-                        
-                        <div class="ultra-strobo-presets">
-                            <button class="btn danger ultra-btn" onclick="startUltraStrobo('ultra', 15)">
-                                ⚡ ULTRA (15Hz)
-                            </button>
-                            <button class="btn danger ultra-btn" onclick="startUltraStrobo('burst', 10)">
-                                💥 BURST
-                            </button>
-                            <button class="btn danger ultra-btn" onclick="startUltraStrobo('police', 8)">
-                                🚔 POLIZEI
-                            </button>
-                            <button class="btn danger ultra-btn" onclick="startUltraStrobo('disco_flash', 12)">
-                                🪩 DISCO
-                            </button>
-                        </div>
-
-                        <div class="slider-container">
-                            <div class="slider-label">
-                                <span>Ultra Frequenz (GEFAHR!)</span>
-                                <span class="slider-value" id="ultra-frequency-value">15Hz</span>
-                            </div>
-                            <input type="range" class="slider ultra-slider" id="ultra-frequency" 
-                                   min="10" max="25" step="1" value="15" 
-                                   oninput="updateSliderValue('ultra-frequency', this.value + 'Hz'); checkEpilepsyWarning(this.value)">
-                        </div>
-
-                        <div class="slider-container">
-                            <div class="slider-label">
-                                <span>Ultra Dauer</span>
-                                <span class="slider-value" id="ultra-duration-value">∞ Unbegrenzt</span>
-                            </div>
-                            <input type="range" class="slider" id="ultra-duration" 
-                                   min="0" max="300" value="0" 
-                                   oninput="updateUltraDurationValue(this.value)">
-                            <div class="duration-info">
-                                <small>0 = ∞ Unbegrenzt | 1-300 = Sekunden</small>
-                            </div>
-                        </div>
-
-                        <div class="color-selection-section">
-                            <h5>🎨 Strobo-Farbe</h5>
-                            <div class="strobo-color-presets">
-                                <button class="color-preset-btn" data-color="white" style="background: white; color: black;" onclick="setStroboColor('white')">
-                                    ⚪ Weiß
-                                </button>
-                                <button class="color-preset-btn" data-color="red" style="background: #ff0000;" onclick="setStroboColor('red')">
-                                    🔴 Rot
-                                </button>
-                                <button class="color-preset-btn" data-color="blue" style="background: #0066ff;" onclick="setStroboColor('blue')">
-                                    🔵 Blau
-                                </button>
-                                <button class="color-preset-btn" data-color="green" style="background: #00ff00; color: black;" onclick="setStroboColor('green')">
-                                    🟢 Grün
-                                </button>
-                                <button class="color-preset-btn" data-color="purple" style="background: #8000ff;" onclick="setStroboColor('purple')">
-                                    🟣 Lila
-                                </button>
-                                <button class="color-preset-btn" data-color="orange" style="background: #ff8000;" onclick="setStroboColor('orange')">
-                                    🟠 Orange
-                                </button>
-                            </div>
-                            <div class="color-values" id="strobo-color-display">
-                                <span>Aktuelle Farbe: <strong id="current-strobo-color">Weiß</strong></span>
-                            </div>
-                        </div>
-
-                        <div class="emergency-controls">
-                            <button class="btn warning" onclick="startCustomUltraStrobo()">
-                                🔥 Custom Ultra
-                            </button>
-                        </div>
-                    </div>
 
                     <div class="control-group">
                         <h4>Farbschleife</h4>
@@ -2872,6 +2947,9 @@
             <!-- Licht-Details -->
             <div class="card" style="margin-top: var(--spacing-6);">
                 <div class="card-title">Licht-Details</div>
+                <div style="padding: var(--spacing-3); background: rgba(225, 97, 98, 0.1); border-radius: var(--radius); margin-bottom: var(--spacing-4); font-size: 0.875rem;">
+                    <strong>Hinweis:</strong> Nicht erreichbare Lichter (⚠️) verbrauchen weiterhin Strom, wenn sie eingeschaltet sind.
+                </div>
                 <div id="light-power-details"></div>
             </div>
         </div>
@@ -3472,8 +3550,9 @@
                 const card = document.createElement('div');
                 
                 const state = type === 'light' ? item.state : item.action;
-                const isOn = state.on;
                 const isReachable = type === 'light' ? (state.reachable !== false) : true; // Groups are always reachable
+                // Use on_display for UI (shows unreachable lights as off) but keep original state.on for power calculations
+                const isOn = type === 'light' && state.on_display !== undefined ? state.on_display : state.on;
                 const brightness = Math.round((state.bri || 0) / 254 * 100);
                 const supportsColor = type === 'light' ? (item.capabilities?.control?.colorgamut !== undefined) : true;
                 
@@ -3523,6 +3602,10 @@
                             <button class="color-btn" style="background: #00ffff;" onclick="hue.setColor('${id}', '#00ffff', '${type}')" title="Cyan"></button>
                             <button class="color-btn" style="background: #ff8000;" onclick="hue.setColor('${id}', '#ff8000', '${type}')" title="Orange"></button>
                             <button class="color-btn" style="background: #8000ff;" onclick="hue.setColor('${id}', '#8000ff', '${type}')" title="Violett"></button>
+                            <button class="color-btn" style="background: #fff2cc; color: black;" onclick="hue.setColor('${id}', '#fff2cc', '${type}')" title="Warmweiß"></button>
+                            <button class="color-btn" style="background: #ffffff; color: black;" onclick="hue.setColor('${id}', '#ffffff', '${type}')" title="Kaltweiß"></button>
+                            <button class="color-btn" style="background: #f5f5f5; color: black;" onclick="hue.setColor('${id}', '#f5f5f5', '${type}')" title="Neutralweiß"></button>
+                            <button class="color-btn" style="background: #fffacd; color: black;" onclick="hue.setColor('${id}', '#fffacd', '${type}')" title="Tageslicht"></button>
                         </div>
                     </div>
                     ` : ''}
@@ -3717,7 +3800,7 @@
                     const detailsContainer = document.getElementById('light-power-details');
                     detailsContainer.innerHTML = data.light_details.map(light => `
                         <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                            <span>${light.name}</span>
+                            <span>${light.name}${!light.reachable ? ' ⚠️ (nicht erreichbar)' : ''}</span>
                             <span>${light.watts}W (${Math.round(light.brightness/254*100)}%)</span>
                         </div>
                     `).join('');
@@ -5085,12 +5168,12 @@
                     this.updateActiveTimers();
                 }, 60000);
 
-                // Update light states every 1 minute if on lights or groups tab
+                // Update light states every 10 seconds if on lights or groups tab
                 this.updateInterval = setInterval(() => {
                     if (this.activeTab === 'lights' || this.activeTab === 'groups') {
                         this.refreshCurrentTab();
                     }
-                }, 60000);
+                }, 10000);
             }
 
             async refreshCurrentTab() {
@@ -5233,22 +5316,127 @@
             document.getElementById(sliderId + '-value').textContent = value;
         }
 
-        function setGlobalColor(hexColor) {
-            globalColorChange(hexColor);
+        // Globale Variable für aktuelle globale Farbe
+        let currentGlobalColor = null;
+
+        function setGlobalColor(colorKey) {
+            if (!ALL_COLORS[colorKey]) {
+                console.error(`Color '${colorKey}' not found in universal palette`);
+                return;
+            }
+            
+            const color = ALL_COLORS[colorKey];
+            currentGlobalColor = color;
+            
+            // Update UI
+            const displayElement = document.getElementById('current-global-color');
+            if (displayElement) displayElement.textContent = color.name;
+            
+            // Update button active state
+            document.querySelectorAll('.global-color-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`.global-color-btn[data-color="${colorKey}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            // Apply color to only ON lights
+            globalColorChangeOnlyOn(color.hue, color.sat);
+        }
+
+        // Enhanced global color change that only affects lights that are ON
+        async function globalColorChangeOnlyOn(hue, sat) {
+            try {
+                // First get all lights to check their status
+                const lightsResponse = await fetch(`${hue.baseUrl}/api/lights`);
+                const lights = await lightsResponse.json();
+                
+                // Filter only lights that are currently ON
+                const onLights = Object.entries(lights).filter(([id, light]) => {
+                    return light.state && light.state.on === true;
+                });
+                
+                if (onLights.length === 0) {
+                    hue.showMessage('Keine eingeschalteten Lichter gefunden', 'warning');
+                    return;
+                }
+                
+                // Apply color to each ON light individually
+                const promises = onLights.map(([lightId, light]) => {
+                    return fetch(`${hue.baseUrl}/api/lights/${lightId}/state`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            hue: hue, 
+                            sat: sat,
+                            transitiontime: 4  // Smooth transition
+                        })
+                    });
+                });
+                
+                await Promise.all(promises);
+                hue.showMessage(`Farbe auf ${onLights.length} eingeschaltete${onLights.length === 1 ? 's' : ''} Licht${onLights.length === 1 ? '' : 'er'} angewendet`, 'success');
+                
+            } catch (error) {
+                hue.showMessage('Fehler beim Setzen der globalen Farbe: ' + error.message, 'error');
+            }
+        }
+
+        // Enhanced function for hex color support - only affects ON lights
+        async function setGlobalColorHex(hexColor) {
+            try {
+                // First get all lights to check their status
+                const lightsResponse = await fetch(`${hue.baseUrl}/api/lights`);
+                const lights = await lightsResponse.json();
+                
+                // Filter only lights that are currently ON
+                const onLights = Object.entries(lights).filter(([id, light]) => {
+                    return light.state && light.state.on === true;
+                });
+                
+                if (onLights.length === 0) {
+                    hue.showMessage('Keine eingeschalteten Lichter gefunden', 'warning');
+                    return;
+                }
+                
+                // Convert hex to HSB using existing function
+                const [hue_val, sat] = hue.hexToHue(hexColor);
+                
+                // Apply color to each ON light individually
+                const promises = onLights.map(([lightId, light]) => {
+                    return fetch(`${hue.baseUrl}/api/lights/${lightId}/state`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            hue: hue_val, 
+                            sat: sat,
+                            transitiontime: 4  // Smooth transition
+                        })
+                    });
+                });
+                
+                await Promise.all(promises);
+                hue.showMessage(`Farbe auf ${onLights.length} eingeschaltete${onLights.length === 1 ? 's' : ''} Licht${onLights.length === 1 ? '' : 'er'} angewendet`, 'success');
+                
+            } catch (error) {
+                hue.showMessage('Fehler beim Setzen der globalen Farbe: ' + error.message, 'error');
+            }
         }
 
         async function activateQuickScene(sceneType) {
+            // Use universal color palette for consistent scene definitions
             const scenes = {
-                'relax': { hue: 14000, sat: 140, bri: 150 },
-                'work': { hue: 0, sat: 0, bri: 254 },
-                'party': { hue: 25000, sat: 254, bri: 254 },
-                'romantic': { hue: 65000, sat: 254, bri: 100 },
-                'reading': { hue: 0, sat: 0, bri: 200 },
-                'gaming': { hue: 46000, sat: 254, bri: 200 }
+                'relax': 'relax',     // Maps to aktivitaet.relax
+                'work': 'coolwhite',  // Maps to basis.coolwhite  
+                'party': 'party',     // Maps to aktivitaet.party
+                'romantic': 'red',    // Maps to spektrum.red
+                'reading': 'reading', // Maps to aktivitaet.reading
+                'gaming': 'gaming'    // Maps to aktivitaet.gaming
             };
 
-            const scene = scenes[sceneType];
-            if (!scene) return;
+            const colorKey = scenes[sceneType];
+            if (!colorKey || !ALL_COLORS[colorKey]) return;
+            
+            const scene = ALL_COLORS[colorKey];
 
             try {
                 await fetch(`${hue.baseUrl}/api/global/all-lights`, {
@@ -5964,9 +6152,74 @@
             }
         }
 
+        // === ZENTRALE FARBDEFINITION FÜR ALLE BEREICHE ===
+        const UNIVERSAL_COLOR_PALETTES = {
+            basis: {
+                warmwhite: { name: 'Warmweiß', hue: 8000, sat: 80, bri: 200, color: '#FFF2CC' },
+                coolwhite: { name: 'Kaltweiß', hue: 0, sat: 0, bri: 254, color: '#FFFFFF' },
+                neutralwhite: { name: 'Neutralweiß', hue: 6500, sat: 40, bri: 180, color: '#F5F5F5' },
+                daylight: { name: 'Tageslicht', hue: 4000, sat: 60, bri: 220, color: '#FFFACD' }
+            },
+            stimmung: {
+                sunset: { name: 'Sonnenuntergang', hue: 5000, sat: 200, bri: 120, color: '#FF7F50' },
+                evening: { name: 'Abendhimmel', hue: 45000, sat: 180, bri: 100, color: '#9370DB' },
+                candle: { name: 'Kerzenschein', hue: 12000, sat: 220, bri: 80, color: '#FFA500' },
+                moonlight: { name: 'Mondlicht', hue: 42000, sat: 40, bri: 60, color: '#B0C4DE' }
+            },
+            aktivitaet: {
+                reading: { name: 'Lesen', hue: 4000, sat: 60, bri: 220, color: '#FFFAF0' },
+                gaming: { name: 'Gaming', hue: 46000, sat: 254, bri: 180, color: '#0066FF' },
+                relax: { name: 'Entspannung', hue: 14000, sat: 140, bri: 100, color: '#FFEBCD' },
+                party: { name: 'Party', hue: 25000, sat: 254, bri: 254, color: '#00FF00' }
+            },
+            spektrum: {
+                red: { name: 'Feuerrot', hue: 65000, sat: 254, bri: 200, color: '#FF0000' },
+                yellow: { name: 'Sonnengelb', hue: 15000, sat: 254, bri: 220, color: '#FFFF00' },
+                green: { name: 'Naturgrün', hue: 25000, sat: 200, bri: 180, color: '#00FF00' },
+                blue: { name: 'Himmelblau', hue: 46000, sat: 200, bri: 200, color: '#0066FF' }
+            }
+        };
+
+        // Flatten all colors for easy access
+        const ALL_COLORS = {};
+        Object.keys(UNIVERSAL_COLOR_PALETTES).forEach(category => {
+            Object.keys(UNIVERSAL_COLOR_PALETTES[category]).forEach(colorKey => {
+                ALL_COLORS[colorKey] = UNIVERSAL_COLOR_PALETTES[category][colorKey];
+            });
+        });
+
+        // Legacy color mapping for backward compatibility
+        const LEGACY_COLOR_MAPPING = {
+            'white': 'coolwhite',
+            'red': 'red', 
+            'blue': 'blue',
+            'green': 'green',
+            'purple': 'evening',
+            'orange': 'candle'
+        };
+
+        // Helper function to get color name from hex value
+        function getColorNameFromHex(hexColor) {
+            const colorMap = {
+                '#ff0000': 'Rot',
+                '#00ff00': 'Grün',
+                '#0066ff': 'Blau',
+                '#ffff00': 'Gelb',
+                '#ff00ff': 'Magenta',
+                '#00ffff': 'Cyan',
+                '#ff8000': 'Orange',
+                '#8000ff': 'Violett',
+                '#fff2cc': 'Warmweiß',
+                '#ffffff': 'Kaltweiß',
+                '#f5f5f5': 'Neutralweiß',
+                '#fffacd': 'Tageslicht'
+            };
+            return colorMap[hexColor.toLowerCase()] || 'Benutzerdefiniert';
+        }
+
         // Globale Variable für Strobo-Farbe
         let currentStroboColor = {
-            name: 'Weiß',
+            name: 'Kaltweiß',
             hue: 0,
             sat: 0,
             bri: 254
@@ -5990,41 +6243,99 @@
             }
         }
 
+        // === EINHEITLICHE FARBAUSWAHL-FUNKTIONEN ===
+        function setUniversalColor(colorKey, targetType = 'strobo') {
+            // Map legacy color names to new system
+            const mappedColorKey = LEGACY_COLOR_MAPPING[colorKey] || colorKey;
+            
+            if (!ALL_COLORS[mappedColorKey]) {
+                console.error(`Color '${colorKey}' not found in universal palette`);
+                return;
+            }
+            
+            const color = ALL_COLORS[mappedColorKey];
+            
+            // Update appropriate global variable based on target type
+            if (targetType === 'strobo') {
+                currentStroboColor = { ...color };
+                
+                // Update UI elements
+                const displayElement = document.getElementById('current-strobo-color');
+                if (displayElement) displayElement.textContent = color.name;
+                
+                // Update hidden inputs
+                const hueInput = document.getElementById('strobe-hue');
+                const satInput = document.getElementById('strobe-sat');
+                const briInput = document.getElementById('strobe-brightness');
+                
+                if (hueInput) hueInput.value = color.hue;
+                if (satInput) satInput.value = color.sat;
+                if (briInput) briInput.value = color.bri;
+                
+                // Update button active state
+                document.querySelectorAll('.color-preset-btn:not(.normal-strobe-color)').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                const activeBtn = document.querySelector(`[data-color="${colorKey}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+                
+            } else if (targetType === 'normal-strobo') {
+                currentNormalStroboColor = { ...color };
+                
+                // Update UI elements
+                const displayElement = document.getElementById('current-normal-strobo-color');
+                if (displayElement) displayElement.textContent = color.name;
+                
+                // Update hidden inputs
+                const hueInput = document.getElementById('strobe-hue');
+                const satInput = document.getElementById('strobe-sat');
+                
+                if (hueInput) hueInput.value = color.hue;
+                if (satInput) satInput.value = color.sat;
+                
+                // Update button active state
+                document.querySelectorAll('.normal-strobe-color').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                const activeBtn = document.querySelector(`.normal-strobe-color[data-color="${colorKey}"]`);
+                if (activeBtn) activeBtn.classList.add('active');
+            }
+        }
+
+        // Legacy wrapper functions for backward compatibility
         function setStroboColor(colorName) {
-            // Entferne active Klasse von allen Buttons
-            document.querySelectorAll('.color-preset-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            setUniversalColor(colorName, 'strobo');
+        }
+
+        // Hex color support for Ultra Strobo
+        function setStroboColorHex(hexColor) {
+            const [hue_val, sat] = hue.hexToHue(hexColor);
             
-            // Aktiviere aktuellen Button
-            document.querySelector(`[data-color="${colorName}"]`).classList.add('active');
-            
-            // Setze Farbwerte
-            const colors = {
-                'white': { name: 'Weiß', hue: 0, sat: 0, bri: 254 },
-                'red': { name: 'Rot', hue: 0, sat: 254, bri: 254 },
-                'blue': { name: 'Blau', hue: 46000, sat: 254, bri: 254 },
-                'green': { name: 'Grün', hue: 25000, sat: 254, bri: 254 },
-                'purple': { name: 'Lila', hue: 56000, sat: 254, bri: 254 },
-                'orange': { name: 'Orange', hue: 8000, sat: 254, bri: 254 }
+            // Update global variable
+            currentStroboColor = {
+                name: getColorNameFromHex(hexColor),
+                hue: hue_val,
+                sat: sat,
+                bri: 254
             };
             
-            currentStroboColor = colors[colorName];
-            document.getElementById('current-strobo-color').textContent = currentStroboColor.name;
+            // Update UI elements
+            const displayElement = document.getElementById('current-strobo-color');
+            if (displayElement) displayElement.textContent = currentStroboColor.name;
             
-            // Update hidden inputs falls vorhanden
+            // Update hidden inputs
             const hueInput = document.getElementById('strobe-hue');
             const satInput = document.getElementById('strobe-sat');
             const briInput = document.getElementById('strobe-brightness');
             
-            if (hueInput) hueInput.value = currentStroboColor.hue;
-            if (satInput) satInput.value = currentStroboColor.sat;
-            if (briInput) briInput.value = currentStroboColor.bri;
+            if (hueInput) hueInput.value = hue_val;
+            if (satInput) satInput.value = sat;
+            if (briInput) briInput.value = 254;
         }
 
         // Globale Variable für Normal-Strobo-Farbe
         let currentNormalStroboColor = {
-            name: 'Weiß',
+            name: 'Kaltweiß',
             hue: 0,
             sat: 0,
             bri: 254
@@ -6040,39 +6351,88 @@
         }
 
         function setNormalStroboColor(colorName) {
-            // Entferne active Klasse von allen Normal-Strobo Buttons
-            document.querySelectorAll('.normal-strobe-color').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            setUniversalColor(colorName, 'normal-strobo');
+        }
+
+        // Hex color support for Normal Strobo
+        function setNormalStroboColorHex(hexColor) {
+            const [hue_val, sat] = hue.hexToHue(hexColor);
             
-            // Aktiviere aktuellen Button
-            document.querySelector(`.normal-strobe-color[data-color="${colorName}"]`).classList.add('active');
-            
-            // Setze Farbwerte
-            const colors = {
-                'white': { name: 'Weiß', hue: 0, sat: 0, bri: 254 },
-                'red': { name: 'Rot', hue: 0, sat: 254, bri: 254 },
-                'blue': { name: 'Blau', hue: 46000, sat: 254, bri: 254 },
-                'green': { name: 'Grün', hue: 25000, sat: 254, bri: 254 },
-                'purple': { name: 'Lila', hue: 56000, sat: 254, bri: 254 },
-                'orange': { name: 'Orange', hue: 8000, sat: 254, bri: 254 }
+            // Update global variable
+            currentNormalStroboColor = {
+                name: getColorNameFromHex(hexColor),
+                hue: hue_val,
+                sat: sat,
+                bri: 254
             };
             
-            currentNormalStroboColor = colors[colorName];
-            document.getElementById('current-normal-strobo-color').textContent = currentNormalStroboColor.name;
+            // Update UI elements
+            const displayElement = document.getElementById('current-normal-strobo-color');
+            if (displayElement) displayElement.textContent = currentNormalStroboColor.name;
             
             // Update hidden inputs
             const hueInput = document.getElementById('strobe-hue');
             const satInput = document.getElementById('strobe-sat');
             
-            if (hueInput) hueInput.value = currentNormalStroboColor.hue;
-            if (satInput) satInput.value = currentNormalStroboColor.sat;
+            if (hueInput) hueInput.value = hue_val;
+            if (satInput) satInput.value = sat;
         }
 
+        // === KLAPPBARE CARDS FUNKTIONALITÄT ===
+        
+        // Toggle card expanded/collapsed state
+        function toggleCard(cardId) {
+            const content = document.getElementById(cardId + '-content');
+            const icon = document.getElementById(cardId + '-icon');
+            
+            if (content.classList.contains('collapsed')) {
+                // Expand
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                icon.classList.remove('collapsed');
+                
+                // Set max-height to auto for proper content display
+                content.style.maxHeight = 'none';
+                
+                // Save expanded state to localStorage
+                localStorage.setItem('card-' + cardId, 'expanded');
+            } else {
+                // Collapse
+                content.classList.remove('expanded');
+                content.classList.add('collapsed');
+                icon.classList.add('collapsed');
+                content.style.maxHeight = '0';
+                
+                // Save collapsed state to localStorage
+                localStorage.setItem('card-' + cardId, 'collapsed');
+            }
+        }
+        
+        // Initialize card states from localStorage
+        function initializeCardStates() {
+            const cards = ['quickaccess', 'globalcontrols'];
+            
+            cards.forEach(cardId => {
+                const content = document.getElementById(cardId + '-content');
+                const icon = document.getElementById(cardId + '-icon');
+                const savedState = localStorage.getItem('card-' + cardId);
+                
+                if (savedState === 'collapsed') {
+                    content.classList.add('collapsed');
+                    icon.classList.add('collapsed');
+                    content.style.maxHeight = '0';
+                } else {
+                    // Default to expanded
+                    content.classList.add('expanded');
+                    content.style.maxHeight = 'none';
+                }
+            });
+        }
+        
         // Initialize default color on page load
         document.addEventListener('DOMContentLoaded', function() {
-            setStroboColor('white');
-            setNormalStroboColor('white');
+            setNormalStroboColorHex('#ff0000');  // Red as default
+            initializeCardStates();  // Initialize collapsible cards
         });
 
         async function startCustomUltraStrobo() {
