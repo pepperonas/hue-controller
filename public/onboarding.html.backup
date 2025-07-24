@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philips Hue Controller - Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .onboarding-container {
+            max-width: 480px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4);
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-subtitle {
+            opacity: 0.8;
+            font-size: 1rem;
+        }
+
+        .step-content {
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4ECDC4;
+            box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.3);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(68, 160, 141, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%);
+        }
+
+        .bridge-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 12px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bridge-card:hover {
+            border-color: #4ECDC4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .bridge-card.selected {
+            border-color: #4ECDC4;
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+        .bridge-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .bridge-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .message {
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+            color: #C8E6C9;
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+            color: #FFCDD2;
+        }
+
+        .message.warning {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid rgba(255, 152, 0, 0.5);
+            color: #FFE0B2;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #FFFFFF;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin: 24px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ECDC4, #44A08D);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .step-navigation {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .step-navigation .btn {
+            flex: 1;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .feature-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 480px) {
+            .onboarding-container {
+                padding: 24px;
+                margin: 16px;
+            }
+
+            .step-title {
+                font-size: 1.5rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="onboarding-container">
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressBar" style="width: 25%;"></div>
+    </div>
+
+    <!-- Step 1: Welcome -->
+    <div class="step active" id="step-1">
+        <div class="step-header">
+            <div class="step-number">1</div>
+            <h1 class="step-title">Willkommen</h1>
+            <p class="step-subtitle">bei Philips Hue Controller</p>
+        </div>
+        <div class="step-content">
+            <p style="text-align: center; margin-bottom: 24px; opacity: 0.9;">
+                Lassen Sie uns Ihre Philips Hue Beleuchtung einrichten. Dieser Prozess dauert nur
+                wenige Minuten.
+            </p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-name">20+ Lichteffekte</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎵</div>
+                    <div class="feature-name">Musik-Synchronisation</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-name">Stromverbrauch-Tracking</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-name">Mobile-optimiert</div>
+                </div>
+            </div>
+        </div>
+        <div class="step-navigation">
+            <button class="btn" onclick="nextStep()">Los geht's!</button>
+        </div>
+    </div>
+
+    <!-- Step 2: Bridge Discovery -->
+    <div class="step" id="step-2">
+        <div class="step-header">
+            <div class="step-number">2</div>
+            <h1 class="step-title">Hue Bridge finden</h1>
+            <p class="step-subtitle">Suche nach Ihrer Philips Hue Bridge</p>
+        </div>
+        <div class="step-content">
+            <div id="discoveryMessage"></div>
+            <div id="bridgeList"></div>
+
+            <div style="margin-top: 20px;">
+                <button class="btn secondary" onclick="discoverBridges()">
+                    <span id="discoverBtnText">Bridge suchen</span>
+                </button>
+            </div>
+
+            <div class="input-group" style="margin-top: 20px;">
+                <label>Oder Bridge IP manuell eingeben:</label>
+                <input type="text" id="manualBridgeIp" placeholder="z.B. 192.168.1.100">
+            </div>
+        </div>
+        <div class="step-navigation">
+            <button class="btn secondary" onclick="prevStep()">Zurück</button>
+            <button class="btn" id="bridgeNextBtn" onclick="nextStep()" disabled>Weiter</button>
+        </div>
+    </div>
+
+    <!-- Step 3: API Key Generation -->
+    <div class="step" id="step-3">
+        <div class="step-header">
+            <div class="step-number">3</div>
+            <h1 class="step-title">Verbindung herstellen</h1>
+            <p class="step-subtitle">API-Schlüssel generieren</p>
+        </div>
+        <div class="step-content">
+            <div class="message warning">
+                <strong>Wichtig:</strong> Drücken Sie jetzt den Button auf Ihrer Hue Bridge und
+                klicken Sie dann auf "Verbinden".
+            </div>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <div style="width: 120px; height: 120px; margin: 0 auto; background: rgba(255,255,255,0.1); border-radius: 60px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🔗
+                </div>
+            </div>
+
+            <div id="connectionMessage"></div>
+
+            <button class="btn" id="connectBtn" onclick="generateApiKey()">
+                <span id="connectBtnText">Verbinden</span>
+            </button>
+        </div>
+        <div class="step-navigation">
+            <button class="btn secondary" onclick="prevStep()">Zurück</button>
+            <button class="btn" id="connectionNextBtn" onclick="nextStep()" disabled>Weiter</button>
+        </div>
+    </div>
+
+    <!-- Step 4: Setup Complete -->
+    <div class="step" id="step-4">
+        <div class="step-header">
+            <div class="step-number">✓</div>
+            <h1 class="step-title">Setup abgeschlossen!</h1>
+            <p class="step-subtitle">Ihre Philips Hue Controller ist bereit</p>
+        </div>
+        <div class="step-content">
+            <div class="message success" id="setupSummary">
+                <strong>Erfolgreich eingerichtet!</strong><br>
+                <span id="summaryText"></span>
+            </div>
+
+            <div style="text-align: center; margin: 32px 0;">
+                <div style="width: 120px; height: 120px; margin: 0 auto; background: linear-gradient(135deg, #4ECDC4, #44A08D); border-radius: 60px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    🎉
+                </div>
+            </div>
+
+            <p style="text-align: center; opacity: 0.9;">
+                Sie können jetzt alle erweiterten Funktionen nutzen: Lichteffekte,
+                Musik-Synchronisation, Stromverbrauch-Tracking und vieles mehr!
+            </p>
+        </div>
+        <div class="step-navigation">
+            <button class="btn" onclick="completeOnboarding()">App starten</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStep = 1;
+    let selectedBridge = null;
+    let apiKey = null;
+
+    function updateProgress() {
+        const progress = (currentStep / 4) * 100;
+        document.getElementById('progressBar').style.width = progress + '%';
+    }
+
+    function showStep(step) {
+        // Hide all steps
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        // Show current step
+        document.getElementById(`step-${step}`).classList.add('active');
+        updateProgress();
+    }
+
+    function nextStep() {
+        if (currentStep < 4) {
+            currentStep++;
+            showStep(currentStep);
+
+            if (currentStep === 2) {
+                // Auto-discover when entering step 2
+                setTimeout(discoverBridges, 500);
+            }
+        }
+    }
+
+    function prevStep() {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    }
+
+    async function discoverBridges() {
+        const btn = document.getElementById('discoverBtnText');
+        const originalText = btn.textContent;
+        btn.innerHTML = '<span class="loading-spinner"></span>Suche läuft...';
+
+        try {
+            const response = await fetch('/api/onboarding/discover-bridge');
+            const data = await response.json();
+
+            if (data.success && data.bridges.length > 0) {
+                displayBridges(data.bridges);
+            } else {
+                showMessage('error', 'Keine Bridge gefunden. Prüfen Sie Ihre Netzwerkverbindung.', 'discoveryMessage');
+            }
+        } catch (error) {
+            showMessage('error', 'Fehler bei der Bridge-Suche: ' + error.message, 'discoveryMessage');
+        }
+
+        btn.textContent = originalText;
+    }
+
+    function displayBridges(bridges) {
+        const container = document.getElementById('bridgeList');
+        container.innerHTML = '';
+
+        bridges.forEach(bridge => {
+            const card = document.createElement('div');
+            card.className = 'bridge-card';
+            card.onclick = () => selectBridge(bridge, card);
+
+            card.innerHTML = `
+                    <div class="bridge-info">
+                        <div class="bridge-icon">🌉</div>
+                        <div>
+                            <div style="font-weight: 600;">Philips Hue Bridge</div>
+                            <div style="opacity: 0.8; font-size: 0.9rem;">IP: ${bridge.internalipaddress}</div>
+                        </div>
+                    </div>
+                `;
+
+            container.appendChild(card);
+        });
+
+        showMessage('success', `${bridges.length} Bridge(s) gefunden. Wählen Sie Ihre Bridge aus.`, 'discoveryMessage');
+    }
+
+    function selectBridge(bridge, cardElement) {
+        // Remove previous selection
+        document.querySelectorAll('.bridge-card').forEach(c => c.classList.remove('selected'));
+
+        // Select current
+        cardElement.classList.add('selected');
+        selectedBridge = bridge;
+
+        // Enable next button
+        document.getElementById('bridgeNextBtn').disabled = false;
+    }
+
+    // Manual bridge IP input
+    document.getElementById('manualBridgeIp').addEventListener('input', function (e) {
+        const ip = e.target.value.trim();
+        if (ip) {
+            selectedBridge = {internalipaddress: ip};
+            document.getElementById('bridgeNextBtn').disabled = false;
+        }
+    });
+
+    async function generateApiKey() {
+        if (!selectedBridge) return;
+
+        const btn = document.getElementById('connectBtnText');
+        const originalText = btn.textContent;
+        btn.innerHTML = '<span class="loading-spinner"></span>Verbinde...';
+
+        try {
+            const response = await fetch('/api/onboarding/generate-key', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({bridge_ip: selectedBridge.internalipaddress})
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                apiKey = data.username;
+                showMessage('success', data.message, 'connectionMessage');
+                document.getElementById('connectionNextBtn').disabled = false;
+
+                // Test connection
+                await testConnection();
+            } else if (data.error === 'button_not_pressed') {
+                showMessage('warning', data.message, 'connectionMessage');
+            } else {
+                showMessage('error', 'Fehler: ' + data.error, 'connectionMessage');
+            }
+        } catch (error) {
+            showMessage('error', 'Verbindungsfehler: ' + error.message, 'connectionMessage');
+        }
+
+        btn.textContent = originalText;
+    }
+
+    async function testConnection() {
+        try {
+            const response = await fetch('/api/onboarding/test-connection', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    bridge_ip: selectedBridge.internalipaddress,
+                    username: apiKey
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('summaryText').textContent =
+                    `Bridge IP: ${selectedBridge.internalipaddress} • ${data.lights_count} Lichter gefunden`;
+            } else {
+                showMessage('error', 'Verbindungstest fehlgeschlagen', 'connectionMessage');
+            }
+        } catch (error) {
+            console.error('Connection test failed:', error);
+        }
+    }
+
+    async function completeOnboarding() {
+        try {
+            const response = await fetch('/api/onboarding/save-config', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    bridge_ip: selectedBridge.internalipaddress,
+                    username: apiKey
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Redirect to main app
+                window.location.href = '/';
+            } else {
+                alert('Fehler beim Speichern der Konfiguration: ' + data.error);
+            }
+        } catch (error) {
+            alert('Fehler: ' + error.message);
+        }
+    }
+
+    function showMessage(type, text, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `<div class="message ${type}">${text}</div>`;
+    }
+
+    // Initialize
+    updateProgress();
+</script>
+</body>
+</html>
