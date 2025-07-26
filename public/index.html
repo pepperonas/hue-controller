@@ -597,6 +597,235 @@
             filter: grayscale(0.8);
         }
 
+        /* Button Configuration Styles */
+        .button-config-form {
+            background: rgba(52, 56, 69, 0.7);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-6);
+            margin-top: var(--spacing-4);
+            border: 1px solid rgba(156, 182, 143, 0.3);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-6);
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-field label {
+            font-weight: 500;
+            margin-bottom: var(--spacing-2);
+            color: var(--accent-blue);
+        }
+
+        .form-field input,
+        .form-field select {
+            padding: var(--spacing-3);
+            border: 1px solid rgba(156, 182, 143, 0.3);
+            border-radius: var(--radius);
+            background-color: var(--background-darker);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(104, 141, 177, 0.1);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-4);
+            padding: var(--spacing-3);
+            border-radius: var(--radius);
+            background: rgba(52, 56, 69, 0.5);
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-red);
+        }
+
+        .status-dot.online {
+            background: var(--accent-green);
+        }
+
+        .button-configs-container {
+            display: grid;
+            gap: var(--spacing-4);
+        }
+
+        .button-config-item {
+            background: rgba(52, 56, 69, 0.5);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-4);
+            border: 1px solid rgba(156, 182, 143, 0.2);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+
+        .button-config-info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-1);
+        }
+
+        .button-config-title {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .button-config-details {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .button-config-actions {
+            display: flex;
+            gap: var(--spacing-2);
+        }
+
+        .small-btn {
+            padding: var(--spacing-2) var(--spacing-3);
+            border: none;
+            border-radius: var(--radius);
+            background: var(--accent-blue);
+            color: white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .small-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .action-btn {
+            padding: var(--spacing-3) var(--spacing-6);
+            border: none;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #5a7a9a 100%);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-2);
+            width: 100%;
+            margin-top: var(--spacing-4);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: linear-gradient(135deg, #5a7a9a 0%, var(--accent-blue) 100%);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow);
+        }
+
+        .button-logs-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-4);
+        }
+
+        .logs-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid rgba(156, 182, 143, 0.2);
+            border-radius: var(--radius);
+            background: rgba(52, 56, 69, 0.3);
+        }
+
+        .log-entry {
+            padding: var(--spacing-3);
+            border-bottom: 1px solid rgba(156, 182, 143, 0.1);
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: var(--spacing-3);
+            align-items: center;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-timestamp {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .log-details {
+            color: var(--text-primary);
+        }
+
+        .log-status {
+            padding: var(--spacing-1) var(--spacing-2);
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .log-status.success {
+            background: rgba(156, 182, 143, 0.2);
+            color: var(--accent-green);
+        }
+
+        .log-status.error {
+            background: rgba(225, 97, 98, 0.2);
+            color: var(--accent-red);
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: var(--spacing-6);
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-config-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .button-logs-header {
+                flex-direction: column;
+                gap: var(--spacing-2);
+            }
+            
+            .log-entry {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: var(--spacing-2);
+            }
+        }
+
         .unreachable-label {
             font-size: 0.75rem;
             color: #e74c3c;
@@ -2607,6 +2836,7 @@
             <button class="tab" onclick="switchTab('effects')">Effekte</button>
             <button class="tab" onclick="switchTab('timers')">Timer</button>
             <button class="tab" onclick="switchTab('sensors')">Sensoren</button>
+            <button class="tab" onclick="switchTab('buttons')">Custom Buttons</button>
             <button class="tab" onclick="switchTab('debug')">Debug</button>
             <button class="tab" onclick="switchTab('power')">Stromverbrauch</button>
         </div>
@@ -3327,6 +3557,73 @@
             </div>
         </div>
 
+        <div id="buttons-tab" class="tab-content">
+            <div class="card">
+                <div class="card-title">🔘 Custom Button Konfiguration</div>
+                <div class="card-content">
+                    <p>Konfiguriere physische Buttons (GPIO) zur direkten Steuerung von Hue-Gruppen.</p>
+                    
+                    <!-- GPIO Status -->
+                    <div id="gpio-status" class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span id="gpio-status-text">GPIO Status wird geladen...</span>
+                    </div>
+                    
+                    <!-- Button hinzufügen -->
+                    <div class="button-config-form">
+                        <h3>🆕 Neuen Button hinzufügen</h3>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label for="gpio-pin">GPIO Pin:</label>
+                                <input type="number" id="gpio-pin" min="2" max="27" placeholder="z.B. 26">
+                            </div>
+                            <div class="form-field">
+                                <label for="button-group">Gruppe:</label>
+                                <select id="button-group">
+                                    <option value="">-- Gruppe wählen --</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="button-action">Aktion:</label>
+                                <select id="button-action">
+                                    <option value="toggle">Toggle (Ein/Aus)</option>
+                                    <option value="on">Immer Ein</option>
+                                    <option value="off">Immer Aus</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="button-name">Name (optional):</label>
+                                <input type="text" id="button-name" placeholder="z.B. Wohnzimmer Button">
+                            </div>
+                        </div>
+                        <button class="action-btn" onclick="addButtonConfiguration()">
+                            ➕ Button hinzufügen
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Konfigurierte Buttons -->
+            <div class="card">
+                <div class="card-title">⚙️ Aktuelle Konfiguration</div>
+                <div id="button-configurations" class="button-configs-container">
+                    <div class="loading-spinner">Lade Konfigurationen...</div>
+                </div>
+            </div>
+
+            <!-- Button-Logs -->
+            <div class="card">
+                <div class="card-title">📋 Button Activity Log</div>
+                <div class="button-logs-header">
+                    <button class="small-btn" onclick="loadButtonLogs()">🔄 Aktualisieren</button>
+                    <button class="small-btn" onclick="clearButtonLogs()" style="background: var(--accent-red);">🗑️ Logs löschen</button>
+                </div>
+                <div id="button-logs" class="logs-container">
+                    <div class="loading-spinner">Lade Logs...</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Schwebende Steuerungselemente -->
         <div class="floating-controls">
             <button class="floating-btn" onclick="globalControl('all-off')" title="Alles Aus" style="background: linear-gradient(135deg, #f44336 0%, #da190b 100%);">💡</button>
@@ -3351,6 +3648,10 @@
         <div class="nav-item" onclick="switchTab('groups')" data-tab="groups">
             <div class="nav-icon">🏠</div>
             <div class="nav-label">Räume</div>
+        </div>
+        <div class="nav-item" onclick="switchTab('buttons')" data-tab="buttons">
+            <div class="nav-icon">🔘</div>
+            <div class="nav-label">Buttons</div>
         </div>
         <div class="nav-item" onclick="switchTab('debug')" data-tab="debug">
             <div class="nav-icon">🐛</div>
@@ -6842,7 +7143,316 @@
                     hue.lampSelectionLoaded = true;
                 }
             }
+            
+            // Button-Tab spezifische Aktionen
+            if (tabName === 'buttons') {
+                console.log('Loading buttons tab...');
+                if (!hue.buttonsLoaded) {
+                    console.log('First time loading buttons tab');
+                    loadButtonConfigurations();
+                    loadButtonStatus();
+                    loadButtonLogs();
+                    loadGroupsForButtons();
+                    hue.buttonsLoaded = true;
+                } else {
+                    console.log('Buttons tab already loaded');
+                }
+            }
         };
+
+        // ═══════════════════ BUTTON CONFIGURATION FUNCTIONS ═══════════════════
+
+        let buttonConfigurations = [];
+        let availableGroups = [];
+
+        // Simple notification function if not exists
+        function showNotification(message, type = 'info') {
+            console.log(`${type.toUpperCase()}: ${message}`);
+            // You could add a proper notification system here
+            alert(message);
+        }
+
+        async function loadButtonConfigurations() {
+            try {
+                const response = await fetch('/api/buttons/configurations');
+                const data = await response.json();
+                
+                if (data.success) {
+                    buttonConfigurations = data.configurations;
+                    renderButtonConfigurations();
+                } else {
+                    console.error('Failed to load button configurations:', data.error);
+                    showNotification('❌ Fehler beim Laden der Button-Konfigurationen', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading button configurations:', error);
+                showNotification('❌ Verbindungsfehler', 'error');
+            }
+        }
+
+        async function loadButtonStatus() {
+            try {
+                const response = await fetch('/api/buttons/status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateGpioStatus(data.gpio_monitoring);
+                }
+            } catch (error) {
+                console.error('Error loading button status:', error);
+            }
+        }
+
+        async function loadGroupsForButtons() {
+            try {
+                const response = await fetch('/api/groups');
+                const data = await response.json();
+                
+                // Handle direct Hue API response (data is the groups object)
+                if (data && typeof data === 'object' && !data.error) {
+                    availableGroups = Object.entries(data).map(([id, group]) => ({
+                        id,
+                        name: group.name
+                    }));
+                    
+                    // Add "All Lights" option
+                    availableGroups.unshift({ id: '0', name: 'Alle Lichter' });
+                    
+                    populateGroupSelect();
+                    console.log('Loaded groups:', availableGroups);
+                } else {
+                    console.error('Groups API returned error:', data);
+                }
+            } catch (error) {
+                console.error('Error loading groups for buttons:', error);
+            }
+        }
+
+        function populateGroupSelect() {
+            const select = document.getElementById('button-group');
+            if (!select) {
+                console.error('button-group select element not found');
+                return;
+            }
+            
+            select.innerHTML = '<option value="">-- Gruppe wählen --</option>';
+            
+            if (availableGroups.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '❌ Keine Gruppen verfügbar';
+                option.disabled = true;
+                select.appendChild(option);
+                return;
+            }
+            
+            availableGroups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group.id;
+                option.textContent = group.name;
+                select.appendChild(option);
+            });
+            
+            console.log(`Populated ${availableGroups.length} groups in select`);
+        }
+
+        function updateGpioStatus(status) {
+            const statusElement = document.getElementById('gpio-status');
+            const statusText = document.getElementById('gpio-status-text');
+            const statusDot = statusElement.querySelector('.status-dot');
+            
+            if (status.running) {
+                statusDot.classList.add('online');
+                statusText.textContent = `GPIO Monitoring aktiv - ${status.active_buttons} Button(s) konfiguriert`;
+            } else {
+                statusDot.classList.remove('online');
+                statusText.textContent = status.message || 'GPIO Monitoring inaktiv';
+            }
+        }
+
+        function renderButtonConfigurations() {
+            const container = document.getElementById('button-configurations');
+            
+            if (buttonConfigurations.length === 0) {
+                container.innerHTML = '<div class="loading-spinner">Keine Button-Konfigurationen vorhanden</div>';
+                return;
+            }
+            
+            container.innerHTML = buttonConfigurations.map(config => `
+                <div class="button-config-item">
+                    <div class="button-config-info">
+                        <div class="button-config-title">
+                            🔘 ${config.button_name || `GPIO Pin ${config.gpio_pin}`}
+                        </div>
+                        <div class="button-config-details">
+                            Pin: ${config.gpio_pin} → ${config.group_name} (${config.action_type})
+                            ${config.enabled ? '✅ Aktiv' : '❌ Deaktiviert'}
+                        </div>
+                    </div>
+                    <div class="button-config-actions">
+                        <button class="small-btn" onclick="testButton(${config.gpio_pin})" 
+                                title="Button testen">
+                            🧪 Test
+                        </button>
+                        <button class="small-btn" onclick="editButtonConfiguration(${config.id})" 
+                                style="background: var(--accent-green);" title="Bearbeiten">
+                            ✏️ Edit
+                        </button>
+                        <button class="small-btn" onclick="deleteButtonConfiguration(${config.id})" 
+                                style="background: var(--accent-red);" title="Löschen">
+                            🗑️ Del
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function addButtonConfiguration() {
+            const gpioPin = document.getElementById('gpio-pin').value;
+            const groupId = document.getElementById('button-group').value;
+            const actionType = document.getElementById('button-action').value;
+            const buttonName = document.getElementById('button-name').value;
+            
+            if (!gpioPin || !groupId) {
+                showNotification('❌ Bitte GPIO Pin und Gruppe auswählen', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/buttons/configurations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        gpio_pin: parseInt(gpioPin),
+                        group_id: groupId,
+                        action_type: actionType,
+                        button_name: buttonName || `Button GPIO ${gpioPin}`
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ Button-Konfiguration hinzugefügt', 'success');
+                    
+                    // Clear form
+                    document.getElementById('gpio-pin').value = '';
+                    document.getElementById('button-group').value = '';
+                    document.getElementById('button-action').value = 'toggle';
+                    document.getElementById('button-name').value = '';
+                    
+                    // Reload configurations
+                    loadButtonConfigurations();
+                    loadButtonStatus();
+                } else {
+                    showNotification(`❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding button configuration:', error);
+                showNotification('❌ Verbindungsfehler', 'error');
+            }
+        }
+
+        async function testButton(gpioPin) {
+            try {
+                const response = await fetch(`/api/buttons/test/${gpioPin}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(`✅ Test erfolgreich: ${data.message}`, 'success');
+                    loadButtonLogs(); // Refresh logs
+                } else {
+                    showNotification(`❌ Test fehlgeschlagen: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error testing button:', error);
+                showNotification('❌ Test-Verbindungsfehler', 'error');
+            }
+        }
+
+        async function deleteButtonConfiguration(configId) {
+            if (!confirm('Sind Sie sicher, dass Sie diese Button-Konfiguration löschen möchten?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/buttons/configurations/${configId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('✅ Button-Konfiguration gelöscht', 'success');
+                    loadButtonConfigurations();
+                    loadButtonStatus();
+                } else {
+                    showNotification(`❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting button configuration:', error);
+                showNotification('❌ Verbindungsfehler', 'error');
+            }
+        }
+
+        async function loadButtonLogs() {
+            try {
+                const response = await fetch('/api/buttons/logs?limit=20');
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderButtonLogs(data.logs);
+                } else {
+                    console.error('Failed to load button logs:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading button logs:', error);
+            }
+        }
+
+        function renderButtonLogs(logs) {
+            const container = document.getElementById('button-logs');
+            
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="loading-spinner">Keine Button-Aktivitäten vorhanden</div>';
+                return;
+            }
+            
+            container.innerHTML = logs.map(log => {
+                const timestamp = new Date(log.timestamp).toLocaleString('de-DE');
+                const statusClass = log.execution_success ? 'success' : 'error';
+                
+                return `
+                    <div class="log-entry">
+                        <div class="log-timestamp">${timestamp}</div>
+                        <div class="log-details">
+                            GPIO ${log.gpio_pin} (${log.button_name || 'Unbenannt'}) → 
+                            Gruppe ${log.group_id} (${log.action_type}) 
+                            [${log.press_type} press]
+                        </div>
+                        <div class="log-status ${statusClass}">
+                            ${log.execution_success ? 'Erfolg' : 'Fehler'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function editButtonConfiguration(configId) {
+            // For now, show a simple alert - could be enhanced with a modal
+            showNotification('🔧 Edit-Funktion kommt bald...', 'info');
+        }
+
+        function clearButtonLogs() {
+            if (!confirm('Sind Sie sicher, dass Sie alle Button-Logs löschen möchten?')) {
+                return;
+            }
+            
+            showNotification('🚧 Clear-Logs-Funktion wird implementiert...', 'info');
+        }
     </script>
     <script>
     if ("serviceWorker" in navigator) {
@@ -6851,5 +7461,10 @@
             .catch(err => console.log("Service Worker registration failed"));
     }
     </script>
+    
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 20px; margin-top: 40px; color: rgba(255, 255, 255, 0.6); font-size: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        Made with ❤️ by Martin Pfeffer
+    </footer>
 </body>
 </html>
