@@ -35,13 +35,29 @@ Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Light
 - **Individuelle Lichtkontrolle**: Strobo nur für ausgewählte Lichter
 - **Farbsynchronisation**: Echtzeit-Farbwechsel während aktiver Effekte
 - **Visuelle Rückmeldung**: Pulsierende Kartenglow-Effekte bei aktiven Strobos
+
+### 🎵 Audio-Reaktive Beleuchtung (Disko-Modus)
+- **FFT-Frequenzanalyse**: Echtzeit-Spektralanalyse mit 2048-Sample-Fenster
+- **5 Frequenzbänder**: Bass (20-250Hz), Low-Mid (250-500Hz), Mid (500-2kHz), High-Mid (2-4kHz), Treble (4-8kHz)
+- **Intelligente Farbmappings**:
+  - 🔴 **Bass → Rot** (kraftvoll, warm für Kick Drums & Bass)
+  - 🟠 **Low-Mid → Orange** (warme Instrumente)
+  - 🟡 **Mid → Gelb** (Vocals, Gitarren)
+  - 🔵 **High-Mid → Blau** (Snare, obere Harmonien)
+  - 🟣 **Treble → Lila** (Hi-Hats, Cymbals)
+- **Dominante Frequenz-Erkennung**: Lichter reagieren auf das stärkste Frequenzband
+- **Bass-Boost**: Extra Helligkeit bei starken Bässen
+- **Live-Visualisierung**: Echtzeit-Frequenzbalken im Web-Interface
+- **Adaptives Farbmischen**: Mehrere Frequenzbänder werden gewichtet gemischt
+- **Optimierte Performance**: 50ms Audio-Updates, 150ms Hue-Updates
+
+### 🌈 Weitere Lichteffekte
 - **Raumwelle**: Farben laufen sequenziell durch alle Lichter
 - **Pulsieren**: Rhythmisches Dimmen aller Lichter
 - **Regenbogen**: Sanfte Farbübergänge durch das gesamte Spektrum
 - **Feuereffekt**: Warme, flackernde Farben mit zufälligen Variationen
 - **Sonnenuntergang**: Automatische Farbtemperatur-Progression
 - **Blitzeffekt**: Zufällige Blitze auf ausgewählten Lichtern
-- **Audio-Sync**: Lichtsteuerung basierend auf Mikrofon-Input
 - **Effekt-Builder**: Benutzerdefinierte Effekte erstellen und speichern
 
 ### ⚡ Stromverbrauch-Monitoring
@@ -64,6 +80,15 @@ Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Light
 - **Aktive Timer-Übersicht**: Verwaltung aller laufenden Timer
 - **Flexible Ziele**: Timer für einzelne Lichter oder Gruppen
 
+### 🔘 Custom Buttons (GPIO)
+- **Hardware-Integration**: Physische GPIO-Buttons für direkte Lichtsteuerung
+- **GPIO-Pin Mapping**: Konfiguration von GPIO-Pins zu Hue-Gruppen über Web-UI
+- **Debouncing**: 200ms Hardware-Debouncing für zuverlässige Buttonerkennung
+- **Single/Double Press**: Single Press = Toggle, Double Press = Aus
+- **Real-time Logging**: Vollständige Button-Aktivitäts-Protokollierung in Datenbank
+- **Web-Konfiguration**: "Custom Buttons" Tab zur einfachen Pin-zu-Gruppe-Zuordnung
+- **Button-Test-Scripts**: Dedicated Test-Tools für GPIO-Button-Debugging
+
 ## 🚀 Installation
 
 ### Voraussetzungen
@@ -71,6 +96,10 @@ Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Light
 - **MariaDB/MySQL**
 - **Philips Hue Bridge** im lokalen Netzwerk
 - **Hue API-Key** (siehe Setup-Anleitung)
+- **Raspberry Pi** mit GPIO-Zugriff (für Custom Buttons)
+- **GPIO-Bibliotheken**: `gpiozero`, `RPi.GPIO`, `lgpio`
+- **Audio-Bibliotheken**: `pyaudio`, `scipy` (für Disko-Modus)
+- **USB-Mikrofon** oder integriertes Mikrofon (für Audio-Reaktivität)
 
 ### 1. Repository klonen
 ```bash
@@ -80,9 +109,16 @@ cd hue-controller
 
 ### 2. Automatische Einrichtung (Empfohlen)
 ```bash
+# System-Pakete für Audio installieren
+sudo apt update && sudo apt install -y python3-gpiozero portaudio19-dev python3-pyaudio
+
 # Python Virtual Environment erstellen
 python3 -m venv venv --system-site-packages
-venv/bin/pip install flask flask-cors requests mysql-connector-python
+venv/bin/pip install flask flask-cors requests mysql-connector-python pyaudio scipy numpy
+
+# GPIO-Bibliotheken für Custom Buttons installieren
+sudo pip3 install RPi.GPIO lgpio
+sudo usermod -a -G gpio pi  # GPIO-Zugriff für pi-Benutzer
 
 # Datenbank einrichten
 sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS hue_monitoring; CREATE USER IF NOT EXISTS 'hueuser'@'localhost' IDENTIFIED BY 'password'; GRANT ALL PRIVILEGES ON hue_monitoring.* TO 'hueuser'@'localhost'; FLUSH PRIVILEGES;"
@@ -176,6 +212,19 @@ pm2 save                    # Konfiguration speichern
 4. **Globale Steuerung**: Alle Lichter gleichzeitig steuern
 5. **Notaus**: Schwebender roter Button für sofortiges Ausschalten
 
+### 🎵 Disko-Modus verwenden
+
+1. **Mikrofon anschließen**: USB-Mikrofon oder integriertes Mikrofon verwenden
+2. **Disko-Modus aktivieren**: "🕺 Disko-Modus" Button in der globalen Steuerung
+3. **Frequenz-Display**: Live-Balkendiagramm zeigt aktive Frequenzbänder
+4. **Musik abspielen**: Lichter reagieren automatisch auf verschiedene Instrumente:
+   - **Bass Drums** → Rote Lichter mit extra Helligkeit
+   - **Vocals/Gitarren** → Gelbe/Orange Lichter
+   - **Hi-Hats/Cymbals** → Blaue/Lila Lichter
+   - **Vollspektrum-Musik** → Dynamische Farbmischung
+5. **Button-Feedback**: Disko-Button wechselt Farbe je nach dominanter Frequenz
+6. **Deaktivieren**: Nochmals auf Button klicken zum Stoppen
+
 ### Mobile Optimierung
 - **Touch-freundlich**: Große Buttons und Slider
 - **Responsive Design**: Funktioniert auf Smartphones und Tablets
@@ -200,6 +249,11 @@ pm2 save                    # Konfiguration speichern
 - `GET /api/effects` - Liste aktiver Effekte
 - `DELETE /api/effects/<id>/stop` - Spezifischen Effekt stoppen
 
+### Audio-Reaktive Beleuchtung (Disko-Modus)
+- `POST /api/disco-mode/start` - Disko-Modus (Audio-reaktive Beleuchtung) starten
+- `POST /api/disco-mode/stop` - Disko-Modus stoppen
+- `GET /api/disco-mode/status` - Status mit Frequenzband-Analyse und dominanter Frequenz
+
 ### Timer & Automatisierung
 - `POST /api/timer` - Timer für verzögerte Aktionen erstellen
 - `GET /api/sensors` - Sensoren/Schalter auflisten
@@ -207,6 +261,15 @@ pm2 save                    # Konfiguration speichern
 ### Stromverbrauch
 - `GET /api/power/current` - Aktueller Verbrauch mit Datenbank-Status
 - `GET /api/power/history` - Historische Daten (täglich, stündlich, Top-Verbraucher)
+
+### Custom Buttons (GPIO)
+- `GET /api/buttons/status` - GPIO-Manager-Status und aktive Button-Konfigurationen
+- `GET /api/buttons` - Alle Button-Konfigurationen auflisten
+- `POST /api/buttons` - Neue Button-Konfiguration erstellen
+- `PUT /api/buttons/<gpio_pin>` - Button-Konfiguration aktualisieren
+- `DELETE /api/buttons/<gpio_pin>` - Button-Konfiguration löschen
+- `GET /api/buttons/logs` - Button-Press-Logs abrufen
+- `POST /api/buttons/reload` - Button-Konfigurationen neu laden
 
 ### System
 - `GET /api/status` - System-Status und Verbindungsinformationen
@@ -217,9 +280,14 @@ pm2 save                    # Konfiguration speichern
 ```
 hue-controller/
 ├── app_lite.py              # Haupt-Flask-Anwendung
+├── disco_mode.py            # Audio-reaktiver Disko-Modus mit FFT-Analyse
+├── gpio_manager.py          # GPIO-Button-Manager für Custom Buttons
 ├── test_db.py              # Datenbank-Tests und Setup
+├── but_working.py          # GPIO-Button-Test-Script für direkte Hardware-Tests
+├── test_gpio_logging.py    # GPIO-Button-Test-Script mit erweiterten Features
+├── check_button_activity.py # Button-Aktivitäts-Monitor
 ├── public/                  # Frontend-Dateien (Templates & Static)
-│   ├── index.html          # Haupt-Frontend (SPA)
+│   ├── index.html          # Haupt-Frontend (SPA) mit Custom Buttons Tab
 │   └── onboarding.html     # Setup-Assistent
 ├── logs/                   # Log-Dateien (PM2)
 │   ├── combined.log
@@ -238,10 +306,12 @@ hue-controller/
 ### Technologie-Stack
 - **Backend**: Flask mit CORS-Support und Smart Error Handling
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3 mit Glassmorphism Design
+- **Hardware**: GPIO-Integration mit gpiozero für Button-Steuerung
 - **Datenbank**: MariaDB/MySQL mit Connection Pooling
 - **Charts**: Chart.js für Visualisierungen
-- **Threading**: Python Threads für Effekte und Timer
-- **Audio**: PyAudio für Mikrofon-basierte Lichtsteuerung
+- **Threading**: Python Threads für Effekte, Timer und GPIO-Monitoring
+- **Audio**: PyAudio mit SciPy FFT für erweiterte Frequenzanalyse
+- **Signal Processing**: NumPy für Echtzeit-Spektralanalyse und Frequenzband-Filterung
 - **Logging**: Strukturiertes Logging-System mit Rotation
 
 ### Datenbank-Schema
@@ -266,10 +336,40 @@ CREATE TABLE total_consumption (
     active_lights INT NOT NULL,
     INDEX idx_timestamp (timestamp)
 );
+
+-- Custom Button Konfigurationen
+CREATE TABLE button_configurations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    gpio_pin INT NOT NULL UNIQUE,
+    group_id VARCHAR(10) NOT NULL,
+    action_type VARCHAR(20) NOT NULL DEFAULT 'toggle',
+    button_name VARCHAR(100),
+    description TEXT,
+    enabled BOOLEAN DEFAULT TRUE,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_gpio_pin (gpio_pin),
+    INDEX idx_group_id (group_id),
+    INDEX idx_enabled (enabled)
+);
+
+-- Button Press Logs
+CREATE TABLE button_press_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    gpio_pin INT NOT NULL,
+    press_type ENUM('single', 'double') NOT NULL,
+    group_id VARCHAR(10) NOT NULL,
+    action_type VARCHAR(20) NOT NULL,
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_gpio_pin (gpio_pin),
+    INDEX idx_timestamp (timestamp)
+);
 ```
 
 ### Logging & Monitoring
 - **Power-Monitoring**: Automatisch alle 5 Minuten in Datenbank
+- **GPIO-Monitoring**: Real-time Button-Press-Erkennung mit Hardware-Debouncing
+- **Button-Logging**: Alle Button-Aktivitäten werden in Datenbank protokolliert
 - **Effekt-Tracking**: Laufende Effekte in Memory mit Thread-IDs
 - **Connection Pooling**: MySQL-Pool mit 5 Verbindungen
 - **Fehlerbehandlung**: Graceful Fallback bei DB-Problemen
@@ -289,6 +389,12 @@ pm2 logs hue-controller
 tail -f logs/combined.log
 tail -f logs/error.log
 tail -f logs/out.log
+
+# GPIO Button-Aktivität prüfen
+source venv/bin/activate && python3 check_button_activity.py
+
+# GPIO Button Hardware-Test (direkte Button-Erkennung)
+sudo python3 but_working.py
 ```
 
 ### Datenbank-Wartung
@@ -342,6 +448,19 @@ pm2 restart hue-controller
    - Neuen API-Key generieren (siehe Installation)
    - `.env` Datei aktualisieren
 
+5. **GPIO Button-Probleme**
+   ```bash
+   # Button-Hardware direkt testen
+   sudo python3 but_working.py
+   
+   # GPIO-Pin Status prüfen
+   sudo gpio readall
+   
+   # GPIO-Pin freigeben falls belegt
+   echo 21 > /sys/class/gpio/unexport
+   echo 26 > /sys/class/gpio/unexport
+   ```
+
 ### Debug-Modus
 ```bash
 export FLASK_DEBUG=true
@@ -363,12 +482,33 @@ python3 app_lite.py
 
 ## 📝 Changelog
 
-### Version 2.4 (Juli 2025 - Aktuell)
+### Version 2.5 (Juli 2025 - Aktuell)
+- ✅ **Audio-Reaktive Beleuchtung (Disko-Modus)**: Vollständige FFT-basierte Frequenzanalyse
+- ✅ **Intelligente Frequenz-Mappings**: 5 Frequenzbänder (Bass, Low-Mid, Mid, High-Mid, Treble) mit spezifischen Farben
+- ✅ **Real-Time Spektralanalyse**: 2048-Sample FFT-Fenster mit Hanning-Window für präzise Frequenzerkennung
+- ✅ **Dominante Frequenz-Erkennung**: Lichter reagieren auf das stärkste Frequenzband
+- ✅ **Bass-Boost Effekt**: Extra Helligkeit bei starken Bässen (Kick Drums)
+- ✅ **Live-Frequenz-Visualisierung**: Echtzeit-Balkendiagramm im Web-Interface
+- ✅ **Adaptives Farbmischen**: Gewichtete Farbmischung bei mehreren aktiven Frequenzbändern
+- ✅ **Optimierte Performance**: 50ms Audio-Updates, 150ms Hue-Updates für flüssige Reaktion
+- ✅ **Button-Farb-Feedback**: Disko-Button wechselt Farbe basierend auf dominanter Frequenz
+- ✅ **Erweiterte API**: Status-Endpoint mit detaillierter Frequenzband-Information
+- ✅ **Glassmorphism Dropdown-Design**: Einheitliche, elegante Dropdown-Styling mit Backdrop-Blur-Effekten
+- ✅ **Verbesserte UI-Responsivität**: 1-Sekunden-Updates statt 5-Sekunden für sofortige Rückmeldung
+- ✅ **Optimierte Lichtsteuerung**: Sofortige Vorschau bei Helligkeits- und Farbänderungen
+
+### Version 2.4
+- ✅ **Custom GPIO Buttons**: Vollständige Hardware-Integration für physische Button-Steuerung
+- ✅ **GPIO-Manager**: Dedicated GPIO-Management-Modul mit gpiozero-Integration
+- ✅ **Button-Konfiguration**: Web-UI Tab "Custom Buttons" für GPIO-Pin-zu-Gruppe-Mapping
+- ✅ **Hardware-Debouncing**: 200ms Debouncing für zuverlässige Button-Erkennung
+- ✅ **Single/Double Press**: Intelligente Druckerkennung (Single=Toggle, Double=Aus)
+- ✅ **Real-time Logging**: Vollständige Button-Aktivitäts-Protokollierung in Datenbank
+- ✅ **Database Schema**: Erweitert um `button_configurations` und `button_press_log` Tabellen
+- ✅ **API-Endpoints**: 7 neue Endpoints für Button-Management und Monitoring
 - ✅ **Ordnerstruktur**: `templates/` Verzeichnis zu `public/` umbenannt für bessere Klarheit
-- ✅ **Datenbank-Schema**: Vollständige Schema-Dokumentation in README
-- ✅ **API-Dokumentation**: Erweiterte Endpoint-Liste mit allen verfügbaren Funktionen
 - ✅ **Onboarding-Wizard**: Setup-Assistent für einfache Erstkonfiguration
-- ✅ **Erweiterte Threading**: Daemon-Threads für Effekte mit eindeutigen IDs
+- ✅ **Erweiterte Threading**: Daemon-Threads für Effekte und GPIO-Monitoring mit eindeutigen IDs
 
 ### Version 2.3
 - ✅ **Power-Monitoring-Charts**: Datenbank konfiguriert und Stromverbrauchsdaten verfügbar

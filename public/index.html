@@ -2139,6 +2139,188 @@
             }
         }
         
+        @keyframes disco-gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        /* Frequency Display Styles */
+        #frequency-display {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #frequency-display h4 {
+            margin: 0 0 12px 0;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        
+        .freq-bands {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .freq-band {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .freq-band.active .freq-label {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+        
+        .freq-label {
+            min-width: 60px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+        
+        .freq-bar {
+            flex: 1;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .freq-level {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff6b6b);
+            border-radius: 8px;
+            transition: width 0.1s ease;
+            min-width: 2px;
+        }
+        
+        .freq-band.active .freq-level {
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #96ceb4, #45b7d1, #4ecdc4);
+            box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+        }
+        
+        /* Enhanced Dropdown Styles */
+        .form-select, select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            padding: 12px 40px 12px 16px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background-image: 
+                linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.6) 50%),
+                linear-gradient(135deg, rgba(255, 255, 255, 0.6) 50%, transparent 50%);
+            background-position: 
+                calc(100% - 20px) calc(1em + 2px),
+                calc(100% - 15px) calc(1em + 2px);
+            background-size: 5px 5px, 5px 5px;
+            background-repeat: no-repeat;
+        }
+        
+        .form-select:hover, select:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--accent-blue);
+            box-shadow: 0 4px 12px rgba(104, 141, 177, 0.2);
+        }
+        
+        .form-select:focus, select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(104, 141, 177, 0.3);
+        }
+        
+        /* Dropdown wrapper for custom arrow */
+        .select-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            font-size: 0.8rem;
+            z-index: 1;
+        }
+        
+        .select-wrapper:hover::after {
+            color: var(--accent-blue);
+        }
+        
+        /* Option styles (limited browser support but helps where available) */
+        .form-select option, select option {
+            background: rgba(45, 52, 64, 0.95);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border: none;
+        }
+        
+        .form-select option:hover, select option:hover {
+            background: rgba(104, 141, 177, 0.8);
+        }
+        
+        .form-select option:checked, select option:checked {
+            background: var(--accent-blue);
+            color: white;
+        }
+        
+        /* Strobe speed select specific styling */
+        .strobe-speed-select {
+            min-width: 120px;
+            font-size: 0.85rem;
+            padding: 8px 32px 8px 12px;
+        }
+        
+        /* Dark theme enhancements for dropdowns */
+        @media (prefers-color-scheme: dark) {
+            .form-select, select {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.15);
+            }
+            
+            .form-select:hover, select:hover {
+                background: rgba(255, 255, 255, 0.12);
+            }
+            
+            .form-select:focus, select:focus {
+                background: rgba(255, 255, 255, 0.15);
+            }
+        }
+        
+        /* Mobile optimizations for dropdowns */
+        @media (max-width: 768px) {
+            .form-select, select {
+                font-size: 16px; /* Prevent zoom on iOS */
+                padding: 14px 40px 14px 16px;
+            }
+        }
+        
         .modal-header {
             padding: 20px 24px 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -2794,6 +2976,15 @@
                 <div class="effect-controls">
                     <button class="btn" onclick="globalControl('all-on')">Alles An</button>
                     <button class="btn danger" onclick="globalControl('all-off')">Alles Aus</button>
+                    <button class="btn" id="disco-mode-btn" onclick="toggleDiscoMode()">
+                        <span id="disco-icon">🕺</span> Disko-Modus
+                    </button>
+                </div>
+                
+                <!-- Frequency Display for Disco Mode -->
+                <div id="frequency-display" style="display: none; margin-top: 16px;">
+                    <h4>🎵 Frequenz-Analyse</h4>
+                    <div class="freq-bands"></div>
                 </div>
                 
                 <!-- Globaler Helligkeitsregler -->
@@ -2804,7 +2995,7 @@
                             <span class="slider-value" id="global-brightness-value">100%</span>
                         </div>
                         <input type="range" class="slider" id="global-brightness-slider" min="1" max="254" value="254" 
-                               oninput="document.getElementById('global-brightness-value').textContent = Math.round(this.value / 254 * 100) + '%'; globalBrightnessChange(this.value)">
+                               oninput="document.getElementById('global-brightness-value').textContent = Math.round(this.value / 254 * 100) + '%'; debouncedGlobalBrightnessChange(this.value)">
                     </div>
                 </div>
 
@@ -2868,18 +3059,22 @@
                 <div id="audio-sync-container">
                     <div class="control-group">
                         <h4>Audio-Gerät</h4>
-                        <select id="audio-device-select" class="form-select">
-                            <option value="">Audio-Geräte laden...</option>
-                        </select>
+                        <div class="select-wrapper">
+                            <select id="audio-device-select" class="form-select">
+                                <option value="">Audio-Geräte laden...</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="control-group">
                         <h4>Sync-Modus</h4>
-                        <select id="sync-mode-select" class="form-select">
-                            <option value="frequency">Frequenz-basiert</option>
-                            <option value="beat">Beat-Synchronisation</option>
-                            <option value="spectrum">Spektrum-Visualizer</option>
-                        </select>
+                        <div class="select-wrapper">
+                            <select id="sync-mode-select" class="form-select">
+                                <option value="frequency">Frequenz-basiert</option>
+                                <option value="beat">Beat-Synchronisation</option>
+                                <option value="spectrum">Spektrum-Visualizer</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="control-group">
@@ -2978,11 +3173,13 @@
                     <div class="control-group">
                         <h4>Ziel auswählen</h4>
                         <div class="input-group">
-                            <select id="effect-target-type" class="form-select">
-                                <option value="all">Alle Lichter</option>
-                                <option value="light">Einzelnes Licht</option>
-                                <option value="group">Gruppe</option>
-                            </select>
+                            <div class="select-wrapper">
+                                <select id="effect-target-type" class="form-select">
+                                    <option value="all">Alle Lichter</option>
+                                    <option value="light">Einzelnes Licht</option>
+                                    <option value="group">Gruppe</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="input-group">
                             <input type="text" id="effect-target-id" class="form-input" placeholder="ID (falls nicht 'Alle')">
@@ -3038,11 +3235,16 @@
                         </div>
                         <div class="input-group">
                             <label class="form-label">Modus:</label>
-                            <select id="strobe-mode" class="form-select">
-                                <option value="single">Einzelfarbe</option>
-                                <option value="rainbow">Regenbogen</option>
-                                <option value="multi">Mehrfarbig</option>
-                            </select>
+                            <div class="select-wrapper">
+                                <select id="strobe-mode" class="form-select">
+                                    <option value="classic">Classic Strobe</option>
+                                    <option value="double_flash">Double Flash</option>
+                                    <option value="random_chaos">Random Chaos</option>
+                                    <option value="color_strobe">Color Strobe</option>
+                                    <option value="pulse_wave">Pulse Wave</option>
+                                    <option value="lightning_strike">Lightning Strike</option>
+                                </select>
+                            </div>
                         </div>
                         <button class="btn warning" onclick="startAdvancedStrobe()">Strobo Starten</button>
                     </div>
@@ -3066,10 +3268,12 @@
                     <div class="card-title">Timer erstellen</div>
                     <div class="input-group">
                         <label class="form-label">Ziel wählen:</label>
-                        <select id="timer-target-type" class="form-select">
-                            <option value="light">Einzelnes Licht</option>
-                            <option value="group">Gruppe</option>
-                        </select>
+                        <div class="select-wrapper">
+                            <select id="timer-target-type" class="form-select">
+                                <option value="light">Einzelnes Licht</option>
+                                <option value="group">Gruppe</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="input-group">
                         <label class="form-label">ID:</label>
@@ -3081,10 +3285,12 @@
                     </div>
                     <div class="input-group">
                         <label class="form-label">Aktion:</label>
-                        <select id="timer-action" class="form-select">
-                            <option value="off">Ausschalten</option>
-                            <option value="on">Einschalten</option>
-                        </select>
+                        <div class="select-wrapper">
+                            <select id="timer-action" class="form-select">
+                                <option value="off">Ausschalten</option>
+                                <option value="on">Einschalten</option>
+                            </select>
+                        </div>
                     </div>
                     <button class="btn" onclick="createTimer()">Timer Erstellen</button>
                 </div>
@@ -3113,12 +3319,14 @@
                         <button class="btn" onclick="toggleDebugAutoScroll()">Auto-Scroll: <span id="autoscroll-status">AN</span></button>
                         <label class="form-label">
                             Max Entries: 
-                            <select id="max-log-entries" class="form-select" onchange="updateMaxLogEntries()">
-                                <option value="50">50</option>
-                                <option value="100" selected>100</option>
-                                <option value="200">200</option>
-                                <option value="500">500</option>
-                            </select>
+                            <div class="select-wrapper">
+                                <select id="max-log-entries" class="form-select" onchange="updateMaxLogEntries()">
+                                    <option value="50">50</option>
+                                    <option value="100" selected>100</option>
+                                    <option value="200">200</option>
+                                    <option value="500">500</option>
+                                </select>
+                            </div>
                         </label>
                     </div>
                     
@@ -3253,11 +3461,13 @@
                     </div>
                     <div>
                         <label class="form-label">Zeitraum:</label>
-                        <select id="individual-lamp-timeframe" class="form-select" onchange="updateIndividualLampChart()">
-                            <option value="today">Heute</option>
-                            <option value="week">Diese Woche</option>
-                            <option value="month">Dieser Monat</option>
-                        </select>
+                        <div class="select-wrapper">
+                            <select id="individual-lamp-timeframe" class="form-select" onchange="updateIndividualLampChart()">
+                                <option value="today">Heute</option>
+                                <option value="week">Diese Woche</option>
+                                <option value="month">Dieser Monat</option>
+                            </select>
+                        </div>
                         <button class="btn" style="margin-top: var(--spacing-2); width: 100%;" onclick="updateIndividualLampChart()">Chart aktualisieren</button>
                     </div>
                 </div>
@@ -3579,17 +3789,21 @@
                             </div>
                             <div class="form-field">
                                 <label for="button-group">Gruppe:</label>
-                                <select id="button-group">
-                                    <option value="">-- Gruppe wählen --</option>
-                                </select>
+                                <div class="select-wrapper">
+                                    <select id="button-group">
+                                        <option value="">-- Gruppe wählen --</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="form-field">
                                 <label for="button-action">Aktion:</label>
-                                <select id="button-action">
-                                    <option value="toggle">Toggle (Ein/Aus)</option>
-                                    <option value="on">Immer Ein</option>
-                                    <option value="off">Immer Aus</option>
-                                </select>
+                                <div class="select-wrapper">
+                                    <select id="button-action">
+                                        <option value="toggle">Toggle (Ein/Aus)</option>
+                                        <option value="on">Immer Ein</option>
+                                        <option value="off">Immer Aus</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="form-field">
                                 <label for="button-name">Name (optional):</label>
@@ -3709,6 +3923,7 @@
                 this.activeStrobes = {}; // Verfolge aktive Strobe-Effekte
                 this.lastSelectedColors = {}; // Verfolge letzte Farbauswahl pro Licht
                 this.selectedStrobeSpeeds = {}; // Verfolge gewählte Strobo-Geschwindigkeiten
+                this.selectedStrobeModes = {}; // Verfolge gewählte Strobo-Modi
                 this.init();
             }
 
@@ -4023,7 +4238,7 @@
                                 <span class="slider-value">${brightness}%</span>
                             </div>
                             <input type="range" class="slider" min="1" max="254" value="${state.bri || 254}" 
-                                   oninput="this.nextElementSibling.textContent = Math.round(this.value / 254 * 100) + '%'; hue.setBrightness('${id}', this.value, '${type}')"
+                                   oninput="this.nextElementSibling.textContent = Math.round(this.value / 254 * 100) + '%'; hue.updateLightPreview('${id}', this.value, '${type}'); hue.debouncedSetBrightness('${id}', this.value, '${type}')"
                                    ${!isReachable ? 'disabled' : ''}>
                             <div style="display: none;"></div>
                         </div>
@@ -4052,13 +4267,17 @@
                     <div class="control-group">
                         <h4>Schnellaktionen</h4>
                         <div class="strobe-speed-control" style="margin-bottom: 8px;">
-                            <label for="strobe-speed-${type}-${id}" style="font-size: 12px; color: rgba(255, 255, 255, 0.8);">Geschwindigkeit:</label>
-                            <select id="strobe-speed-${type}-${id}" class="strobe-speed-select" onchange="hue.saveStrobeSpeed('${type}', '${id}', this.value)">
-                                <option value="fast" ${this.selectedStrobeSpeeds[`${type}_${id}`] === 'fast' || !this.selectedStrobeSpeeds[`${type}_${id}`] ? 'selected' : ''}>Schnell (3-8 Hz)</option>
-                                <option value="medium" ${this.selectedStrobeSpeeds[`${type}_${id}`] === 'medium' ? 'selected' : ''}>Mittel (1-3 Hz)</option>
-                                <option value="slow" ${this.selectedStrobeSpeeds[`${type}_${id}`] === 'slow' ? 'selected' : ''}>Langsam (0.5-1 Hz)</option>
-                                <option value="variable" ${this.selectedStrobeSpeeds[`${type}_${id}`] === 'variable' ? 'selected' : ''}>Variabel (0.5-8 Hz)</option>
-                            </select>
+                            <label for="strobe-mode-${type}-${id}" style="font-size: 12px; color: rgba(255, 255, 255, 0.8);">Strobo-Modus:</label>
+                            <div class="select-wrapper">
+                                <select id="strobe-mode-${type}-${id}" class="form-select" onchange="hue.saveStrobeMode('${type}', '${id}', this.value)">
+                                    <option value="classic" ${this.selectedStrobeModes[`${type}_${id}`] === 'classic' || !this.selectedStrobeModes[`${type}_${id}`] ? 'selected' : ''}>Classic Strobe</option>
+                                    <option value="double_flash" ${this.selectedStrobeModes[`${type}_${id}`] === 'double_flash' ? 'selected' : ''}>Double Flash</option>
+                                    <option value="random_chaos" ${this.selectedStrobeModes[`${type}_${id}`] === 'random_chaos' ? 'selected' : ''}>Random Chaos</option>
+                                    <option value="color_strobe" ${this.selectedStrobeModes[`${type}_${id}`] === 'color_strobe' ? 'selected' : ''}>Color Strobe</option>
+                                    <option value="pulse_wave" ${this.selectedStrobeModes[`${type}_${id}`] === 'pulse_wave' ? 'selected' : ''}>Pulse Wave</option>
+                                    <option value="lightning_strike" ${this.selectedStrobeModes[`${type}_${id}`] === 'lightning_strike' ? 'selected' : ''}>Lightning Strike</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="effect-controls">
                             <button class="btn warning" onclick="hue.toggleStrobe('${id}', '${type}')" ${!isReachable ? 'disabled' : ''} id="strobe-btn-${type}-${id}">⚡ Strobo</button>
@@ -4105,12 +4324,45 @@
                         await fetch(`${this.baseUrl}${endpoint}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ bri: parseInt(brightness), transitiontime: 2 })
+                            body: JSON.stringify({ bri: parseInt(brightness), transitiontime: 1 }) // Faster transition
                         });
                     } catch (error) {
                         this.showMessage('Fehler beim Dimmen: ' + error.message, 'error');
                     }
-                }, 250); // 250ms Debounce für Slider
+                }, 150); // Reduced debounce time for faster response
+            }
+            
+            // New method for debounced brightness setting with faster response
+            debouncedSetBrightness(id, brightness, type) {
+                this.setBrightness(id, brightness, type);
+            }
+            
+            // New method for immediate visual preview
+            updateLightPreview(id, brightness, type) {
+                // Update the card appearance immediately for better UX
+                const cards = document.querySelectorAll('.card');
+                cards.forEach(card => {
+                    const button = card.querySelector(`button[onclick*="${id}"]`);
+                    if (button) {
+                        const brightnessPercent = Math.round(brightness / 254 * 100);
+                        
+                        // Update visual brightness by changing opacity/glow
+                        if (brightnessPercent > 10) {
+                            card.style.opacity = Math.max(0.7, brightness / 254);
+                            if (card.style.boxShadow && card.style.boxShadow !== 'none') {
+                                // Enhance glow based on brightness
+                                const glowIntensity = brightness / 254;
+                                const currentBoxShadow = card.style.boxShadow;
+                                // Update the alpha values in the box shadow
+                                card.style.boxShadow = currentBoxShadow.replace(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/g, 
+                                    (match, r, g, b, alpha) => `rgba(${r}, ${g}, ${b}, ${glowIntensity * 0.4})`
+                                );
+                            }
+                        } else {
+                            card.style.opacity = 0.5;
+                        }
+                    }
+                });
             }
 
             setColor(id, hexColor, type) {
@@ -4130,6 +4382,9 @@
                     }, 300);
                 }
                 
+                // Immediate visual preview
+                this.updateColorPreview(id, hexColor, type);
+                
                 debouncer.debounce(key, async () => {
                     const endpoint = type === 'light' ? `/api/lights/${id}/state` : `/api/groups/${id}/action`;
 
@@ -4137,12 +4392,32 @@
                         await fetch(`${this.baseUrl}${endpoint}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ hue, sat, transitiontime: 3 })
+                            body: JSON.stringify({ hue, sat, transitiontime: 1 }) // Faster color transition
                         });
                     } catch (error) {
                         this.showMessage('Fehler beim Färben: ' + error.message, 'error');
                     }
-                }, 200); // 200ms Debounce für Farben
+                }, 100); // Faster debounce for colors
+            }
+            
+            // New method for immediate color preview
+            updateColorPreview(id, hexColor, type) {
+                const cards = document.querySelectorAll('.card');
+                cards.forEach(card => {
+                    const button = card.querySelector(`button[onclick*="${id}"]`);
+                    if (button) {
+                        // Convert hex to RGB for glow effect
+                        const [r, g, b] = [
+                            parseInt(hexColor.slice(1, 3), 16),
+                            parseInt(hexColor.slice(3, 5), 16),
+                            parseInt(hexColor.slice(5, 7), 16)
+                        ];
+                        
+                        // Update card glow immediately
+                        card.style.boxShadow = `0 0 20px rgba(${r}, ${g}, ${b}, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15)`;
+                        card.style.borderColor = `rgba(${r}, ${g}, ${b}, 0.5)`;
+                    }
+                });
             }
 
             async activateScene(sceneId, scene) {
@@ -4204,15 +4479,15 @@
                     // Strobo aktivieren
                     try {
                         const selectedColor = this.getSelectedColor(strobeKey);
-                        const speed = this.selectedStrobeSpeeds[strobeKey] || 'fast';
-                        const frequency = this.getRandomFrequency(speed);
+                        const mode = this.selectedStrobeModes[strobeKey] || 'classic';
+                        const frequency = 2.0; // Standard frequency for new modes
                         
                         const strobeData = {
                             target_type: type,
                             target_id: id,
                             duration: 0, // Permanent
                             frequency: frequency,
-                            mode: 'single',
+                            mode: mode,
                             brightness: 254,
                             hue: selectedColor.hue,
                             sat: selectedColor.sat,
@@ -4229,7 +4504,8 @@
                             id: id,
                             type: type,
                             color: selectedColor,
-                            frequency: frequency
+                            frequency: frequency,
+                            mode: mode
                         };
                         
                         if (button) {
@@ -4241,7 +4517,8 @@
                             card.classList.add('strobe-active');
                         }
                         
-                        this.showMessage(`Strobo aktiviert (${frequency.toFixed(1)}Hz)`, 'success');
+                        const modeDisplay = mode.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        this.showMessage(`${modeDisplay}-Strobo aktiviert (${frequency.toFixed(1)}Hz)`, 'success');
                         setTimeout(() => this.updateActiveEffects(), 1000);
                     } catch (error) {
                         this.showMessage('Fehler beim Aktivieren: ' + error.message, 'error');
@@ -4299,6 +4576,11 @@
                 this.selectedStrobeSpeeds[lightKey] = speed;
             }
 
+            saveStrobeMode(type, id, mode) {
+                const lightKey = `${type}_${id}`;
+                this.selectedStrobeModes[lightKey] = mode;
+            }
+
             async restartStrobeWithNewColor(lightKey, type, id) {
                 const strobeData = this.activeStrobes[lightKey];
                 if (!strobeData) return;
@@ -4313,7 +4595,7 @@
                         target_id: id,
                         duration: 0, // Permanent
                         frequency: strobeData.frequency,
-                        mode: 'single',
+                        mode: strobeData.mode || 'classic',
                         brightness: 254,
                         hue: strobeData.color.hue,
                         sat: strobeData.color.sat,
@@ -4326,7 +4608,8 @@
                         body: JSON.stringify(newStrobeData)
                     });
                     
-                    this.showMessage(`Strobo-Farbe aktualisiert (${strobeData.frequency.toFixed(1)}Hz)`, 'info');
+                    const modeDisplay = (strobeData.mode || 'classic').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    this.showMessage(`${modeDisplay}-Strobo-Farbe aktualisiert (${strobeData.frequency.toFixed(1)}Hz)`, 'info');
                 } catch (error) {
                     this.showMessage('Fehler beim Farbwechsel: ' + error.message, 'error');
                 }
@@ -5675,10 +5958,10 @@
                     this.updateActiveTimers();
                 }, 60000);
 
-                // Update light states every 5 seconds for all tabs
+                // Update light states every 1 second for real-time feedback
                 this.updateInterval = setInterval(() => {
                     this.refreshCurrentTab();
-                }, 5000);
+                }, 1000);
                 
                 // Update power stats every 30 seconds
                 this.powerUpdateInterval = setInterval(() => {
@@ -6092,7 +6375,8 @@
                     
                     await Promise.all(promises);
                     const durationText = duration == 0 ? '∞ UNBEGRENZT' : `${duration}s`;
-                    hue.showMessage(`${mode.charAt(0).toUpperCase() + mode.slice(1)}-Strobo gestartet (${frequency}Hz) - ${durationText} - ${currentNormalStroboColor.name} - ${onLights.length} Lichter`, 'success');
+                    const modeDisplay = mode.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    hue.showMessage(`${modeDisplay}-Strobo gestartet (${frequency}Hz) - ${durationText} - ${currentNormalStroboColor.name} - ${onLights.length} Lichter`, 'success');
                 } else {
                     // Einzelnes Licht oder Gruppe - normale API-Nutzung
                     await fetch(`${hue.baseUrl}/api/effects/strobe/advanced`, {
@@ -6110,7 +6394,8 @@
                         })
                     });
                     const durationText = duration == 0 ? '∞ UNBEGRENZT' : `${duration}s`;
-                    hue.showMessage(`${mode.charAt(0).toUpperCase() + mode.slice(1)}-Strobo gestartet (${frequency}Hz) - ${durationText} - ${currentNormalStroboColor.name}`, 'success');
+                    const modeDisplay = mode.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    hue.showMessage(`${modeDisplay}-Strobo gestartet (${frequency}Hz) - ${durationText} - ${currentNormalStroboColor.name}`, 'success');
                 }
                 
                 setTimeout(() => hue.updateActiveEffects(), 1000);
@@ -6206,12 +6491,219 @@
             }
         }
 
+        // === DISCO MODE FUNCTIONS ===
+        let discoModeActive = false;
+        
+        // Check disco mode status on page load
+        async function initDiscoModeStatus() {
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/disco-mode/status`);
+                const status = await response.json();
+                
+                if (status.running) {
+                    discoModeActive = true;
+                    const btn = document.getElementById('disco-mode-btn');
+                    const icon = document.getElementById('disco-icon');
+                    
+                    btn.classList.add('btn-active');
+                    btn.style.background = 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57)';
+                    btn.style.backgroundSize = '400% 400%';
+                    btn.style.animation = 'disco-gradient 2s ease infinite';
+                    icon.textContent = '🎵';
+                    btn.innerHTML = `<span id="disco-icon">🎵</span> Disko AUS`;
+                    
+                    // Show frequency display
+                    document.getElementById('frequency-display').style.display = 'block';
+                    
+                    // Start status checking
+                    checkDiscoModeStatus();
+                }
+            } catch (error) {
+                console.log('Failed to check disco mode status:', error);
+            }
+        }
+        
+        async function toggleDiscoMode() {
+            const btn = document.getElementById('disco-mode-btn');
+            const icon = document.getElementById('disco-icon');
+            
+            try {
+                // First check current status to be sure
+                const statusResponse = await fetch(`${hue.baseUrl}/api/disco-mode/status`);
+                const status = await statusResponse.json();
+                
+                if (!status.running && !discoModeActive) {
+                    // Start Disco Mode
+                    const response = await fetch(`${hue.baseUrl}/api/disco-mode/start`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.status === 'success') {
+                        discoModeActive = true;
+                        btn.classList.add('btn-active');
+                        btn.style.background = 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57)';
+                        btn.style.backgroundSize = '400% 400%';
+                        btn.style.animation = 'disco-gradient 2s ease infinite';
+                        btn.innerHTML = `<span id="disco-icon">🎵</span> Disko AUS`;
+                        hue.showMessage('🕺 Disko-Modus aktiviert! Mach Lärm!', 'success');
+                        
+                        // Show frequency display
+                        document.getElementById('frequency-display').style.display = 'block';
+                        
+                        // Start status checking
+                        checkDiscoModeStatus();
+                    } else if (result.message && result.message.includes('already running')) {
+                        // Handle "already running" case - just update UI
+                        discoModeActive = true;
+                        btn.classList.add('btn-active');
+                        btn.style.background = 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57)';
+                        btn.style.backgroundSize = '400% 400%';
+                        btn.style.animation = 'disco-gradient 2s ease infinite';
+                        btn.innerHTML = `<span id="disco-icon">🎵</span> Disko AUS`;
+                        hue.showMessage('🕺 Disko-Modus bereits aktiv!', 'info');
+                        
+                        // Show frequency display
+                        document.getElementById('frequency-display').style.display = 'block';
+                        
+                        checkDiscoModeStatus();
+                    } else {
+                        hue.showMessage('Fehler beim Starten des Disko-Modus: ' + result.message, 'error');
+                    }
+                } else {
+                    // Stop Disco Mode (running or UI thinks it's active)
+                    const response = await fetch(`${hue.baseUrl}/api/disco-mode/stop`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        discoModeActive = false;
+                        btn.classList.remove('btn-active');
+                        btn.style.background = '';
+                        btn.style.animation = '';
+                        btn.innerHTML = `<span id="disco-icon">🕺</span> Disko-Modus`;
+                        
+                        // Hide frequency display
+                        document.getElementById('frequency-display').style.display = 'none';
+                        
+                        hue.showMessage('🔇 Disko-Modus deaktiviert', 'info');
+                    } else {
+                        hue.showMessage('Fehler beim Stoppen des Disko-Modus: ' + result.message, 'error');
+                    }
+                }
+            } catch (error) {
+                hue.showMessage('Fehler bei Disko-Modus: ' + error.message, 'error');
+            }
+        }
+        
+        async function checkDiscoModeStatus() {
+            if (!discoModeActive) return;
+            
+            try {
+                const response = await fetch(`${hue.baseUrl}/api/disco-mode/status`);
+                const status = await response.json();
+                
+                if (status.running) {
+                    // Update visual indicators based on volume and frequency
+                    const volumePercent = Math.min(status.current_volume / 10000, 1.0);
+                    const btn = document.getElementById('disco-mode-btn');
+                    
+                    // Visual feedback based on volume
+                    if (volumePercent > 0.1) {
+                        btn.style.transform = `scale(${1 + volumePercent * 0.1})`;
+                        setTimeout(() => {
+                            btn.style.transform = 'scale(1)';
+                        }, 100);
+                    }
+                    
+                    // Update button color based on dominant frequency
+                    if (status.dominant_frequency && status.dominant_frequency.percentage > 40) {
+                        const dominantBand = status.dominant_frequency.band;
+                        const bandColors = {
+                            'bass': '#ff0000',      // Red
+                            'mid_low': '#ff8000',   // Orange  
+                            'mid': '#ffff00',       // Yellow
+                            'mid_high': '#0066ff',  // Blue
+                            'treble': '#8000ff'     // Purple
+                        };
+                        
+                        const color = bandColors[dominantBand] || '#ff6b6b';
+                        btn.style.background = `linear-gradient(45deg, ${color}, #4ecdc4, #45b7d1, #96ceb4, #feca57)`;
+                    }
+                    
+                    // Update frequency display if visible
+                    updateFrequencyDisplay(status.frequency_bands, status.dominant_frequency);
+                    
+                    // Continue checking
+                    setTimeout(checkDiscoModeStatus, 300); // Faster updates for frequency visualization
+                } else {
+                    // Disco mode stopped externally
+                    discoModeActive = false;
+                    const btn = document.getElementById('disco-mode-btn');
+                    btn.classList.remove('btn-active');
+                    btn.style.background = '';
+                    btn.style.animation = '';
+                    btn.innerHTML = `<span id="disco-icon">🕺</span> Disko-Modus`;
+                    
+                    // Hide frequency display
+                    document.getElementById('frequency-display').style.display = 'none';
+                }
+            } catch (error) {
+                console.log('Disco mode status check failed:', error);
+            }
+        }
+        
+        function updateFrequencyDisplay(bands, dominant) {
+            // Create or update frequency display (will be added to UI later)
+            let freqDisplay = document.getElementById('frequency-display');
+            if (freqDisplay && bands) {
+                const maxEnergy = Math.max(...Object.values(bands));
+                if (maxEnergy > 0) {
+                    const bandLabels = {
+                        'bass': 'Bass',
+                        'mid_low': 'Low-Mid', 
+                        'mid': 'Mid',
+                        'mid_high': 'High-Mid',
+                        'treble': 'Treble'
+                    };
+                    
+                    let html = '<div class="freq-bands">';
+                    for (const [band, level] of Object.entries(bands)) {
+                        const percentage = (level / maxEnergy) * 100;
+                        const isActive = dominant && dominant.band === band;
+                        html += `<div class="freq-band ${isActive ? 'active' : ''}">
+                            <div class="freq-label">${bandLabels[band]}</div>
+                            <div class="freq-bar">
+                                <div class="freq-level" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>`;
+                    }
+                    html += '</div>';
+                    freqDisplay.innerHTML = html;
+                }
+            }
+        }
+
+        // Debounced version for better responsiveness
+        let globalBrightnessTimeout;
+        function debouncedGlobalBrightnessChange(brightness) {
+            clearTimeout(globalBrightnessTimeout);
+            globalBrightnessTimeout = setTimeout(() => {
+                globalBrightnessChange(brightness);
+            }, 100); // Fast response for global controls
+        }
+        
         async function globalBrightnessChange(brightness) {
             try {
                 await fetch(`${hue.baseUrl}/api/global/all-lights`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ bri: parseInt(brightness), transitiontime: 4 })
+                    body: JSON.stringify({ bri: parseInt(brightness), transitiontime: 1 }) // Faster transition
                 });
                 // Keine störende Nachricht
             } catch (error) {
@@ -6996,6 +7488,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             setNormalStroboColorHex('#ff0000');  // Red as default
             initializeCardStates();  // Initialize collapsible cards
+            initDiscoModeStatus();  // Check if disco mode is already running
         });
 
         async function startCustomUltraStrobo() {
