@@ -194,6 +194,155 @@
                 background-color: rgba(104, 141, 177, 0.1);
             }
 
+            /* Schnellzugriff Sektion */
+            .quick-access-section {
+                background: var(--card-background);
+                backdrop-filter: blur(20px);
+                border-radius: var(--radius);
+                margin-bottom: var(--spacing-6);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                overflow: hidden;
+            }
+
+            .quick-access-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: var(--spacing-4) var(--spacing-6);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                cursor: pointer;
+            }
+
+            .quick-access-header h3 {
+                margin: 0;
+                color: var(--text-primary);
+                font-size: 1.1rem;
+            }
+
+            .toggle-quick-access {
+                background: none;
+                border: none;
+                color: var(--text-secondary);
+                font-size: 1.2rem;
+                cursor: pointer;
+                transition: transform 0.3s ease;
+                padding: var(--spacing-2);
+            }
+
+            .toggle-quick-access:hover {
+                color: var(--text-primary);
+            }
+
+            .quick-access-content {
+                padding: var(--spacing-6);
+                transition: all 0.3s ease;
+                overflow: hidden;
+            }
+
+            .quick-access-content.collapsed {
+                padding: 0;
+                max-height: 0;
+            }
+
+            .quick-actions-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: var(--spacing-4);
+            }
+
+            .quick-action-card {
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: var(--radius);
+                padding: var(--spacing-4);
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            }
+
+            .quick-action-card:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: var(--accent-blue);
+                transform: translateY(-2px);
+            }
+
+            .quick-action-icon {
+                font-size: 1.8rem;
+                margin-bottom: var(--spacing-2);
+            }
+
+            .quick-action-label {
+                color: var(--text-primary);
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            /* Toast Notification System */
+            .toast {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                min-width: 280px;
+                max-width: 400px;
+                background: var(--card-background);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: var(--radius);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                transform: translateX(100%);
+                opacity: 0;
+                transition: all 0.3s ease;
+            }
+
+            .toast.show {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            .toast-content {
+                display: flex;
+                align-items: center;
+                padding: var(--spacing-4);
+                gap: var(--spacing-3);
+            }
+
+            .toast-icon {
+                font-size: 1.25rem;
+                flex-shrink: 0;
+            }
+
+            .toast-message {
+                color: var(--text-primary);
+                font-size: 0.9rem;
+                font-weight: 500;
+            }
+
+            .toast-success {
+                border-left: 4px solid var(--accent-green);
+            }
+
+            .toast-error {
+                border-left: 4px solid var(--accent-red);
+            }
+
+            .toast-info {
+                border-left: 4px solid var(--accent-blue);
+            }
+
+            /* Globaler Schnellzugriff (unten) */
+            .global-quick-access {
+                background: var(--card-background);
+                backdrop-filter: blur(20px);
+                border-radius: var(--radius);
+                margin: var(--spacing-6) 0 var(--spacing-4) 0;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                overflow: hidden;
+                position: relative;
+                z-index: 100;
+            }
+
             .bottom-nav {
                 display: none;
             }
@@ -246,6 +395,195 @@
             font-weight: 500;
             margin-bottom: var(--spacing-3);
             color: var(--accent-blue);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card-background);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: var(--spacing-6);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-3);
+            padding: var(--spacing-6);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* System Info Styles */
+        .system-info-accordion {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--card-background);
+        }
+
+        .info-section {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-section:last-child {
+            border-bottom: none;
+        }
+
+        .info-header {
+            padding: var(--spacing-4);
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+            user-select: none;
+        }
+
+        .info-header:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .info-content {
+            padding: var(--spacing-4);
+            display: none;
+            background: var(--card-background);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-3);
+        }
+
+        .info-item {
+            padding: var(--spacing-2);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+        }
+
+        .device-item {
+            margin-bottom: var(--spacing-3);
+            padding: var(--spacing-3);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius);
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .device-item.unreachable {
+            border-left-color: var(--accent-red);
+            opacity: 0.7;
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-2);
+            flex-wrap: wrap;
+        }
+
+        .device-id {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .device-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-2);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: var(--radius);
+            font-weight: bold;
+        }
+
+        .status-badge.reachable {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .status-badge.unreachable {
+            background: rgba(244, 67, 54, 0.2);
+            color: #F44336;
+        }
+
+        .status-badge.active {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+
+        .status-badge.inactive {
+            background: rgba(158, 158, 158, 0.2);
+            color: #9E9E9E;
+        }
+
+        .toggle-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
         }
 
         /* Buttons */
@@ -2640,6 +2978,96 @@
                 font-size: 0.875rem;
                 padding: var(--spacing-2) var(--spacing-3);
             }
+
+            /* Mobile Schnellzugriff */
+            .quick-access-section {
+                margin-bottom: var(--spacing-4);
+            }
+
+            .quick-access-header {
+                padding: var(--spacing-3) var(--spacing-4);
+            }
+
+            .quick-access-content {
+                padding: var(--spacing-4);
+            }
+
+            .quick-actions-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: var(--spacing-3);
+            }
+
+            .quick-action-card {
+                padding: var(--spacing-3);
+            }
+
+            .quick-action-icon {
+                font-size: 1.5rem;
+                margin-bottom: var(--spacing-1);
+            }
+
+            .quick-action-label {
+                font-size: 0.8rem;
+            }
+
+            /* Mobile Toast */
+            .toast {
+                right: 10px;
+                left: 10px;
+                top: 10px;
+                max-width: none;
+                min-width: auto;
+                transform: translateY(-100%);
+            }
+
+            .toast.show {
+                transform: translateY(0);
+            }
+
+            /* Mobile Globaler Schnellzugriff */
+            .global-quick-access {
+                margin: var(--spacing-4) 0;
+            }
+
+            /* PIR Motion Sensor Styles */
+            .pir-info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: var(--spacing-3);
+                margin: var(--spacing-4) 0;
+            }
+
+            .info-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: var(--spacing-3);
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: var(--radius);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .info-item strong {
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+            }
+
+            .info-item span {
+                color: var(--text-primary);
+                font-weight: 500;
+            }
+
+            .pir-controls {
+                display: flex;
+                gap: var(--spacing-3);
+                margin-top: var(--spacing-4);
+                flex-wrap: wrap;
+            }
+
+            .pir-controls .action-btn {
+                flex: 1;
+                min-width: 150px;
+            }
             
             .quick-scenes {
                 grid-template-columns: repeat(3, 1fr);
@@ -2931,41 +3359,6 @@
 
         <div id="messages"></div>
 
-        <!-- Quick Scene Access -->
-        <div class="card collapsible-card">
-            <div class="card-title collapsible-header" onclick="toggleCard('quickaccess')">
-                ⚡ Schnellzugriff
-                <span class="collapse-icon" id="quickaccess-icon">▼</span>
-            </div>
-            <div class="collapsible-content" id="quickaccess-content">
-                <div class="quick-scenes">
-                    <div class="quick-scene" onclick="activateQuickScene('relax')">
-                        <span class="icon">🛋️</span>
-                        <div class="name">Entspannung</div>
-                    </div>
-                    <div class="quick-scene" onclick="activateQuickScene('work')">
-                        <span class="icon">💼</span>
-                        <div class="name">Arbeit</div>
-                    </div>
-                    <div class="quick-scene" onclick="activateQuickScene('party')">
-                        <span class="icon">🎉</span>
-                        <div class="name">Party</div>
-                    </div>
-                    <div class="quick-scene" onclick="activateQuickScene('romantic')">
-                        <span class="icon">💕</span>
-                        <div class="name">Romantik</div>
-                    </div>
-                    <div class="quick-scene" onclick="activateQuickScene('reading')">
-                        <span class="icon">📖</span>
-                        <div class="name">Lesen</div>
-                    </div>
-                    <div class="quick-scene" onclick="activateQuickScene('gaming')">
-                        <span class="icon">🎮</span>
-                        <div class="name">Gaming</div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="global-controls collapsible-card">
             <div class="collapsible-header" onclick="toggleCard('globalcontrols')">
@@ -3031,6 +3424,7 @@
             <button class="tab" onclick="switchTab('debug')">Debug</button>
             <button class="tab" onclick="switchTab('power')">Stromverbrauch</button>
         </div>
+
 
         <div id="lights-tab" class="tab-content active">
             <div id="lights-container" class="controls-grid"></div>
@@ -3312,6 +3706,15 @@
             <div class="card">
                 <div class="card-title">🐛 Live Debug Monitor</div>
                 
+                <div class="control-group">
+                    <h4>System Informationen</h4>
+                    <div class="debug-controls">
+                        <button class="btn" onclick="showSystemInfo()" style="background: var(--accent-green);">🔍 System-Info anzeigen</button>
+                        <button class="btn" onclick="refreshSystemInfo()">🔄 Aktualisieren</button>
+                    </div>
+                    <div id="system-info-container" style="display: none; margin-top: var(--spacing-4);"></div>
+                </div>
+
                 <div class="control-group">
                     <h4>Hue Bridge Kommunikation</h4>
                     <div class="debug-controls">
@@ -3798,11 +4201,37 @@
                             <div class="form-field">
                                 <label for="button-action">Aktion:</label>
                                 <div class="select-wrapper">
-                                    <select id="button-action">
+                                    <select id="button-action" onchange="toggleStroboOptions()">
                                         <option value="toggle">Toggle (Ein/Aus)</option>
                                         <option value="on">Immer Ein</option>
                                         <option value="off">Immer Aus</option>
+                                        <option value="strobo_push">Strobo Push</option>
                                     </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Strobo Configuration (hidden by default) -->
+                            <div id="strobo-config" style="display: none;">
+                                <div class="form-field">
+                                    <label for="strobo-color">Strobo Farbe:</label>
+                                    <input type="color" id="strobo-color" value="#ff0000">
+                                </div>
+                                <div class="form-field">
+                                    <label for="strobo-duration">Dauer (Sekunden):</label>
+                                    <input type="number" id="strobo-duration" min="1" max="60" value="5">
+                                </div>
+                                <div class="form-field">
+                                    <label for="strobo-mode">Strobo Modus:</label>
+                                    <div class="select-wrapper">
+                                        <select id="strobo-mode">
+                                            <option value="classic">Classic Strobe</option>
+                                            <option value="double_flash">Double Flash</option>
+                                            <option value="random_chaos">Random Chaos</option>
+                                            <option value="color_strobe">Color Strobe</option>
+                                            <option value="pulse_wave">Pulse Wave</option>
+                                            <option value="lightning_strike">Lightning Strike</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-field">
@@ -3822,6 +4251,48 @@
                 <div class="card-title">⚙️ Aktuelle Konfiguration</div>
                 <div id="button-configurations" class="button-configs-container">
                     <div class="loading-spinner">Lade Konfigurationen...</div>
+                </div>
+            </div>
+
+            <!-- PIR Motion Sensor -->
+            <div class="card">
+                <div class="card-title">🔍 PIR Bewegungsmelder</div>
+                <div class="card-content">
+                    <p>Automatische Garten-Beleuchtung bei Bewegungserkennung (GPIO Pin 23).</p>
+                    
+                    <!-- PIR Status -->
+                    <div id="pir-status" class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span id="pir-status-text">PIR Status wird geladen...</span>
+                    </div>
+                    
+                    <div class="pir-info-grid">
+                        <div class="info-item">
+                            <strong>Zielgruppe:</strong>
+                            <span id="pir-target-group">Garten (86)</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Leuchtdauer:</strong>
+                            <span id="pir-duration">10 Minuten</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Cooldown:</strong>
+                            <span id="pir-cooldown">30 Sekunden</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Timer aktiv:</strong>
+                            <span id="pir-timer-status">❌</span>
+                        </div>
+                    </div>
+                    
+                    <div class="pir-controls">
+                        <button class="action-btn" onclick="testPIRMotion()" style="background: var(--accent-blue);">
+                            🧪 Motion Test
+                        </button>
+                        <button class="action-btn" id="pir-toggle-btn" onclick="togglePIRMonitoring()">
+                            ⏸️ Monitoring pausieren
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -7107,6 +7578,297 @@
             // Placeholder für zukünftige Implementierung
         }
 
+        async function showSystemInfo() {
+            const container = document.getElementById('system-info-container');
+            
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                await loadSystemInfo();
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        async function refreshSystemInfo() {
+            const container = document.getElementById('system-info-container');
+            if (container.style.display !== 'none') {
+                await loadSystemInfo();
+            }
+        }
+
+        async function loadSystemInfo() {
+            const container = document.getElementById('system-info-container');
+            container.innerHTML = '<div class="loading-spinner">🔄 Lade System-Informationen...</div>';
+
+            try {
+                // Parallel API calls for better performance
+                const [
+                    statusResponse,
+                    lightsResponse, 
+                    groupsResponse,
+                    sensorsResponse,
+                    bridgeResponse
+                ] = await Promise.all([
+                    fetch('/api/status'),
+                    fetch('/api/lights'),
+                    fetch('/api/groups'),
+                    fetch('/api/sensors'),
+                    fetch(`http://${hue.hue_bridge_ip}/api/${hue.hue_username}/config`)
+                ]);
+
+                const statusData = await statusResponse.json();
+                const lightsData = await lightsResponse.json();
+                const groupsData = await groupsResponse.json();
+                const sensorsData = await sensorsResponse.json();
+                const bridgeData = await bridgeResponse.json();
+
+                displaySystemInfo({
+                    status: statusData,
+                    lights: lightsData,
+                    groups: groupsData,
+                    sensors: sensorsData,
+                    bridge: bridgeData
+                });
+
+            } catch (error) {
+                container.innerHTML = `<div class="debug-entry error">❌ Fehler beim Laden der System-Informationen: ${error.message}</div>`;
+            }
+        }
+
+        function displaySystemInfo(data) {
+            const container = document.getElementById('system-info-container');
+            
+            // Bridge Information
+            const bridgeInfo = data.bridge || {};
+            const bridgeModelYear = getBridgeModelYear(bridgeInfo.modelid);
+            
+            // Lights Analysis
+            const lights = data.lights || {};
+            const lightsArray = Object.entries(lights);
+            const reachableLights = lightsArray.filter(([id, light]) => light.state?.reachable !== false);
+            const unreachableLights = lightsArray.filter(([id, light]) => light.state?.reachable === false);
+            
+            // Groups Analysis  
+            const groups = data.groups || {};
+            const groupsArray = Object.entries(groups).filter(([id, group]) => group.name !== 'Lightset 0');
+            
+            // Sensors Analysis
+            const sensors = data.sensors || {};
+            const sensorsArray = Object.entries(sensors);
+            
+            const html = `
+                <div class="system-info-accordion">
+                    <!-- Bridge Information -->
+                    <div class="info-section">
+                        <div class="info-header" onclick="toggleInfoSection('bridge-info')">
+                            🌉 <strong>Hue Bridge Information</strong>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div id="bridge-info" class="info-content">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <strong>Name:</strong> ${bridgeInfo.name || 'Unbekannt'}
+                                </div>
+                                <div class="info-item">
+                                    <strong>IP-Adresse:</strong> ${data.status.hue_bridge_ip || 'Unbekannt'}
+                                </div>
+                                <div class="info-item">
+                                    <strong>MAC-Adresse:</strong> ${bridgeInfo.mac || 'Unbekannt'}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Model:</strong> ${bridgeInfo.modelid || 'Unbekannt'} ${bridgeModelYear ? `(${bridgeModelYear})` : ''}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Software Version:</strong> ${bridgeInfo.swversion || 'Unbekannt'}
+                                </div>
+                                <div class="info-item">
+                                    <strong>API Version:</strong> ${bridgeInfo.apiversion || 'Unbekannt'}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Zigbee Channel:</strong> ${bridgeInfo.zigbeechannel || 'Unbekannt'}
+                                </div>
+                                <div class="info-item">
+                                    <strong>UTC Zeit:</strong> ${bridgeInfo.UTC || 'Unbekannt'}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Timezone:</strong> ${bridgeInfo.timezone || 'Unbekannt'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lights Information -->
+                    <div class="info-section">
+                        <div class="info-header" onclick="toggleInfoSection('lights-info')">
+                            💡 <strong>Lichter (${lightsArray.length} gesamt, ${reachableLights.length} erreichbar)</strong>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div id="lights-info" class="info-content">
+                            ${lightsArray.map(([id, light]) => {
+                                const modelYear = getLightModelYear(light.modelid);
+                                const isReachable = light.state?.reachable !== false;
+                                return `
+                                    <div class="device-item ${!isReachable ? 'unreachable' : ''}">
+                                        <div class="device-header">
+                                            <strong>${light.name}</strong> 
+                                            <span class="device-id">(ID: ${id})</span>
+                                            ${!isReachable ? '<span class="status-badge unreachable">❌ Nicht erreichbar</span>' : '<span class="status-badge reachable">✅ Erreichbar</span>'}
+                                        </div>
+                                        <div class="device-details">
+                                            <span><strong>Typ:</strong> ${light.type || 'Unbekannt'}</span>
+                                            <span><strong>Model:</strong> ${light.modelid || 'Unbekannt'} ${modelYear ? `(${modelYear})` : ''}</span>
+                                            <span><strong>Hersteller:</strong> ${light.manufacturername || 'Unbekannt'}</span>
+                                            <span><strong>Software:</strong> ${light.swversion || 'Unbekannt'}</span>
+                                            ${light.state ? `<span><strong>Status:</strong> ${light.state.on ? 'Ein' : 'Aus'} | Helligkeit: ${Math.round((light.state.bri || 0) / 254 * 100)}%</span>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Groups Information -->
+                    <div class="info-section">
+                        <div class="info-header" onclick="toggleInfoSection('groups-info')">
+                            👥 <strong>Gruppen (${groupsArray.length} gesamt)</strong>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div id="groups-info" class="info-content">
+                            ${groupsArray.map(([id, group]) => `
+                                <div class="device-item">
+                                    <div class="device-header">
+                                        <strong>${group.name}</strong>
+                                        <span class="device-id">(ID: ${id})</span>
+                                        <span class="status-badge ${group.state?.any_on ? 'active' : 'inactive'}">${group.state?.any_on ? '🟢 Aktiv' : '⚫ Inaktiv'}</span>
+                                    </div>
+                                    <div class="device-details">
+                                        <span><strong>Typ:</strong> ${group.type || 'Unbekannt'}</span>
+                                        <span><strong>Klasse:</strong> ${group.class || 'Unbekannt'}</span>
+                                        <span><strong>Lichter:</strong> ${group.lights ? group.lights.length : 0} (${(group.lights || []).join(', ')})</span>
+                                        <span><strong>Status:</strong> ${group.state?.all_on ? 'Alle Ein' : group.state?.any_on ? 'Teilweise Ein' : 'Alle Aus'}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Sensors Information -->
+                    <div class="info-section">
+                        <div class="info-header" onclick="toggleInfoSection('sensors-info')">
+                            🔘 <strong>Sensoren/Switches (${sensorsArray.length} gesamt)</strong>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div id="sensors-info" class="info-content">
+                            ${sensorsArray.length > 0 ? sensorsArray.map(([id, sensor]) => `
+                                <div class="device-item">
+                                    <div class="device-header">
+                                        <strong>${sensor.name}</strong>
+                                        <span class="device-id">(ID: ${id})</span>
+                                        <span class="status-badge ${sensor.config?.on ? 'active' : 'inactive'}">${sensor.config?.on ? '🟢 Aktiv' : '⚫ Inaktiv'}</span>
+                                    </div>
+                                    <div class="device-details">
+                                        <span><strong>Typ:</strong> ${sensor.type || 'Unbekannt'}</span>
+                                        <span><strong>Model:</strong> ${sensor.modelid || 'Unbekannt'}</span>
+                                        <span><strong>Hersteller:</strong> ${sensor.manufacturername || 'Unbekannt'}</span>
+                                        <span><strong>Software:</strong> ${sensor.swversion || 'Unbekannt'}</span>
+                                        ${sensor.config?.battery !== undefined ? `<span><strong>Batterie:</strong> ${sensor.config.battery}%</span>` : ''}
+                                    </div>
+                                </div>
+                            `).join('') : '<div class="device-item">Keine Sensoren gefunden</div>'}
+                        </div>
+                    </div>
+
+                    <!-- System Status -->
+                    <div class="info-section">
+                        <div class="info-header" onclick="toggleInfoSection('system-info')">
+                            ⚙️ <strong>System-Status</strong>
+                            <span class="toggle-icon">▼</span>
+                        </div>
+                        <div id="system-info" class="info-content">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <strong>Verbindung:</strong> <span class="status-badge reachable">✅ ${data.status.hue_connected ? 'Verbunden' : '❌ Getrennt'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <strong>Datenbank:</strong> <span class="status-badge reachable">✅ ${data.status.database === 'enabled' ? 'Verfügbar' : '❌ Nicht verfügbar'}</span>
+                                </div>
+                                <div class="info-item">
+                                    <strong>Aktive Effekte:</strong> ${data.status.active_effects || 0}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Aktive Timer:</strong> ${data.status.active_timers || 0}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Onboarding:</strong> ${data.status.onboarding_completed ? '✅ Abgeschlossen' : '❌ Ausstehend'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function toggleInfoSection(sectionId) {
+            const content = document.getElementById(sectionId);
+            const header = content.previousElementSibling;
+            const icon = header.querySelector('.toggle-icon');
+            
+            if (content.style.display === 'none' || !content.style.display) {
+                content.style.display = 'block';
+                icon.textContent = '▲';
+            } else {
+                content.style.display = 'none';
+                icon.textContent = '▼';
+            }
+        }
+
+        function getBridgeModelYear(modelId) {
+            const bridgeModels = {
+                'BSB001': '2012 (Bridge v1)',
+                'BSB002': '2015 (Bridge v2)', 
+                '929000226503': '2015 (Bridge v2)',
+                '7455': '2012 (Bridge v1)'
+            };
+            return bridgeModels[modelId] || null;
+        }
+
+        function getLightModelYear(modelId) {
+            const lightModels = {
+                'LCT001': '2012 (Hue Bulb A19 Gen1)',
+                'LCT002': '2013 (Hue Bulb BR30 Gen1)', 
+                'LCT003': '2013 (Hue Bulb GU10 Gen1)',
+                'LCT007': '2014 (Hue Bulb A19 Gen2)',
+                'LCT010': '2014 (Hue Bulb A19 Gen2)',
+                'LCT011': '2014 (Hue Bulb BR30 Gen2)',
+                'LCT012': '2015 (Hue Bulb E14 Gen2)',
+                'LCT014': '2016 (Hue Bulb A19 Gen3)',
+                'LCT015': '2016 (Hue Bulb A19 Gen3)',
+                'LCT016': '2016 (Hue Bulb A19 Gen3)',
+                'LST001': '2013 (LightStrip Gen1)',
+                'LST002': '2015 (LightStrip Plus)',
+                'LST003': '2017 (LightStrip Plus)',
+                'LST004': '2020 (LightStrip Plus V4)',
+                'LWB004': '2014 (White Bulb)',
+                'LWB006': '2015 (White Bulb Gen2)',
+                'LWB007': '2015 (White Bulb Gen2)',
+                'LWB010': '2016 (White Bulb Gen3)',
+                'LWB014': '2016 (White Bulb Gen3)',
+                'LTW001': '2015 (White Ambiance)',
+                'LTW004': '2016 (White Ambiance Gen2)',
+                'LTW010': '2017 (White Ambiance A19)',
+                'LTW011': '2017 (White Ambiance BR30)',
+                'LTW012': '2017 (White Ambiance E12)',
+                'LTW013': '2017 (White Ambiance GU10)',
+                'LTW015': '2018 (White Ambiance A19 Gen4)',
+                'LCA001': '2018 (Color A19 Gen4)',
+                'LCA002': '2018 (Color E12 Gen4)',
+                'LCA003': '2018 (Color GU10 Gen4)'
+            };
+            return lightModels[modelId] || null;
+        }
+
         async function testHueConnection() {
             try {
                 const response = await fetch(`${hue.baseUrl}/api/debug/test/connection`, { method: 'POST' });
@@ -7646,9 +8408,11 @@
                     loadButtonStatus();
                     loadButtonLogs();
                     loadGroupsForButtons();
+                    loadPIRStatus();
                     hue.buttonsLoaded = true;
                 } else {
                     console.log('Buttons tab already loaded');
+                    loadPIRStatus(); // Always refresh PIR status
                 }
             }
         };
@@ -7658,11 +8422,150 @@
         let buttonConfigurations = [];
         let availableGroups = [];
 
-        // Simple notification function if not exists
+        // Toast notification system
         function showNotification(message, type = 'info') {
             console.log(`${type.toUpperCase()}: ${message}`);
-            // You could add a proper notification system here
-            alert(message);
+            showToast(message, type);
+        }
+
+        function showToast(message, type = 'info') {
+            // Remove existing toasts
+            const existingToasts = document.querySelectorAll('.toast');
+            existingToasts.forEach(toast => toast.remove());
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <span class="toast-icon">${icon}</span>
+                    <span class="toast-message">${message}</span>
+                </div>
+            `;
+
+            // Add to body
+            document.body.appendChild(toast);
+
+            // Show animation
+            setTimeout(() => toast.classList.add('show'), 100);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ═══════════════════ SCHNELLZUGRIFF FUNCTIONS ═══════════════════
+
+        function toggleQuickAccess() {
+            const content = document.getElementById('quick-access-content');
+            const toggle = document.getElementById('quick-access-toggle');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                toggle.textContent = '▼';
+            } else {
+                content.classList.add('collapsed');
+                toggle.textContent = '▶';
+            }
+        }
+
+        function toggleGlobalQuickAccess() {
+            const content = document.getElementById('global-quick-access-content');
+            const toggle = document.getElementById('global-quick-access-toggle');
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                toggle.textContent = '▼';
+            } else {
+                content.classList.add('collapsed');
+                toggle.textContent = '▶';
+            }
+        }
+
+        async function executeQuickAction(action) {
+            console.log('Executing quick action:', action);
+            
+            try {
+                switch (action) {
+                    case 'all_on':
+                        await fetch('/api/global/all-lights', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ on: true, bri: 254 })
+                        });
+                        showToast('Alle Lichter eingeschaltet', 'success');
+                        break;
+
+                    case 'all_off':
+                        await fetch('/api/global/all-lights', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ on: false })
+                        });
+                        showToast('Alle Lichter ausgeschaltet', 'success');
+                        break;
+
+                    case 'emergency_off':
+                        await fetch('/api/global/emergency-off', {
+                            method: 'POST'
+                        });
+                        showToast('Notaus ausgeführt', 'success');
+                        break;
+
+                    case 'scene_relax':
+                        await applyMoodScene('entspannung');
+                        showToast('Entspannungsszene aktiviert', 'success');
+                        break;
+
+                    case 'scene_work':
+                        await applyMoodScene('arbeit');
+                        showToast('Arbeitsszene aktiviert', 'success');
+                        break;
+
+                    case 'scene_party':
+                        await applyMoodScene('party');
+                        showToast('Partyszene aktiviert', 'success');
+                        break;
+
+                    case 'effect_colorloop':
+                        await fetch('/api/global/all-lights', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ on: true, effect: 'colorloop' })
+                        });
+                        showToast('Farbschleife gestartet', 'success');
+                        break;
+
+                    case 'effect_stop_all':
+                        const stopResponse = await fetch('/api/effects/stop-all', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const stopData = await stopResponse.json();
+                        if (stopData.success) {
+                            showToast(stopData.message || 'Alle Effekte gestoppt', 'success');
+                        } else {
+                            showToast('Fehler beim Stoppen der Effekte', 'error');
+                        }
+                        break;
+
+                    default:
+                        showToast('Unbekannte Aktion', 'error');
+                }
+                
+                // Refresh current data if on lights tab
+                if (hue.currentTab === 'lights') {
+                    refreshLights();
+                }
+                
+            } catch (error) {
+                console.error('Quick action error:', error);
+                showToast('Fehler bei Schnellaktion', 'error');
+            }
         }
 
         async function loadButtonConfigurations() {
@@ -7780,6 +8683,7 @@
                         <div class="button-config-details">
                             Pin: ${config.gpio_pin} → ${config.group_name} (${config.action_type})
                             ${config.enabled ? '✅ Aktiv' : '❌ Deaktiviert'}
+                            ${config.action_type === 'strobo_push' ? `<br>🎨 <span style="background: ${config.strobo_color}; padding: 1px 4px; color: white; border-radius: 2px;">${config.strobo_color}</span> | ${config.strobo_duration}s | ${config.strobo_mode}` : ''}
                         </div>
                     </div>
                     <div class="button-config-actions">
@@ -7800,11 +8704,33 @@
             `).join('');
         }
 
+        function toggleStroboOptions() {
+            const actionSelect = document.getElementById('button-action');
+            const stroboConfig = document.getElementById('strobo-config');
+            
+            if (actionSelect.value === 'strobo_push') {
+                stroboConfig.style.display = 'block';
+            } else {
+                stroboConfig.style.display = 'none';
+            }
+        }
+
         async function addButtonConfiguration() {
             const gpioPin = document.getElementById('gpio-pin').value;
             const groupId = document.getElementById('button-group').value;
             const actionType = document.getElementById('button-action').value;
             const buttonName = document.getElementById('button-name').value;
+            
+            // Get strobo parameters if action is strobo_push
+            let stroboColor = null;
+            let stroboDuration = 5;
+            let stroboMode = 'classic';
+            
+            if (actionType === 'strobo_push') {
+                stroboColor = document.getElementById('strobo-color').value;
+                stroboDuration = parseInt(document.getElementById('strobo-duration').value) || 5;
+                stroboMode = document.getElementById('strobo-mode').value;
+            }
             
             if (!gpioPin || !groupId) {
                 showNotification('❌ Bitte GPIO Pin und Gruppe auswählen', 'error');
@@ -7812,21 +8738,30 @@
             }
             
             try {
+                const requestData = {
+                    gpio_pin: parseInt(gpioPin),
+                    group_id: groupId,
+                    action_type: actionType,
+                    button_name: buttonName || `Button GPIO ${gpioPin}`
+                };
+                
+                // Add strobo parameters if action is strobo_push
+                if (actionType === 'strobo_push') {
+                    requestData.strobo_color = stroboColor;
+                    requestData.strobo_duration = stroboDuration;
+                    requestData.strobo_mode = stroboMode;
+                }
+                
                 const response = await fetch('/api/buttons/configurations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        gpio_pin: parseInt(gpioPin),
-                        group_id: groupId,
-                        action_type: actionType,
-                        button_name: buttonName || `Button GPIO ${gpioPin}`
-                    })
+                    body: JSON.stringify(requestData)
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    showNotification('✅ Button-Konfiguration hinzugefügt', 'success');
+                    showToast('Button-Konfiguration hinzugefügt', 'success');
                     
                     // Clear form
                     document.getElementById('gpio-pin').value = '';
@@ -7834,15 +8769,21 @@
                     document.getElementById('button-action').value = 'toggle';
                     document.getElementById('button-name').value = '';
                     
+                    // Reset strobo fields
+                    document.getElementById('strobo-color').value = '#ff0000';
+                    document.getElementById('strobo-duration').value = '5';
+                    document.getElementById('strobo-mode').value = 'classic';
+                    document.getElementById('strobo-config').style.display = 'none';
+                    
                     // Reload configurations
                     loadButtonConfigurations();
                     loadButtonStatus();
                 } else {
-                    showNotification(`❌ ${data.error}`, 'error');
+                    showToast(`Fehler: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Error adding button configuration:', error);
-                showNotification('❌ Verbindungsfehler', 'error');
+                showToast('Verbindungsfehler beim Hinzufügen', 'error');
             }
         }
 
@@ -7855,22 +8796,18 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showNotification(`✅ Test erfolgreich: ${data.message}`, 'success');
+                    showToast(`Test erfolgreich: ${data.message}`, 'success');
                     loadButtonLogs(); // Refresh logs
                 } else {
-                    showNotification(`❌ Test fehlgeschlagen: ${data.error}`, 'error');
+                    showToast(`Test fehlgeschlagen: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Error testing button:', error);
-                showNotification('❌ Test-Verbindungsfehler', 'error');
+                showToast('Test-Verbindungsfehler', 'error');
             }
         }
 
         async function deleteButtonConfiguration(configId) {
-            if (!confirm('Sind Sie sicher, dass Sie diese Button-Konfiguration löschen möchten?')) {
-                return;
-            }
-            
             try {
                 const response = await fetch(`/api/buttons/configurations/${configId}`, {
                     method: 'DELETE'
@@ -7879,15 +8816,15 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showNotification('✅ Button-Konfiguration gelöscht', 'success');
+                    showToast('Button-Konfiguration gelöscht', 'success');
                     loadButtonConfigurations();
                     loadButtonStatus();
                 } else {
-                    showNotification(`❌ ${data.error}`, 'error');
+                    showToast(`Fehler: ${data.error}`, 'error');
                 }
             } catch (error) {
                 console.error('Error deleting button configuration:', error);
-                showNotification('❌ Verbindungsfehler', 'error');
+                showToast('Verbindungsfehler beim Löschen', 'error');
             }
         }
 
@@ -7935,8 +8872,192 @@
         }
 
         function editButtonConfiguration(configId) {
-            // For now, show a simple alert - could be enhanced with a modal
-            showNotification('🔧 Edit-Funktion kommt bald...', 'info');
+            // Find the configuration to edit
+            const config = buttonConfigurations.find(c => c.id === configId);
+            if (!config) {
+                showNotification('❌ Konfiguration nicht gefunden', 'error');
+                return;
+            }
+            
+            // Create and show modal
+            showEditModal(config);
+        }
+        
+        function showEditModal(config) {
+            // Create modal HTML
+            const modalHtml = `
+                <div id="edit-modal" class="modal-overlay" onclick="closeEditModal(event)">
+                    <div class="modal-content" onclick="event.stopPropagation()">
+                        <div class="modal-header">
+                            <h3>🔧 Button-Konfiguration bearbeiten</h3>
+                            <button class="modal-close" onclick="closeEditModal()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-field">
+                                <label>GPIO Pin:</label>
+                                <input type="number" id="edit-gpio-pin" value="${config.gpio_pin}" readonly style="background: rgba(255,255,255,0.1);">
+                            </div>
+                            <div class="form-field">
+                                <label>Gruppe:</label>
+                                <div class="select-wrapper">
+                                    <select id="edit-button-group"></select>
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label>Aktion:</label>
+                                <div class="select-wrapper">
+                                    <select id="edit-button-action" onchange="toggleEditStroboOptions()">
+                                        <option value="toggle">Toggle (Ein/Aus)</option>
+                                        <option value="on">Immer Ein</option>
+                                        <option value="off">Immer Aus</option>
+                                        <option value="strobo_push">Strobo Push</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="edit-strobo-config" style="display: none;">
+                                <div class="form-field">
+                                    <label>Strobo Farbe:</label>
+                                    <input type="color" id="edit-strobo-color" value="${config.strobo_color || '#ff0000'}">
+                                </div>
+                                <div class="form-field">
+                                    <label>Dauer (Sekunden):</label>
+                                    <input type="number" id="edit-strobo-duration" min="1" max="60" value="${config.strobo_duration || 5}">
+                                </div>
+                                <div class="form-field">
+                                    <label>Strobo Modus:</label>
+                                    <div class="select-wrapper">
+                                        <select id="edit-strobo-mode">
+                                            <option value="classic">Classic Strobe</option>
+                                            <option value="double_flash">Double Flash</option>
+                                            <option value="random_chaos">Random Chaos</option>
+                                            <option value="color_strobe">Color Strobe</option>
+                                            <option value="pulse_wave">Pulse Wave</option>
+                                            <option value="lightning_strike">Lightning Strike</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label>Name (optional):</label>
+                                <input type="text" id="edit-button-name" value="${config.button_name || ''}" placeholder="z.B. Wohnzimmer Button">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn" onclick="closeEditModal()">Abbrechen</button>
+                            <button class="btn" style="background: var(--accent-green);" onclick="saveButtonConfiguration(${config.id})">💾 Speichern</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to DOM
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Populate groups dropdown
+            populateEditGroupsDropdown(config.group_id);
+            
+            // Set current action and show/hide strobo config
+            document.getElementById('edit-button-action').value = config.action_type;
+            if (config.action_type === 'strobo_push') {
+                document.getElementById('edit-strobo-config').style.display = 'block';
+                document.getElementById('edit-strobo-mode').value = config.strobo_mode || 'classic';
+            }
+        }
+        
+        function toggleEditStroboOptions() {
+            const actionSelect = document.getElementById('edit-button-action');
+            const stroboConfig = document.getElementById('edit-strobo-config');
+            
+            if (actionSelect.value === 'strobo_push') {
+                stroboConfig.style.display = 'block';
+            } else {
+                stroboConfig.style.display = 'none';
+            }
+        }
+        
+        async function populateEditGroupsDropdown(selectedGroupId) {
+            try {
+                const response = await fetch('/api/groups');
+                const data = await response.json();
+                
+                const select = document.getElementById('edit-button-group');
+                select.innerHTML = '<option value="">-- Gruppe wählen --</option>';
+                
+                // Handle direct Hue API response
+                if (data && typeof data === 'object' && !data.error) {
+                    Object.entries(data).forEach(([groupId, group]) => {
+                        if (group.name && group.name !== 'Lightset 0') {
+                            const option = document.createElement('option');
+                            option.value = groupId;
+                            option.textContent = `${group.name} (${groupId})`;
+                            if (groupId === selectedGroupId) {
+                                option.selected = true;
+                            }
+                            select.appendChild(option);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading groups for edit:', error);
+            }
+        }
+        
+        function closeEditModal(event) {
+            // Only close if clicking overlay or close button
+            if (event && event.target !== event.currentTarget && !event.target.classList.contains('modal-close')) {
+                return;
+            }
+            
+            const modal = document.getElementById('edit-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        async function saveButtonConfiguration(configId) {
+            const groupId = document.getElementById('edit-button-group').value;
+            const actionType = document.getElementById('edit-button-action').value;
+            const buttonName = document.getElementById('edit-button-name').value;
+            
+            if (!groupId) {
+                showNotification('❌ Bitte Gruppe auswählen', 'error');
+                return;
+            }
+            
+            const requestData = {
+                group_id: groupId,
+                action_type: actionType,
+                button_name: buttonName
+            };
+            
+            // Add strobo parameters if needed
+            if (actionType === 'strobo_push') {
+                requestData.strobo_color = document.getElementById('edit-strobo-color').value;
+                requestData.strobo_duration = parseInt(document.getElementById('edit-strobo-duration').value) || 5;
+                requestData.strobo_mode = document.getElementById('edit-strobo-mode').value;
+            }
+            
+            try {
+                const response = await fetch(`/api/buttons/configurations/${configId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('Konfiguration aktualisiert', 'success');
+                    closeEditModal();
+                    loadButtonConfigurations();
+                    loadButtonStatus();
+                } else {
+                    showToast(`Fehler: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating configuration:', error);
+                showToast('Verbindungsfehler beim Aktualisieren', 'error');
+            }
         }
 
         function clearButtonLogs() {
@@ -7946,6 +9067,92 @@
             
             showNotification('🚧 Clear-Logs-Funktion wird implementiert...', 'info');
         }
+
+        // ═══════════════════ PIR MOTION SENSOR FUNCTIONS ═══════════════════
+
+        async function loadPIRStatus() {
+            try {
+                const response = await fetch('/api/pir/status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    updatePIRStatus(data.pir_sensor);
+                } else {
+                    console.error('Failed to load PIR status');
+                }
+            } catch (error) {
+                console.error('Error loading PIR status:', error);
+            }
+        }
+
+        function updatePIRStatus(status) {
+            // Update status indicator
+            const statusDot = document.querySelector('#pir-status .status-dot');
+            const statusText = document.getElementById('pir-status-text');
+            const toggleBtn = document.getElementById('pir-toggle-btn');
+            
+            if (status.running) {
+                statusDot.classList.add('online');
+                statusText.textContent = status.gpio_available ? 'PIR Monitoring aktiv' : 'PIR Monitoring (Simulation)';
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '⏸️ Monitoring pausieren';
+                    toggleBtn.style.background = 'var(--accent-red)';
+                }
+            } else {
+                statusDot.classList.remove('online');
+                statusText.textContent = 'PIR Monitoring inaktiv';
+                if (toggleBtn) {
+                    toggleBtn.innerHTML = '▶️ Monitoring starten';
+                    toggleBtn.style.background = 'var(--accent-green)';
+                }
+            }
+            
+            // Update info items
+            document.getElementById('pir-target-group').textContent = `Garten (${status.garden_group_id})`;
+            document.getElementById('pir-duration').textContent = `${status.light_duration_minutes} Minuten`;
+            document.getElementById('pir-cooldown').textContent = `${status.motion_cooldown_seconds} Sekunden`;
+            document.getElementById('pir-timer-status').textContent = status.timer_active ? '✅ Aktiv' : '❌ Inaktiv';
+        }
+
+        async function testPIRMotion() {
+            try {
+                const response = await fetch('/api/pir/test', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('PIR Motion Test ausgeführt - Garten-Beleuchtung für 10 Min aktiviert', 'success');
+                    loadPIRStatus(); // Refresh status
+                } else {
+                    showToast(`PIR Test fehlgeschlagen: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error testing PIR motion:', error);
+                showToast('PIR Test-Verbindungsfehler', 'error');
+            }
+        }
+
+        async function togglePIRMonitoring() {
+            try {
+                const response = await fetch('/api/pir/toggle', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    loadPIRStatus(); // Refresh status
+                } else {
+                    showToast(`PIR Toggle Fehler: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error toggling PIR monitoring:', error);
+                showToast('PIR Toggle-Verbindungsfehler', 'error');
+            }
+        }
     </script>
     <script>
     if ("serviceWorker" in navigator) {
@@ -7954,6 +9161,57 @@
             .catch(err => console.log("Service Worker registration failed"));
     }
     </script>
+    
+    <!-- Globaler Schnellzugriff (unten auf allen Seiten) -->
+    <div class="global-quick-access">
+        <div class="quick-access-header">
+            <h3>⚡ Schnellzugriff</h3>
+            <button class="toggle-quick-access" onclick="toggleGlobalQuickAccess()">
+                <span id="global-quick-access-toggle">▶</span>
+            </button>
+        </div>
+        <div class="quick-access-content collapsed" id="global-quick-access-content">
+            <div class="quick-actions-grid">
+                <!-- Globale Aktionen -->
+                <div class="quick-action-card" onclick="executeQuickAction('all_on')">
+                    <div class="quick-action-icon">🌟</div>
+                    <div class="quick-action-label">Alle An</div>
+                </div>
+                <div class="quick-action-card" onclick="executeQuickAction('all_off')">
+                    <div class="quick-action-icon">🌙</div>
+                    <div class="quick-action-label">Alle Aus</div>
+                </div>
+                <div class="quick-action-card" onclick="executeQuickAction('emergency_off')">
+                    <div class="quick-action-icon">🚨</div>
+                    <div class="quick-action-label">Notaus</div>
+                </div>
+                
+                <!-- Stimmungsszenen -->
+                <div class="quick-action-card" onclick="executeQuickAction('scene_relax')">
+                    <div class="quick-action-icon">😌</div>
+                    <div class="quick-action-label">Entspannung</div>
+                </div>
+                <div class="quick-action-card" onclick="executeQuickAction('scene_work')">
+                    <div class="quick-action-icon">💼</div>
+                    <div class="quick-action-label">Arbeit</div>
+                </div>
+                <div class="quick-action-card" onclick="executeQuickAction('scene_party')">
+                    <div class="quick-action-icon">🎉</div>
+                    <div class="quick-action-label">Party</div>
+                </div>
+                
+                <!-- Effekte -->
+                <div class="quick-action-card" onclick="executeQuickAction('effect_colorloop')">
+                    <div class="quick-action-icon">🌈</div>
+                    <div class="quick-action-label">Farbschleife</div>
+                </div>
+                <div class="quick-action-card" onclick="executeQuickAction('effect_stop_all')">
+                    <div class="quick-action-icon">⏹️</div>
+                    <div class="quick-action-label">Effekte Stop</div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Footer -->
     <footer style="text-align: center; padding: 20px; margin-top: 40px; color: rgba(255, 255, 255, 0.6); font-size: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1);">

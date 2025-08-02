@@ -19,6 +19,15 @@ from error_handler import smart_error_handler, log_system_error, get_system_heal
 # Effect Builder System
 from effect_builder import EffectBuilder, init_effect_builder_db
 
+# GPIO Manager System
+from gpio_manager import GPIOManager
+
+# PIR Motion Sensor System
+from pir_manager import PIRManager
+
+# Disco Mode System
+from disco_mode import DiscoMode
+
 # .env Datei laden falls vorhanden
 def load_env():
     env_path = Path(__file__).parent / '.env'
@@ -56,6 +65,7 @@ active_timers = {}
 db_pool = None
 power_logging_thread = None
 effect_builder = None
+disco_mode = None
 
 # Smart Caching System für Performance
 cache_store = {}
@@ -428,6 +438,41 @@ def init_db():
             )
         """)
         
+        # Button Configuration Tabelle
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS button_configurations (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                gpio_pin INT NOT NULL UNIQUE,
+                group_id VARCHAR(10) NOT NULL,
+                action_type VARCHAR(20) NOT NULL DEFAULT 'toggle',
+                button_name VARCHAR(100),
+                description TEXT,
+                enabled BOOLEAN DEFAULT TRUE,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_gpio_pin (gpio_pin),
+                INDEX idx_group_id (group_id),
+                INDEX idx_enabled (enabled)
+            )
+        """)
+        
+        # Button Press Log Tabelle
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS button_press_log (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                gpio_pin INT NOT NULL,
+                press_type VARCHAR(20) NOT NULL,
+                group_id VARCHAR(10) NOT NULL,
+                action_type VARCHAR(20) NOT NULL,
+                timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                execution_success BOOLEAN DEFAULT TRUE,
+                error_message TEXT,
+                INDEX idx_gpio_pin (gpio_pin),
+                INDEX idx_timestamp (timestamp),
+                INDEX idx_group_id (group_id)
+            )
+        """)
+        
         conn.commit()
         cursor.close()
         conn.close()
@@ -575,6 +620,16 @@ def get_lights():
 @smart_error_handler('light_control')
 def set_light_state(light_id):
     data = request.get_json()
+    
+    # Auto-activation: If brightness is set and light is off, turn it on
+    if 'bri' in data and data.get('on') is not False:
+        # Check current light state
+        current_light = hue_request(f'lights/{light_id}', 'GET')
+        if current_light and current_light.get('state', {}).get('on') == False:
+            # Light is off, automatically turn it on with the new brightness
+            data['on'] = True
+            add_debug_log('info', f'💡 Auto-activating light {light_id} with brightness {data["bri"]}')
+    
     return jsonify(hue_request(f'lights/{light_id}/state', 'PUT', data))
 
 @app.route('/api/groups', methods=['GET'])
@@ -586,6 +641,16 @@ def get_groups():
 @smart_error_handler('group_control')
 def set_group_action(group_id):
     data = request.get_json()
+    
+    # Auto-activation: If brightness is set and group is off, turn it on
+    if 'bri' in data and data.get('on') is not False:
+        # Check current group state
+        current_group = hue_request(f'groups/{group_id}', 'GET')
+        if current_group and current_group.get('state', {}).get('any_on') == False:
+            # Group is off, automatically turn it on with the new brightness
+            data['on'] = True
+            add_debug_log('info', f'💡 Auto-activating group {group_id} with brightness {data["bri"]}')
+    
     return jsonify(hue_request(f'groups/{group_id}/action', 'PUT', data))
 
 # === SZENEN ===
@@ -613,14 +678,84 @@ def set_light_scene(light_id):
     
     return jsonify({"error": "Scene not found or light not in scene"})
 
+# === STATE BACKUP/RESTORE FUNCTIONS ===
+def backup_lights_state(target_type, target_id):
+    """Backup current state of lights before effects"""
+    backup = {}
+    
+    try:
+        if target_type == 'all':
+            # Backup all lights
+            lights = get_lights_raw()
+            for light_id, light_data in lights.items():
+                if 'state' in light_data:
+                    backup[f'light_{light_id}'] = light_data['state'].copy()
+        elif target_type == 'group':
+            # Backup all lights in the group
+            group_data = hue_request(f'groups/{target_id}', 'GET')
+            if group_data and 'lights' in group_data:
+                lights = get_lights_raw()
+                for light_id in group_data['lights']:
+                    if light_id in lights and 'state' in lights[light_id]:
+                        backup[f'light_{light_id}'] = lights[light_id]['state'].copy()
+        elif target_type == 'light':
+            # Backup single light
+            light_data = hue_request(f'lights/{target_id}', 'GET')
+            if light_data and 'state' in light_data:
+                backup[f'light_{target_id}'] = light_data['state'].copy()
+        
+        add_debug_log('success', f'💾 State backup created: {len(backup)} lights')
+        return backup
+        
+    except Exception as e:
+        add_debug_log('error', f'❌ State backup failed: {str(e)}')
+        return {}
+
+def restore_lights_state(backup):
+    """Restore lights to their previous state"""
+    if not backup:
+        add_debug_log('warning', '⚠️ No backup to restore')
+        return
+        
+    try:
+        restored = 0
+        for key, state in backup.items():
+            if key.startswith('light_'):
+                light_id = key.replace('light_', '')
+                # Only restore essential properties to avoid conflicts
+                restore_state = {
+                    'on': state.get('on', False),
+                    'bri': state.get('bri', 254),
+                    'transitiontime': 10  # 1 second smooth transition
+                }
+                
+                # Add color properties if they exist
+                if 'hue' in state and 'sat' in state:
+                    restore_state['hue'] = state['hue']
+                    restore_state['sat'] = state['sat']
+                elif 'ct' in state:
+                    restore_state['ct'] = state['ct']
+                elif 'xy' in state:
+                    restore_state['xy'] = state['xy']
+                
+                result = hue_request(f'lights/{light_id}/state', 'PUT', restore_state)
+                if result:
+                    restored += 1
+                
+        add_debug_log('success', f'🔄 State restored: {restored}/{len(backup)} lights')
+        
+    except Exception as e:
+        add_debug_log('error', f'❌ State restore failed: {str(e)}')
+
 # === SPECIAL EFFECTS ===
 @app.route('/api/effects/strobe', methods=['POST'])
 @smart_error_handler('strobe_effect')
 def start_strobe():
     """Legacy Strobo Effect (für Rückwärtskompatibilität)"""
     data = request.get_json()
-    target_type = data.get('type', 'light')
-    target_id = data.get('id')
+    # Support both old API (type/id) and new API (target_type/target_id)
+    target_type = data.get('target_type') or data.get('type', 'light')
+    target_id = data.get('target_id') or data.get('id')
     duration = data.get('duration', 10)
     interval = data.get('interval', 0.5)
     
@@ -629,11 +764,12 @@ def start_strobe():
         'target_type': target_type,
         'target_id': target_id,
         'duration': duration,
-        'frequency': 1.0 / interval,
-        'hue': 0,
-        'sat': 0,
-        'bri': 254,
-        'mode': 'single'
+        'frequency': 1.0 / interval if interval > 0 else 2.0,
+        'hue': data.get('hue', 0),
+        'sat': data.get('sat', 254),
+        'bri': data.get('bri', 254),
+        'mode': data.get('mode', 'single'),
+        'restore_state': data.get('restore_state', True)  # Enable by default
     })
 
 @app.route('/api/effects/strobe/advanced', methods=['POST'])
@@ -649,6 +785,7 @@ def start_advanced_strobe(config):
     target_type = config.get('target_type', 'all')
     target_id = config.get('target_id', 'all')
     duration = config.get('duration', 0)  # 0 = unbegrenzt, sonst 1-300 Sekunden
+    restore_state = config.get('restore_state', True)  # State restore by default
     if duration > 0:
         duration = max(1, min(300, duration))
     frequency = max(0.1, min(10.0, config.get('frequency', 2.0)))  # 0.1-10 Hz
@@ -670,58 +807,284 @@ def start_advanced_strobe(config):
         on_time = cycle_time * 0.25   # 25% an, 75% aus für wilderes Strobo
         off_time = cycle_time * 0.75
         
-        # Farbsequenz für verschiedene Modi
-        color_sequence = []
-        if mode == 'single':
-            color_sequence = [{'hue': hue, 'sat': sat, 'bri': bri}]
-        elif mode == 'multi' and colors:
-            color_sequence = colors
-        elif mode == 'rainbow':
-            # Regenbogen-Sequenz
-            color_sequence = [
-                {'hue': 0, 'sat': 254, 'bri': bri},      # Rot
-                {'hue': 10922, 'sat': 254, 'bri': bri},  # Grün
-                {'hue': 46920, 'sat': 254, 'bri': bri},  # Blau
-                {'hue': 21845, 'sat': 254, 'bri': bri},  # Gelb
-                {'hue': 54613, 'sat': 254, 'bri': bri},  # Magenta
-                {'hue': 32768, 'sat': 254, 'bri': bri},  # Cyan
-            ]
-        else:
-            color_sequence = [{'hue': hue, 'sat': sat, 'bri': bri}]
+        # Backup current state before starting strobe
+        state_backup = None
+        if restore_state:
+            state_backup = backup_lights_state(target_type, target_id)
         
+        import random
+        import math
         color_index = 0
+        flash_count = 0
         
         try:
-            while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
-                current_color = color_sequence[color_index % len(color_sequence)]
+            if mode == 'classic':
+                # Classic Strobe: 10Hz, 50ms flash, 50ms pause
+                flash_duration = 0.05  # 50ms
+                pause_duration = 0.05  # 50ms
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}  # Use configured color
                 
-                # Lichter einschalten mit aktueller Farbe (maximum intensity)
-                if target_type == 'all':
-                    lights = get_lights_raw()
-                    for light_id in lights.keys():
-                        state = {'on': True, **current_color, 'bri': 254, 'transitiontime': 0}
-                        hue_request(f'lights/{light_id}/state', 'PUT', state)
-                else:
-                    endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
-                    state = {'on': True, **current_color, 'bri': 254, 'transitiontime': 0}
-                    hue_request(endpoint, 'PUT', state)
+                while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
+                    # Flash on
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            state = {'on': True, **strobe_color, 'transitiontime': 0}
+                            hue_request(f'lights/{light_id}/state', 'PUT', state)
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        state = {'on': True, **strobe_color, 'transitiontime': 0}
+                        hue_request(endpoint, 'PUT', state)
+                    
+                    time.sleep(flash_duration)
+                    
+                    # Flash off
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            hue_request(f'lights/{light_id}/state', 'PUT', {'on': False, 'transitiontime': 0})
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 0})
+                    
+                    time.sleep(pause_duration)
+                    
+            elif mode == 'double_flash':
+                # Double Flash: Two quick flashes, then pause
+                flash_duration = 0.05  # 50ms each flash
+                inter_flash_pause = 0.05  # 50ms between flashes
+                pattern_pause = 0.2  # 200ms after double flash
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}  # Use configured color
                 
-                time.sleep(on_time)
+                while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
+                    # First flash
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            state = {'on': True, **strobe_color, 'transitiontime': 0}
+                            hue_request(f'lights/{light_id}/state', 'PUT', state)
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        state = {'on': True, **strobe_color, 'transitiontime': 0}
+                        hue_request(endpoint, 'PUT', state)
+                    
+                    time.sleep(flash_duration)
+                    
+                    # Off
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            hue_request(f'lights/{light_id}/state', 'PUT', {'on': False, 'transitiontime': 0})
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 0})
+                    
+                    time.sleep(inter_flash_pause)
+                    
+                    # Second flash
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            state = {'on': True, **strobe_color, 'transitiontime': 0}
+                            hue_request(f'lights/{light_id}/state', 'PUT', state)
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        state = {'on': True, **strobe_color, 'transitiontime': 0}
+                        hue_request(endpoint, 'PUT', state)
+                    
+                    time.sleep(flash_duration)
+                    
+                    # Off
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            hue_request(f'lights/{light_id}/state', 'PUT', {'on': False, 'transitiontime': 0})
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 0})
+                    
+                    time.sleep(pattern_pause)
+                    
+            elif mode == 'random_chaos':
+                # Random Chaos: Random flash duration (20-100ms) and pause (50-250ms)
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}  # Use configured color
                 
-                # Lichter ausschalten
-                if target_type == 'all':
-                    lights = get_lights_raw()
-                    for light_id in lights.keys():
-                        hue_request(f'lights/{light_id}/state', 'PUT', {'on': False, 'transitiontime': 0})
-                else:
-                    endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
-                    hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 0})
+                while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
+                    flash_duration = random.uniform(0.02, 0.1)  # 20-100ms
+                    pause_duration = random.uniform(0.05, 0.25)  # 50-250ms
+                    
+                    # Flash on
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            state = {'on': True, **strobe_color, 'transitiontime': 0}
+                            hue_request(f'lights/{light_id}/state', 'PUT', state)
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        state = {'on': True, **strobe_color, 'transitiontime': 0}
+                        hue_request(endpoint, 'PUT', state)
+                    
+                    time.sleep(flash_duration)
+                    
+                    # Flash off
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            hue_request(f'lights/{light_id}/state', 'PUT', {'on': False, 'transitiontime': 0})
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 0})
+                    
+                    time.sleep(pause_duration)
+                    
+            elif mode == 'color_strobe':
+                # Color Strobe: Cycling through colors (Red, Green, Blue, Yellow, Magenta, Cyan)
+                color_sequence = [
+                    {'hue': 0, 'sat': 254, 'bri': 254},      # Red
+                    {'hue': 21845, 'sat': 254, 'bri': 254}, # Green
+                    {'hue': 43690, 'sat': 254, 'bri': 254}, # Blue
+                    {'hue': 10922, 'sat': 254, 'bri': 254}, # Yellow
+                    {'hue': 54613, 'sat': 254, 'bri': 254}, # Magenta
+                    {'hue': 32768, 'sat': 254, 'bri': 254}, # Cyan
+                ]
+                flash_duration = 0.06  # 60ms flash
+                pause_duration = 0.06  # 60ms pause (120ms total cycle)
                 
-                time.sleep(off_time)
-                
-                # Nächste Farbe bei Multi-Color Modi
-                if mode in ['multi', 'rainbow']:
+                while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
+                    current_color = color_sequence[color_index % len(color_sequence)]
+                    
+                    # Flash on with color
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            state = {'on': True, **current_color, 'transitiontime': 0}
+                            hue_request(f'lights/{light_id}/state', 'PUT', state)
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        state = {'on': True, **current_color, 'transitiontime': 0}
+                        hue_request(endpoint, 'PUT', state)
+                    
+                    time.sleep(flash_duration)
+                    
+                    # Flash off
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            hue_request(f'lights/{light_id}/state', 'PUT', {'on': False, 'transitiontime': 0})
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 0})
+                    
+                    time.sleep(pause_duration)
                     color_index += 1
+                    
+            elif mode == 'pulse_wave':
+                # Pulse Wave: Sinusoidal flash duration variation (30-100ms)
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}  # Use configured color
+                base_cycle_time = 0.15  # Base cycle time
+                
+                while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
+                    # Calculate sinusoidal flash duration
+                    sine_value = math.sin(flash_count * 0.2)  # Slow sine wave
+                    flash_duration = 0.03 + (0.035 * (sine_value + 1))  # 30-100ms range
+                    pause_duration = base_cycle_time - flash_duration
+                    
+                    # Flash on
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            state = {'on': True, **strobe_color, 'transitiontime': 0}
+                            hue_request(f'lights/{light_id}/state', 'PUT', state)
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        state = {'on': True, **strobe_color, 'transitiontime': 0}
+                        hue_request(endpoint, 'PUT', state)
+                    
+                    time.sleep(flash_duration)
+                    
+                    # Flash off
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            hue_request(f'lights/{light_id}/state', 'PUT', {'on': False, 'transitiontime': 0})
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 0})
+                    
+                    time.sleep(pause_duration)
+                    flash_count += 1
+                    
+            elif mode == 'lightning_strike':
+                # Lightning Strike: 2-5 rapid flashes, then 2-5 second pause
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}  # Use configured color
+                
+                while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
+                    strikes = random.randint(2, 5)  # 2-5 strikes per lightning
+                    
+                    for strike in range(strikes):
+                        # Random flash duration for irregular lightning
+                        flash_duration = random.uniform(0.02, 0.08)  # 20-80ms
+                        
+                        # Flash on
+                        if target_type == 'all':
+                            lights = get_lights_raw()
+                            for light_id in lights.keys():
+                                state = {'on': True, **strobe_color, 'transitiontime': 0}
+                                hue_request(f'lights/{light_id}/state', 'PUT', state)
+                        else:
+                            endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                            state = {'on': True, **strobe_color, 'transitiontime': 0}
+                            hue_request(endpoint, 'PUT', state)
+                        
+                        time.sleep(flash_duration)
+                        
+                        # Flash off
+                        if target_type == 'all':
+                            lights = get_lights_raw()
+                            for light_id in lights.keys():
+                                hue_request(f'lights/{light_id}/state', 'PUT', {'on': False, 'transitiontime': 0})
+                        else:
+                            endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                            hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 0})
+                        
+                        # Short pause between strikes in same lightning
+                        if strike < strikes - 1:
+                            time.sleep(random.uniform(0.01, 0.05))  # 10-50ms between strikes
+                    
+                    # Long pause between lightning strikes
+                    pause_duration = random.uniform(2.0, 5.0)  # 2-5 seconds
+                    time.sleep(pause_duration)
+            
+            else:
+                # Fallback to classic if unknown mode
+                flash_duration = 0.05
+                pause_duration = 0.05
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}
+                
+                while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
+                    # Flash on
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            state = {'on': True, **strobe_color, 'transitiontime': 0}
+                            hue_request(f'lights/{light_id}/state', 'PUT', state)
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        state = {'on': True, **strobe_color, 'transitiontime': 0}
+                        hue_request(endpoint, 'PUT', state)
+                    
+                    time.sleep(flash_duration)
+                    
+                    # Flash off
+                    if target_type == 'all':
+                        lights = get_lights_raw()
+                        for light_id in lights.keys():
+                            hue_request(f'lights/{light_id}/state', 'PUT', {'on': False, 'transitiontime': 0})
+                    else:
+                        endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                        hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 0})
+                    
+                    time.sleep(pause_duration)
                     
         except Exception as e:
             log_system_error(e, f"Strobo effect {effect_id}")
@@ -730,6 +1093,18 @@ def start_advanced_strobe(config):
                 del running_effects[effect_id]
                 track_effect_usage('strobe', f'{mode}_strobe_{frequency}Hz', target_type, 
                                  effect_id=effect_id)
+            
+            # Restore previous state if backup exists
+            if restore_state and state_backup:
+                add_debug_log('info', '🔄 Restoring lights to previous state...')
+                restore_lights_state(state_backup)
+            else:
+                # Fallback: Turn lights off smoothly if no backup
+                if target_type == 'all':
+                    batch_lights_control({'on': False, 'transitiontime': 10}, 'all')
+                else:
+                    endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
+                    hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 10})
     
     if effect_id not in running_effects:
         running_effects[effect_id] = {
@@ -952,6 +1327,101 @@ def stop_effect(effect_id):
 def get_active_effects():
     """Aktive Effects auflisten"""
     return jsonify({"active_effects": list(running_effects.keys())})
+
+@app.route('/api/effects/stop-all', methods=['POST'])
+def stop_all_effects():
+    """Alle aktiven Effekte stoppen"""
+    global running_effects
+    
+    # Anzahl der gestoppten Effekte für Feedback
+    stopped_count = len(running_effects)
+    
+    # Alle Effekte aus dem Dictionary entfernen (stoppt die Threads)
+    running_effects.clear()
+    
+    # Zusätzlich: Hue native Effekte stoppen
+    try:
+        lights = get_lights_raw()
+        if lights:
+            for light_id in lights.keys():
+                hue_request(f'lights/{light_id}/state', 'PUT', {'effect': 'none'})
+        
+        # Auch für Gruppen
+        groups = hue_request('groups', method='GET')
+        if groups:
+            for group_id in groups.keys():
+                hue_request(f'groups/{group_id}/action', 'PUT', {'effect': 'none'})
+                
+    except Exception as e:
+        log_system_error(e, "stop_all_effects_hue_native")
+    
+    return jsonify({
+        "success": True, 
+        "message": f"Alle Effekte gestoppt ({stopped_count} Effekte beendet)",
+        "stopped_count": stopped_count
+    })
+
+# === DISCO MODE ===
+@app.route('/api/disco-mode/start', methods=['POST'])
+def start_disco_mode():
+    """Start Disco Mode (Audio-reactive lighting)"""
+    global disco_mode
+    
+    try:
+        print("Starting Disco Mode...")
+        
+        if disco_mode is None:
+            print("Creating new DiscoMode instance...")
+            disco_mode = DiscoMode(HUE_BRIDGE_IP, HUE_USERNAME)
+        
+        if disco_mode.is_running():
+            print("Disco Mode already running")
+            return jsonify({"status": "error", "message": "Disco Mode already running"}), 400
+        
+        print("Calling disco_mode.start()...")
+        result = disco_mode.start()
+        print(f"DiscoMode start result: {result}")
+        
+        if result["status"] == "success":
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 400
+            
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Disco Mode start error: {error_details}")
+        return jsonify({"status": "error", "message": f"Failed to start Disco Mode: {str(e)}", "details": error_details}), 500
+
+@app.route('/api/disco-mode/stop', methods=['POST'])
+def stop_disco_mode():
+    """Stop Disco Mode"""
+    global disco_mode
+    
+    try:
+        if disco_mode is None:
+            return jsonify({"status": "error", "message": "Disco Mode not initialized"}), 400
+        
+        result = disco_mode.stop()
+        return jsonify(result), 200
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Failed to stop Disco Mode: {str(e)}"}), 500
+
+@app.route('/api/disco-mode/status', methods=['GET'])
+def get_disco_mode_status():
+    """Get Disco Mode status"""
+    global disco_mode
+    
+    try:
+        if disco_mode is None:
+            return jsonify({"running": False, "current_volume": 0, "audio_device": None})
+        
+        status = disco_mode.get_status()
+        return jsonify(status), 200
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Failed to get Disco Mode status: {str(e)}"}), 500
 
 # === ERWEITERTE LICHTEFFEKTE ===
 @app.route('/api/effects/advanced/<effect_type>', methods=['POST'])
@@ -4233,6 +4703,474 @@ def log_system_health():
     except Exception:
         pass  # Silent fail für Health-Logging
 
+# ═════════════════ BUTTON CONFIGURATION API ═════════════════
+
+@app.route('/api/buttons/configurations', methods=['GET'])
+def get_button_configurations():
+    """Get all button configurations"""
+    if not db_pool:
+        return jsonify({'error': 'Database not available', 'success': False}), 503
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT bc.*
+            FROM button_configurations bc
+            ORDER BY bc.gpio_pin
+        """)
+        
+        configurations = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        # Fetch group names from Hue API to get real names
+        try:
+            groups_response = hue_request('groups', method='GET')
+            if groups_response and isinstance(groups_response, dict):
+                # Add real group names to configurations
+                for config in configurations:
+                    group_id = str(config['group_id'])
+                    if group_id == '0':
+                        config['group_name'] = 'Alle Lichter'
+                    elif group_id in groups_response:
+                        config['group_name'] = groups_response[group_id].get('name', f'Gruppe {group_id}')
+                    else:
+                        config['group_name'] = f'Gruppe {group_id} (nicht gefunden)'
+            else:
+                # Fallback to generic names if Hue API fails
+                for config in configurations:
+                    group_id = config['group_id']
+                    config['group_name'] = 'Alle Lichter' if group_id == '0' else f'Gruppe {group_id}'
+        except Exception as hue_error:
+            # Fallback to generic names if Hue API fails
+            for config in configurations:
+                group_id = config['group_id']
+                config['group_name'] = 'Alle Lichter' if group_id == '0' else f'Gruppe {group_id}'
+        
+        return jsonify({
+            'success': True,
+            'configurations': configurations,
+            'count': len(configurations)
+        })
+        
+    except Exception as e:
+        log_system_error(e, "get_button_configurations")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+@app.route('/api/buttons/configurations', methods=['POST'])
+def create_button_configuration():
+    """Create new button configuration"""
+    if not db_pool:
+        return jsonify({'error': 'Database not available', 'success': False}), 503
+    
+    data = request.get_json()
+    required_fields = ['gpio_pin', 'group_id']
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify({'error': f'Missing field: {field}', 'success': False}), 400
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            INSERT INTO button_configurations 
+            (gpio_pin, group_id, action_type, button_name, description, enabled, strobo_color, strobo_duration, strobo_mode)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            data['gpio_pin'],
+            data['group_id'],
+            data.get('action_type', 'toggle'),
+            data.get('button_name', f'Button GPIO {data["gpio_pin"]}'),
+            data.get('description', ''),
+            data.get('enabled', True),
+            data.get('strobo_color', None),
+            data.get('strobo_duration', 5),
+            data.get('strobo_mode', 'classic')
+        ))
+        
+        config_id = cursor.lastrowid
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        # Reload GPIO configurations if GPIO manager is running
+        if hasattr(app, 'gpio_manager'):
+            app.gpio_manager.reload_configurations()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Button configuration created',
+            'id': config_id
+        })
+        
+    except mysql.connector.IntegrityError as e:
+        if 'Duplicate entry' in str(e):
+            return jsonify({'error': f'GPIO pin {data["gpio_pin"]} already configured', 'success': False}), 409
+        return jsonify({'error': str(e), 'success': False}), 400
+    except Exception as e:
+        log_system_error(e, "create_button_configuration")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+@app.route('/api/buttons/configurations/<int:config_id>', methods=['PUT'])
+def update_button_configuration(config_id):
+    """Update button configuration"""
+    if not db_pool:
+        return jsonify({'error': 'Database not available', 'success': False}), 503
+    
+    data = request.get_json()
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor()
+        
+        # Build update query dynamically
+        update_fields = []
+        update_values = []
+        
+        for field in ['gpio_pin', 'group_id', 'action_type', 'button_name', 'description', 'enabled', 'strobo_color', 'strobo_duration', 'strobo_mode']:
+            if field in data:
+                update_fields.append(f"{field} = %s")
+                update_values.append(data[field])
+        
+        if not update_fields:
+            return jsonify({'error': 'No fields to update', 'success': False}), 400
+        
+        update_values.append(config_id)
+        
+        cursor.execute(f"""
+            UPDATE button_configurations 
+            SET {', '.join(update_fields)}
+            WHERE id = %s
+        """, update_values)
+        
+        if cursor.rowcount == 0:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Configuration not found', 'success': False}), 404
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        # Reload GPIO configurations if GPIO manager is running
+        if hasattr(app, 'gpio_manager'):
+            app.gpio_manager.reload_configurations()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Button configuration updated'
+        })
+        
+    except mysql.connector.IntegrityError as e:
+        if 'Duplicate entry' in str(e):
+            return jsonify({'error': 'GPIO pin already configured by another button', 'success': False}), 409
+        return jsonify({'error': str(e), 'success': False}), 400
+    except Exception as e:
+        log_system_error(e, "update_button_configuration")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+@app.route('/api/buttons/configurations/<int:config_id>', methods=['DELETE'])
+def delete_button_configuration(config_id):
+    """Delete button configuration"""
+    if not db_pool:
+        return jsonify({'error': 'Database not available', 'success': False}), 503
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("DELETE FROM button_configurations WHERE id = %s", (config_id,))
+        
+        if cursor.rowcount == 0:
+            cursor.close()
+            conn.close()
+            return jsonify({'error': 'Configuration not found', 'success': False}), 404
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        # Reload GPIO configurations if GPIO manager is running
+        if hasattr(app, 'gpio_manager'):
+            app.gpio_manager.reload_configurations()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Button configuration deleted'
+        })
+        
+    except Exception as e:
+        log_system_error(e, "delete_button_configuration")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+@app.route('/api/buttons/status', methods=['GET'])
+def get_button_status():
+    """Get GPIO button monitoring status"""
+    if hasattr(app, 'gpio_manager'):
+        status = app.gpio_manager.get_button_status()
+        return jsonify({
+            'success': True,
+            'gpio_monitoring': status
+        })
+    else:
+        return jsonify({
+            'success': True,
+            'gpio_monitoring': {
+                'running': False,
+                'configured_pins': [],
+                'active_buttons': 0,
+                'configurations': {},
+                'message': 'GPIO manager not initialized'
+            }
+        })
+
+# ═════════════════ PIR MOTION SENSOR API ═════════════════
+
+@app.route('/api/pir/status', methods=['GET'])
+def get_pir_status():
+    """Get PIR motion sensor status"""
+    if hasattr(app, 'pir_manager'):
+        status = app.pir_manager.get_status()
+        return jsonify({
+            'success': True,
+            'pir_sensor': status
+        })
+    else:
+        return jsonify({
+            'success': True,
+            'pir_sensor': {
+                'running': False,
+                'gpio_available': False,
+                'pir_pin': 23,
+                'garden_group_id': '86',
+                'light_duration_minutes': 10,
+                'motion_cooldown_seconds': 30,
+                'last_motion_time': 0,
+                'timer_active': False
+            }
+        })
+
+@app.route('/api/pir/test', methods=['POST'])
+def test_pir_motion():
+    """Manually trigger PIR motion detection for testing"""
+    if hasattr(app, 'pir_manager'):
+        try:
+            success = app.pir_manager.test_motion_trigger()
+            return jsonify({
+                'success': True,
+                'message': 'PIR motion test executed - Garden lights activated for 10 minutes'
+            })
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    else:
+        return jsonify({
+            'success': False,
+            'error': 'PIR manager not available'
+        }), 503
+
+@app.route('/api/pir/toggle', methods=['POST'])
+def toggle_pir_monitoring():
+    """Start or stop PIR motion monitoring"""
+    if not hasattr(app, 'pir_manager'):
+        return jsonify({
+            'success': False,
+            'error': 'PIR manager not available'
+        }), 503
+    
+    try:
+        current_status = app.pir_manager.get_status()
+        
+        if current_status['running']:
+            app.pir_manager.stop_monitoring()
+            message = 'PIR motion monitoring stopped'
+        else:
+            app.pir_manager.start_monitoring()
+            message = 'PIR motion monitoring started'
+        
+        return jsonify({
+            'success': True,
+            'message': message,
+            'running': not current_status['running']
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/buttons/test/<int:gpio_pin>', methods=['POST'])
+def test_button_action(gpio_pin):
+    """Manually test button action"""
+    if not db_pool:
+        return jsonify({'error': 'Database not available', 'success': False}), 503
+    
+    try:
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT group_id, action_type 
+            FROM button_configurations 
+            WHERE gpio_pin = %s AND enabled = 1
+        """, (gpio_pin,))
+        
+        config = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        if not config:
+            return jsonify({'error': f'No active configuration found for GPIO pin {gpio_pin}', 'success': False}), 404
+        
+        # Execute the action
+        group_id = config['group_id']
+        action_type = config['action_type']
+        
+        # Simulate button press
+        if hasattr(app, 'gpio_manager'):
+            # Use the proper button press handling logic
+            if action_type == 'strobo_push':
+                app.gpio_manager._execute_strobo_action(gpio_pin, int(group_id))
+            else:
+                app.gpio_manager._execute_hue_action(int(group_id), action_type)
+        else:
+            # Direct API call if GPIO manager not available
+            if action_type == 'toggle':
+                # Get current state
+                group_data = hue_request(f'groups/{group_id}', 'GET')
+                if 'state' in group_data:
+                    current_state = group_data['state'].get('any_on', False)
+                    new_state = not current_state
+                else:
+                    new_state = True
+                payload = {'on': new_state}
+            elif action_type == 'on':
+                payload = {'on': True, 'bri': 254}
+            elif action_type == 'off':
+                payload = {'on': False}
+            elif action_type == 'strobo_push':
+                # For strobo_push, call the strobe API directly
+                try:
+                    # Get fresh connection for strobo config
+                    strobo_conn = db_pool.get_connection()
+                    cursor = strobo_conn.cursor(dictionary=True)
+                    cursor.execute("""
+                        SELECT strobo_color, strobo_duration, strobo_mode 
+                        FROM button_configurations 
+                        WHERE gpio_pin = %s
+                    """, (gpio_pin,))
+                    strobo_config = cursor.fetchone()
+                    cursor.close()
+                    strobo_conn.close()
+                    
+                    strobo_data = {
+                        'target_type': 'group',
+                        'target_id': group_id,
+                        'duration': strobo_config.get('strobo_duration', 5),
+                        'mode': strobo_config.get('strobo_mode', 'classic')
+                    }
+                    
+                    # Convert hex color to hue/sat if provided
+                    strobo_color = strobo_config.get('strobo_color')
+                    if strobo_color and strobo_color.startswith('#'):
+                        # Simple hex to hue conversion
+                        hex_color = strobo_color.lstrip('#')
+                        r = int(hex_color[0:2], 16) / 255.0
+                        g = int(hex_color[2:4], 16) / 255.0  
+                        b = int(hex_color[4:6], 16) / 255.0
+                        
+                        # Convert RGB to HSV
+                        max_val = max(r, g, b)
+                        min_val = min(r, g, b)
+                        diff = max_val - min_val
+                        
+                        if diff == 0:
+                            hue = 0
+                        elif max_val == r:
+                            hue = (60 * ((g - b) / diff) + 360) % 360
+                        elif max_val == g:
+                            hue = (60 * ((b - r) / diff) + 120) % 360
+                        else:
+                            hue = (60 * ((r - g) / diff) + 240) % 360
+                        
+                        sat = 0 if max_val == 0 else diff / max_val
+                        
+                        strobo_data['hue'] = int((hue / 360.0) * 65535)
+                        strobo_data['sat'] = int(sat * 254)
+                    
+                    # Call internal strobe API
+                    response = requests.post(
+                        'http://127.0.0.1:5000/api/effects/strobe',
+                        json=strobo_data,
+                        timeout=10
+                    )
+                    
+                    if response.status_code == 200:
+                        payload = None  # No Hue API call needed
+                    else:
+                        return jsonify({'error': 'Failed to start strobe effect', 'success': False}), 500
+                        
+                except Exception as e:
+                    return jsonify({'error': f'Strobe setup error: {str(e)}', 'success': False}), 500
+            else:
+                return jsonify({'error': f'Unknown action type: {action_type}', 'success': False}), 400
+            
+            # Only make Hue API call if payload exists (not for strobo_push)
+            if payload is not None:
+                result = hue_request(f'groups/{group_id}/action', 'PUT', payload)
+                if 'error' in result:
+                    return jsonify({'error': result['error'], 'success': False}), 500
+        
+        return jsonify({
+            'success': True,
+            'message': f'Test executed: {action_type} on group {group_id}',
+            'gpio_pin': gpio_pin,
+            'group_id': group_id,
+            'action_type': action_type
+        })
+        
+    except Exception as e:
+        log_system_error(e, "test_button_action")
+        return jsonify({'error': str(e), 'success': False}), 500
+
+@app.route('/api/buttons/logs', methods=['GET'])
+def get_button_logs():
+    """Get recent button press logs"""
+    if not db_pool:
+        return jsonify({'error': 'Database not available', 'success': False}), 503
+    
+    try:
+        limit = int(request.args.get('limit', 50))  # Convert to int
+        conn = db_pool.get_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT bpl.*, bc.button_name
+            FROM button_press_log bpl
+            LEFT JOIN button_configurations bc ON bpl.gpio_pin = bc.gpio_pin
+            ORDER BY bpl.timestamp DESC
+            LIMIT %s
+        """, (limit,))
+        
+        logs = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'logs': logs,
+            'count': len(logs)
+        })
+        
+    except Exception as e:
+        log_system_error(e, "get_button_logs")
+        return jsonify({'error': str(e), 'success': False}), 500
+
 if __name__ == '__main__':
     print("🏠 Hue Controller Pro gestartet!")
     print(f"📡 Bridge: {HUE_BRIDGE_IP}")
@@ -4254,11 +5192,48 @@ if __name__ == '__main__':
         power_logging_thread = threading.Thread(target=power_logging_worker, daemon=True)
         power_logging_thread.start()
         print("⚡ Power logging thread started (5 min interval)")
+        
+        # GPIO Manager initialisieren
+        try:
+            app.gpio_manager = GPIOManager(HUE_BRIDGE_IP, HUE_USERNAME, db_pool)
+            app.gpio_manager.start_monitoring()
+            print("🔘 GPIO Manager: Initialized and monitoring started")
+            add_debug_log('success', '🔘 GPIO Manager gestartet')
+        except Exception as e:
+            print(f"⚠️ GPIO Manager: Failed to initialize - {e}")
+            add_debug_log('error', f'❌ GPIO Manager Fehler: {str(e)}')
+            
+        # PIR Motion Sensor Manager initialisieren
+        try:
+            app.pir_manager = PIRManager(HUE_BRIDGE_IP, HUE_USERNAME, db_pool)
+            app.pir_manager.start_monitoring()
+            print("🔍 PIR Manager: Initialized and motion detection started")
+            add_debug_log('success', '🔍 PIR Bewegungsmelder gestartet')
+        except Exception as e:
+            print(f"⚠️ PIR Manager: Failed to initialize - {e}")
+            add_debug_log('error', f'❌ PIR Manager Fehler: {str(e)}')
+            
     else:
         print("🗄️ Database: Disabled - Running without logging")
         # Effect Builder ohne DB initialisieren
         effect_builder = EffectBuilder(None)
         print("🎨 Effect Builder: Initialized (file-based storage)")
+        
+        # GPIO Manager ohne Datenbank
+        try:
+            app.gpio_manager = GPIOManager(HUE_BRIDGE_IP, HUE_USERNAME, None)
+            app.gpio_manager.start_monitoring()
+            print("🔘 GPIO Manager: Initialized without database logging")
+        except Exception as e:
+            print(f"⚠️ GPIO Manager: Failed to initialize - {e}")
+            
+        # PIR Manager ohne Datenbank
+        try:
+            app.pir_manager = PIRManager(HUE_BRIDGE_IP, HUE_USERNAME, None)
+            app.pir_manager.start_monitoring()
+            print("🔍 PIR Manager: Initialized without database logging")
+        except Exception as e:
+            print(f"⚠️ PIR Manager: Failed to initialize - {e}")
     
     # Debug-System initialisieren
     add_debug_log('info', '🚀 Hue Controller Pro gestartet')
