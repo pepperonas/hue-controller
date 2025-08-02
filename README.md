@@ -85,9 +85,18 @@ Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Light
 - **GPIO-Pin Mapping**: Konfiguration von GPIO-Pins zu Hue-Gruppen über Web-UI
 - **Debouncing**: 200ms Hardware-Debouncing für zuverlässige Buttonerkennung
 - **Single/Double Press**: Single Press = Toggle, Double Press = Aus
+- **Strobo with State Restore**: Strobo-Effekte mit automatischer Wiederherstellung der ursprünglichen Lichteinstellungen
 - **Real-time Logging**: Vollständige Button-Aktivitäts-Protokollierung in Datenbank
 - **Web-Konfiguration**: "Custom Buttons" Tab zur einfachen Pin-zu-Gruppe-Zuordnung
 - **Button-Test-Scripts**: Dedicated Test-Tools für GPIO-Button-Debugging
+
+### 🚶 PIR Motion Sensor
+- **Automatische Beleuchtung**: PIR-Sensor triggert automatisch Garten-Beleuchtung
+- **Raspberry Pi 5 Support**: gpiozero-Integration für moderne GPIO-Hardware
+- **Konfigurierbare Parameter**: GPIO Pin, Beleuchtungsdauer, Cooldown-Zeit
+- **Smart Activation**: Warmweißes Licht (2700K) mit 100% Helligkeit für 10 Minuten
+- **Motion Logging**: Automatische Protokollierung aller Bewegungserkennungen
+- **Web-Verwaltung**: PIR-Status und -Konfiguration über Web-Interface
 
 ## 🚀 Installation
 
@@ -271,6 +280,11 @@ pm2 save                    # Konfiguration speichern
 - `GET /api/buttons/logs` - Button-Press-Logs abrufen
 - `POST /api/buttons/reload` - Button-Konfigurationen neu laden
 
+### PIR Motion Sensor
+- `GET /api/pir/status` - PIR-Sensor-Status und Konfiguration
+- `POST /api/pir/toggle` - PIR-Monitoring ein-/ausschalten
+- `POST /api/pir/test` - Manueller PIR-Test (Bewegung simulieren)
+
 ### System
 - `GET /api/status` - System-Status und Verbindungsinformationen
 
@@ -282,6 +296,7 @@ hue-controller/
 ├── app_lite.py              # Haupt-Flask-Anwendung
 ├── disco_mode.py            # Audio-reaktiver Disko-Modus mit FFT-Analyse
 ├── gpio_manager.py          # GPIO-Button-Manager für Custom Buttons
+├── pir_manager.py           # PIR Motion Sensor Manager für automatische Beleuchtung
 ├── test_db.py              # Datenbank-Tests und Setup
 ├── but_working.py          # GPIO-Button-Test-Script für direkte Hardware-Tests
 ├── test_gpio_logging.py    # GPIO-Button-Test-Script mit erweiterten Features
@@ -482,7 +497,17 @@ python3 app_lite.py
 
 ## 📝 Changelog
 
-### Version 2.5 (Juli 2025 - Aktuell)
+### Version 2.6 (August 2025 - Aktuell)
+- ✅ **PIR Motion Sensor Integration**: Automatische Garten-Beleuchtung mit PIR Bewegungsmelder
+- ✅ **Raspberry Pi 5 GPIO Support**: gpiozero-Integration für moderne Pi-Hardware
+- ✅ **State Backup/Restore System**: Intelligente Wiederherstellung der ursprünglichen Lichteinstellungen nach Strobo-Effekten
+- ✅ **Brightness Auto-Activation**: Automatisches Einschalten von Lichtern/Gruppen beim Ändern der Helligkeit
+- ✅ **Enhanced Custom Buttons**: Erweiterte Strobo-Button-Funktionalität mit automatischer State-Wiederherstellung
+- ✅ **PIR Manager**: Vollständige PIR-Sensor-Verwaltung mit konfigurierbaren Parametern (GPIO Pin, Dauer, Cooldown)
+- ✅ **Motion Detection Logging**: Automatische Protokollierung von Bewegungserkennungen in Datenbank
+- ✅ **Smart Light Control**: Intelligente Lichtsteuerung - bei ausgeschalteten Lichtern wird beim Helligkeit-Slider automatisch eingeschaltet
+
+### Version 2.5 (Juli 2025)
 - ✅ **Audio-Reaktive Beleuchtung (Disko-Modus)**: Vollständige FFT-basierte Frequenzanalyse
 - ✅ **Intelligente Frequenz-Mappings**: 5 Frequenzbänder (Bass, Low-Mid, Mid, High-Mid, Treble) mit spezifischen Farben
 - ✅ **Real-Time Spektralanalyse**: 2048-Sample FFT-Fenster mit Hanning-Window für präzise Frequenzerkennung
