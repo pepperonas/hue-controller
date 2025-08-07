@@ -238,6 +238,7 @@ pm2 save                    # Konfiguration speichern
 - **Touch-freundlich**: Große Buttons und Slider
 - **Responsive Design**: Funktioniert auf Smartphones und Tablets
 - **Glassmorphism UI**: Moderne, ansprechende Benutzeroberfläche
+- **PWA-Ready**: Installierbar als App auf Smartphone-Homescreen mit optimierten Favicons für Samsung S24 Ultra
 
 ## 📊 API-Endpoints
 
@@ -498,6 +499,8 @@ python3 app_lite.py
 ## 📝 Changelog
 
 ### Version 2.6 (August 2025 - Aktuell)
+- ✅ **Favicon-Optimierung**: Vollständige Samsung S24 Ultra-Kompatibilität für Homescreen-Verknüpfungen
+- ✅ **PWA-Enhancement**: Erweiterte Meta-Tags und Icons für optimale mobile App-Erfahrung
 - ✅ **PIR Motion Sensor Integration**: Automatische Garten-Beleuchtung mit PIR Bewegungsmelder
 - ✅ **Raspberry Pi 5 GPIO Support**: gpiozero-Integration für moderne Pi-Hardware
 - ✅ **State Backup/Restore System**: Intelligente Wiederherstellung der ursprünglichen Lichteinstellungen nach Strobo-Effekten
