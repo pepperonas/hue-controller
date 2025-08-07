@@ -1,17 +1,77 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#2c2e3b">
-    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
     <title>Hue Controller - Intelligente Lichtsteuerung</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta name="title" content="💡 Hue Controller - Intelligente Lichtsteuerung">
+    <meta name="description" content="Philips Hue Smart Lighting Controller mit Effekten und Power Monitoring via Raspberry Pi.">
+    <meta name="keywords" content="Hue, Philips Hue, Smart Lighting, LED Controller, Raspberry Pi, Home Automation">
+    <meta name="author" content="Hue Control App">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="German">
+    <meta name="revisit-after" content="7 days">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="http://localhost:5000/">
+    <meta property="og:title" content="Hue Controller - Intelligente Lichtsteuerung">
+    <meta property="og:description" content="Philips Hue Smart Lighting Controller mit Effekten und Power Monitoring via Raspberry Pi.">
+    <meta property="og:site_name" content="Hue Control">
+    <meta property="og:locale" content="de_DE">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hue Controller - Intelligente Lichtsteuerung">
+    <meta name="twitter:description" content="Philips Hue Smart Lighting Controller mit Effekten und Power Monitoring via Raspberry Pi.">
+    
+    <!-- Technical Meta Tags -->
+    <meta name="application-name" content="Hue Control">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hue Control">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2c2e3b">
+    <meta name="color-scheme" content="dark">
+    
+    <!-- Samsung Browser & Android specific -->
+    <meta name="msapplication-TileColor" content="#2c2e3b">
+    <meta name="msapplication-TileImage" content="/apple-touch-icon.png">
+    <meta name="msapplication-square70x70logo" content="/apple-touch-icon.png">
+    <meta name="msapplication-square150x150logo" content="/apple-touch-icon.png">
+    <meta name="msapplication-square310x310logo" content="/apple-touch-icon.png">
+    
+    <!-- Additional Android Chrome meta tags -->
+    <meta name="mobile-web-app-title" content="Hue Control">
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Primary Icons (Samsung Browser S24 Ultra priority) with cache busting -->
+    <link rel="shortcut icon" href="/favicon.ico?v=2025080701" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico?v=2025080701" type="image/x-icon">
+    
+    <!-- Apple Touch Icons for iOS and Samsung fallback -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2025080701">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2025080701">
+    
+    <!-- Samsung Browser S24 Ultra specific icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+    <link rel="mask-icon" href="/apple-touch-icon.png" color="#2c2e3b">
+    
+    <!-- Standard sizes for broad compatibility -->
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" type="image/png" sizes="96x96" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="144x144" href="/apple-touch-icon.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#2c2e3b">
+    <meta name="msapplication-TileImage" content="/android-chrome-192x192.png">
     
     <style>
         :root {
