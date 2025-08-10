@@ -9,6 +9,8 @@ import logging
 from typing import Callable, Optional
 import requests
 import json
+from datetime import datetime, timedelta
+import math
 
 # Try to import gpiozero for Raspberry Pi 5 compatibility
 try:
@@ -65,8 +67,74 @@ class PIRManager:
         self.lights_manually_controlled = False
         self.pir_sensor = None  # gpiozero MotionSensor instance
         
+        # NEW: Motion Detection Settings
+        self.motion_detection_enabled = True  # Toggle für Bewegungserkennung
+        self.daylight_detection_enabled = True  # Nur bei Sonnenuntergang aktiv
+        
         # Setup logging
         self.logger = logging.getLogger(__name__)
+    
+    def calculate_sunrise_sunset_berlin(self, date=None):
+        """
+        Berechnet Sonnenauf- und -untergang für Berlin für ein gegebenes Datum
+        Approximation basierend auf astronomischen Formeln
+        
+        Args:
+            date: datetime object, Standard ist heute
+            
+        Returns:
+            tuple: (sunrise_time, sunset_time) als datetime objects
+        """
+        if date is None:
+            date = datetime.now()
+        
+        # Berlin Koordinaten
+        latitude = 52.5200  # Grad Nord
+        longitude = 13.4050  # Grad Ost
+        
+        # Tag des Jahres
+        day_of_year = date.timetuple().tm_yday
+        
+        # Approximationsformeln für Sonnenauf- und -untergang
+        # Declination of the sun
+        declination = 23.45 * math.sin(math.radians(360 * (284 + day_of_year) / 365))
+        
+        # Hour angle
+        hour_angle_deg = math.degrees(math.acos(-math.tan(math.radians(latitude)) * math.tan(math.radians(declination))))
+        
+        # Sunrise and sunset times (in decimal hours from solar noon)
+        sunrise_hours = 12 - (hour_angle_deg / 15) + (longitude / 15) - 1  # -1 for CET
+        sunset_hours = 12 + (hour_angle_deg / 15) + (longitude / 15) - 1   # -1 for CET
+        
+        # Convert to datetime objects
+        sunrise_time = date.replace(hour=int(sunrise_hours), 
+                                   minute=int((sunrise_hours % 1) * 60), 
+                                   second=0, microsecond=0)
+        
+        sunset_time = date.replace(hour=int(sunset_hours), 
+                                  minute=int((sunset_hours % 1) * 60), 
+                                  second=0, microsecond=0)
+        
+        return sunrise_time, sunset_time
+    
+    def is_nighttime(self):
+        """
+        Prüft ob es aktuell Nacht ist (nach Sonnenuntergang und vor Sonnenaufgang)
+        
+        Returns:
+            bool: True wenn es Nacht ist, False wenn Tag
+        """
+        if not self.daylight_detection_enabled:
+            return True  # Wenn Tageslichteerkennung deaktiviert, immer als Nacht behandeln
+        
+        now = datetime.now()
+        sunrise, sunset = self.calculate_sunrise_sunset_berlin(now)
+        
+        # Prüfen ob es zwischen Sonnenuntergang und Sonnenaufgang ist
+        if now < sunrise or now > sunset:
+            return True  # Es ist Nacht
+        else:
+            return False  # Es ist Tag
         
     def setup_pir_sensor(self):
         """Setup PIR sensor using gpiozero"""
@@ -176,13 +244,24 @@ class PIRManager:
         
         while self.running:
             try:
+                # Prüfe zuerst ob Bewegungserkennung aktiviert ist
+                if not self.motion_detection_enabled:
+                    time.sleep(5)  # Längere Pause wenn deaktiviert
+                    continue
+                
+                # Prüfe ob es Nacht ist (nur dann aktiv)
+                if not self.is_nighttime():
+                    time.sleep(30)  # Tagsüber längere Pause
+                    continue
+                
                 if self.gpio_available and self.pir_sensor and self.pir_sensor.motion_detected:
                     current_time = time.time()
                     
                     # Check cooldown period to avoid rapid triggering
                     if current_time - self.last_motion_time > self.motion_cooldown:
-                        print("🚶 PIR: Bewegung erkannt!")
-                        self.logger.info("Motion detected by PIR sensor")
+                        sunrise, sunset = self.calculate_sunrise_sunset_berlin()
+                        print(f"🚶 PIR: Bewegung erkannt! (Nachtzeit: {sunset.strftime('%H:%M')} - {sunrise.strftime('%H:%M')})")
+                        self.logger.info(f"Motion detected by PIR sensor during nighttime")
                         
                         # Turn on garden lights
                         self.turn_on_garden_lights()
@@ -271,6 +350,10 @@ class PIRManager:
     
     def get_status(self) -> dict:
         """Get current PIR sensor status"""
+        # Berechne aktuelle Sonnenzeiten
+        sunrise, sunset = self.calculate_sunrise_sunset_berlin()
+        is_night = self.is_nighttime()
+        
         return {
             'running': self.running,
             'gpio_available': self.gpio_available,
@@ -279,7 +362,14 @@ class PIRManager:
             'light_duration_minutes': self.light_duration / 60,
             'motion_cooldown_seconds': self.motion_cooldown,
             'last_motion_time': self.last_motion_time,
-            'timer_active': self.garden_timer is not None and self.garden_timer.is_alive() if self.garden_timer else False
+            'timer_active': self.garden_timer is not None and self.garden_timer.is_alive() if self.garden_timer else False,
+            # NEW: Motion detection settings
+            'motion_detection_enabled': self.motion_detection_enabled,
+            'daylight_detection_enabled': self.daylight_detection_enabled,
+            'is_nighttime': is_night,
+            'sunrise_today': sunrise.strftime('%H:%M'),
+            'sunset_today': sunset.strftime('%H:%M'),
+            'motion_active': self.motion_detection_enabled and is_night
         }
     
     def test_motion_trigger(self):
@@ -288,3 +378,60 @@ class PIRManager:
         self.logger.info("Manual motion trigger for testing")
         self.turn_on_garden_lights()
         return True
+    
+    def set_motion_detection_enabled(self, enabled: bool):
+        """
+        Aktiviert/deaktiviert die Bewegungserkennung
+        
+        Args:
+            enabled: True um zu aktivieren, False um zu deaktivieren
+        """
+        self.motion_detection_enabled = enabled
+        status_text = "aktiviert" if enabled else "deaktiviert"
+        print(f"🔧 PIR: Bewegungserkennung {status_text}")
+        self.logger.info(f"Motion detection {'enabled' if enabled else 'disabled'}")
+        
+    def set_daylight_detection_enabled(self, enabled: bool):
+        """
+        Aktiviert/deaktiviert die Tageslichteerkennung
+        
+        Args:
+            enabled: True für zeitbasierte Aktivierung, False für 24h Betrieb
+        """
+        self.daylight_detection_enabled = enabled
+        status_text = "aktiviert (nur nachts)" if enabled else "deaktiviert (24h Betrieb)"
+        print(f"🔧 PIR: Tageslichteerkennung {status_text}")
+        self.logger.info(f"Daylight detection {'enabled' if enabled else 'disabled'}")
+    
+    def get_sunrise_sunset_info(self, days=7) -> dict:
+        """
+        Gibt Sonnenauf- und -untergangszeiten für mehrere Tage zurück
+        
+        Args:
+            days: Anzahl der Tage (Standard: 7)
+            
+        Returns:
+            dict: Sonnenzeiten für die nächsten Tage
+        """
+        info = {}
+        today = datetime.now()
+        
+        for i in range(days):
+            date = today + timedelta(days=i)
+            sunrise, sunset = self.calculate_sunrise_sunset_berlin(date)
+            
+            day_name = date.strftime("%A") if i == 0 else date.strftime("%A")
+            if i == 0:
+                day_name = "Heute"
+            elif i == 1:
+                day_name = "Morgen"
+            
+            info[date.strftime("%Y-%m-%d")] = {
+                'day_name': day_name,
+                'date': date.strftime("%d.%m.%Y"),
+                'sunrise': sunrise.strftime("%H:%M"),
+                'sunset': sunset.strftime("%H:%M"),
+                'daylight_hours': f"{(sunset - sunrise).seconds // 3600}h {((sunset - sunrise).seconds % 3600) // 60}min"
+            }
+        
+        return info

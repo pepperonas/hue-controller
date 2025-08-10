@@ -90,12 +90,17 @@ Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Light
 - **Web-Konfiguration**: "Custom Buttons" Tab zur einfachen Pin-zu-Gruppe-Zuordnung
 - **Button-Test-Scripts**: Dedicated Test-Tools für GPIO-Button-Debugging
 
-### 🚶 PIR Motion Sensor
+### 🚶 PIR Motion Sensor (Erweitert)
 - **Automatische Beleuchtung**: PIR-Sensor triggert automatisch Garten-Beleuchtung
 - **Raspberry Pi 5 Support**: gpiozero-Integration für moderne GPIO-Hardware
 - **Konfigurierbare Parameter**: GPIO Pin, Beleuchtungsdauer, Cooldown-Zeit
 - **Smart Activation**: Warmweißes Licht (2700K) mit 100% Helligkeit für 10 Minuten
 - **Motion Logging**: Automatische Protokollierung aller Bewegungserkennungen
+- **Intelligente Zeitsteuerung**: ⭐ **NEU** - Sonnenauf-/untergangsberechnung für Berlin
+- **Tageslichteerkennung**: ⭐ **NEU** - Automatisch nur nachts aktiv (zwischen Sonnenuntergang und Sonnenaufgang)
+- **Flexible Konfiguration**: ⭐ **NEU** - Toggle für 24h Betrieb oder zeitbasierte Aktivierung
+- **Erweiterte Web-Steuerung**: ⭐ **NEU** - Separate Toggles für Bewegungserkennung und Tageslichteerkennung
+- **Sonnenzeiten-Übersicht**: ⭐ **NEU** - 7-Tage-Vorhersage der Sonnenauf-/untergangszeiten
 - **Web-Verwaltung**: PIR-Status und -Konfiguration über Web-Interface
 
 ## 🚀 Installation
@@ -281,10 +286,12 @@ pm2 save                    # Konfiguration speichern
 - `GET /api/buttons/logs` - Button-Press-Logs abrufen
 - `POST /api/buttons/reload` - Button-Konfigurationen neu laden
 
-### PIR Motion Sensor
-- `GET /api/pir/status` - PIR-Sensor-Status und Konfiguration
+### PIR Motion Sensor (Erweitert)
+- `GET /api/pir/status` - PIR-Sensor-Status und Konfiguration (inkl. Sonnenzeiten)
 - `POST /api/pir/toggle` - PIR-Monitoring ein-/ausschalten
 - `POST /api/pir/test` - Manueller PIR-Test (Bewegung simulieren)
+- `POST /api/pir/config` - ⭐ **NEU** - PIR-Konfiguration ändern (Bewegungserkennung/Tageslichteerkennung Toggles)
+- `GET /api/pir/sunrise-sunset` - ⭐ **NEU** - Sonnenauf-/untergangszeiten für Berlin (7-Tage-Vorhersage)
 
 ### System
 - `GET /api/status` - System-Status und Verbindungsinformationen
@@ -508,7 +515,13 @@ python3 app_lite.py
 - ✅ **Enhanced Custom Buttons**: Erweiterte Strobo-Button-Funktionalität mit automatischer State-Wiederherstellung
 - ✅ **PIR Manager**: Vollständige PIR-Sensor-Verwaltung mit konfigurierbaren Parametern (GPIO Pin, Dauer, Cooldown)
 - ✅ **Motion Detection Logging**: Automatische Protokollierung von Bewegungserkennungen in Datenbank
-- ✅ **Smart Light Control**: Intelligente Lichtsteuerung - bei ausgeschalteten Lichtern wird beim Helligkeit-Slider automatisch eingeschaltet
+- ✅ **Smart Light Control**: Intelligente Lichtsteuerung - bei ausgeschaltenen Lichtern wird beim Helligkeit-Slider automatisch eingeschaltet
+- ✅ **⭐ Intelligente Zeitsteuerung**: Sonnenauf-/untergangsberechnung für Berlin mit astronomischen Formeln
+- ✅ **⭐ Tageslichteerkennung**: PIR automatisch nur nachts aktiv (zwischen Sonnenuntergang und Sonnenaufgang)
+- ✅ **⭐ Erweiterte PIR-Konfiguration**: Separate Toggles für Bewegungserkennung und Tageslichteerkennung über Web-Interface
+- ✅ **⭐ Sonnenzeiten-Übersicht**: 7-Tage-Vorhersage mit detaillierter Tageslichtlängen-Berechnung
+- ✅ **⭐ localStorage Persistenz**: Globale Steuerung merkt sich aufgeklappten/eingeklappten Zustand
+- ✅ **⭐ Neue API-Endpunkte**: `/api/pir/config` und `/api/pir/sunrise-sunset` für erweiterte PIR-Steuerung
 
 ### Version 2.5 (Juli 2025)
 - ✅ **Audio-Reaktive Beleuchtung (Disko-Modus)**: Vollständige FFT-basierte Frequenzanalyse
