@@ -819,10 +819,10 @@ def start_advanced_strobe(config):
         
         try:
             if mode == 'classic':
-                # Classic Strobe: 10Hz, 50ms flash, 50ms pause
-                flash_duration = 0.05  # 50ms
-                pause_duration = 0.05  # 50ms
-                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}  # Use configured color
+                # Classic Strobe: Flashiger und intensiver - 30ms flash, 30ms pause  
+                flash_duration = 0.03  # 30ms für flashigere Wirkung
+                pause_duration = 0.03  # 30ms für höhere Frequenz
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': 254}  # Maximale Helligkeit für Flash-Intensität
                 
                 while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
                     # Flash on
@@ -850,11 +850,11 @@ def start_advanced_strobe(config):
                     time.sleep(pause_duration)
                     
             elif mode == 'double_flash':
-                # Double Flash: Two quick flashes, then pause
-                flash_duration = 0.05  # 50ms each flash
-                inter_flash_pause = 0.05  # 50ms between flashes
-                pattern_pause = 0.2  # 200ms after double flash
-                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}  # Use configured color
+                # Double Flash: Flashigere doppelte Blitze
+                flash_duration = 0.025  # 25ms jeder Flash für mehr Intensität
+                inter_flash_pause = 0.025  # 25ms zwischen Flashes
+                pattern_pause = 0.15  # 150ms nach doppeltem Flash (reduziert)
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': 254}  # Maximale Helligkeit
                 
                 while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
                     # First flash
@@ -906,12 +906,12 @@ def start_advanced_strobe(config):
                     time.sleep(pattern_pause)
                     
             elif mode == 'random_chaos':
-                # Random Chaos: Random flash duration (20-100ms) and pause (50-250ms)
-                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}  # Use configured color
+                # Random Chaos: Flashigere zufällige Zeiten
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': 254}  # Maximale Helligkeit
                 
                 while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
-                    flash_duration = random.uniform(0.02, 0.1)  # 20-100ms
-                    pause_duration = random.uniform(0.05, 0.25)  # 50-250ms
+                    flash_duration = random.uniform(0.015, 0.06)  # 15-60ms (flashiger)
+                    pause_duration = random.uniform(0.02, 0.15)  # 20-150ms (kürzer)
                     
                     # Flash on
                     if target_type == 'all':
@@ -947,8 +947,8 @@ def start_advanced_strobe(config):
                     {'hue': 54613, 'sat': 254, 'bri': 254}, # Magenta
                     {'hue': 32768, 'sat': 254, 'bri': 254}, # Cyan
                 ]
-                flash_duration = 0.06  # 60ms flash
-                pause_duration = 0.06  # 60ms pause (120ms total cycle)
+                flash_duration = 0.04  # 40ms flash (flashiger)
+                pause_duration = 0.04  # 40ms pause (80ms total cycle - schneller)
                 
                 while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
                     current_color = color_sequence[color_index % len(color_sequence)]
@@ -984,9 +984,9 @@ def start_advanced_strobe(config):
                 base_cycle_time = 0.15  # Base cycle time
                 
                 while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
-                    # Calculate sinusoidal flash duration
-                    sine_value = math.sin(flash_count * 0.2)  # Slow sine wave
-                    flash_duration = 0.03 + (0.035 * (sine_value + 1))  # 30-100ms range
+                    # Calculate sinusoidal flash duration - flashiger
+                    sine_value = math.sin(flash_count * 0.3)  # Schnellere sine wave
+                    flash_duration = 0.02 + (0.025 * (sine_value + 1))  # 20-70ms range (flashiger)
                     pause_duration = base_cycle_time - flash_duration
                     
                     # Flash on
@@ -1023,7 +1023,7 @@ def start_advanced_strobe(config):
                     
                     for strike in range(strikes):
                         # Random flash duration for irregular lightning
-                        flash_duration = random.uniform(0.02, 0.08)  # 20-80ms
+                        flash_duration = random.uniform(0.01, 0.05)  # 10-50ms (flashiger)
                         
                         # Flash on
                         if target_type == 'all':
@@ -1056,10 +1056,10 @@ def start_advanced_strobe(config):
                     time.sleep(pause_duration)
             
             else:
-                # Fallback to classic if unknown mode
-                flash_duration = 0.05
-                pause_duration = 0.05
-                strobe_color = {'hue': hue, 'sat': sat, 'bri': bri}
+                # Fallback to classic if unknown mode - flashiger
+                flash_duration = 0.03
+                pause_duration = 0.03
+                strobe_color = {'hue': hue, 'sat': sat, 'bri': 254}
                 
                 while (duration == 0 or time.time() - start_time < duration) and effect_id in running_effects:
                     # Flash on
@@ -1094,17 +1094,20 @@ def start_advanced_strobe(config):
                 track_effect_usage('strobe', f'{mode}_strobe_{frequency}Hz', target_type, 
                                  effect_id=effect_id)
             
+            # Schnellere Beendigung nach letztem Aufleuchten - verkürze Wartezeit
+            time.sleep(0.1)  # Kurze Pause nach letztem Flash (100ms statt länger warten)
+            
             # Restore previous state if backup exists
             if restore_state and state_backup:
                 add_debug_log('info', '🔄 Restoring lights to previous state...')
                 restore_lights_state(state_backup)
             else:
-                # Fallback: Turn lights off smoothly if no backup
+                # Fallback: Turn lights off quickly if no backup - sofortiger Übergang
                 if target_type == 'all':
-                    batch_lights_control({'on': False, 'transitiontime': 10}, 'all')
+                    batch_lights_control({'on': False, 'transitiontime': 2}, 'all')  # 200ms statt 1s
                 else:
                     endpoint = f"{target_type}s/{target_id}/{'action' if target_type == 'group' else 'state'}"
-                    hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 10})
+                    hue_request(endpoint, 'PUT', {'on': False, 'transitiontime': 2})  # 200ms statt 1s
     
     if effect_id not in running_effects:
         running_effects[effect_id] = {
@@ -4997,6 +5000,67 @@ def toggle_pir_monitoring():
             'success': True,
             'message': message,
             'running': not current_status['running']
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/pir/config', methods=['POST'])
+def update_pir_config():
+    """Update PIR motion detection configuration"""
+    if not hasattr(app, 'pir_manager'):
+        return jsonify({
+            'success': False,
+            'error': 'PIR manager not available'
+        }), 503
+    
+    try:
+        data = request.get_json()
+        
+        # Update motion detection enabled/disabled
+        if 'motion_detection_enabled' in data:
+            app.pir_manager.set_motion_detection_enabled(data['motion_detection_enabled'])
+        
+        # Update daylight detection enabled/disabled  
+        if 'daylight_detection_enabled' in data:
+            app.pir_manager.set_daylight_detection_enabled(data['daylight_detection_enabled'])
+        
+        # Return updated status
+        status = app.pir_manager.get_status()
+        return jsonify({
+            'success': True,
+            'message': 'PIR configuration updated',
+            'pir_sensor': status
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/pir/sunrise-sunset', methods=['GET'])
+def get_sunrise_sunset_info():
+    """Get sunrise/sunset information for Berlin"""
+    if not hasattr(app, 'pir_manager'):
+        return jsonify({
+            'success': False,
+            'error': 'PIR manager not available'
+        }), 503
+    
+    try:
+        days = int(request.args.get('days', 7))  # Default 7 days
+        if days > 14:  # Limit to max 14 days
+            days = 14
+        
+        info = app.pir_manager.get_sunrise_sunset_info(days)
+        return jsonify({
+            'success': True,
+            'location': 'Berlin, Deutschland',
+            'data': info
         })
         
     except Exception as e:
