@@ -94,7 +94,7 @@ Eine moderne, umfassende Web-Anwendung zur Steuerung von Philips Hue Smart Light
 - **Automatische Beleuchtung**: PIR-Sensor triggert automatisch Garten-Beleuchtung
 - **Raspberry Pi 5 Support**: gpiozero-Integration für moderne GPIO-Hardware
 - **Konfigurierbare Parameter**: GPIO Pin, Beleuchtungsdauer, Cooldown-Zeit
-- **Smart Activation**: Warmweißes Licht (2700K) mit 100% Helligkeit für 10 Minuten
+- **Smart Activation**: Warmweißes Licht (2700K) mit 100% Helligkeit für 3 Minuten
 - **Motion Logging**: Automatische Protokollierung aller Bewegungserkennungen
 - **Intelligente Zeitsteuerung**: ⭐ **NEU** - Sonnenauf-/untergangsberechnung für Berlin
 - **Tageslichteerkennung**: ⭐ **NEU** - Automatisch nur nachts aktiv (zwischen Sonnenuntergang und Sonnenaufgang)
