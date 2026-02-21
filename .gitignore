@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+*.egg-info/
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+
+# Environment Variables
+.env
+.env.local
+.env.*
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PM2
+ecosystem.config.js.backup
+
+# Backups
+*.backup
+*.bak
+*.tmp
+
+# Database
+*.db
+*.sqlite3
+
+# App Config
+hue-config.json
+
+# Claude
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.onboarding_completed
