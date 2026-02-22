@@ -24,51 +24,43 @@ A smart Philips Hue lighting controller for Raspberry Pi with web interface, mot
 ## Wiring Diagram
 
 ```
-    Raspberry Pi 5
-    ┌──────────────┐
-    │              │         PIR Motion Sensor (HC-SR501)
-    │              │         ┌──────────────────────┐
-    │   GPIO 23 ●──┼─────────┤ OUT                  │
-    │   (Pin 16)   │         │                      │
-    │              │         │  Detection range:     │
-    │      5V  ●───┼─────────┤ VCC    ~7m, 120°     │
-    │   (Pin 4)    │         │                      │
-    │              │         │                      │
-    │      GND ●───┼─────────┤ GND                  │
-    │   (Pin 6)    │         └──────────────────────┘
-    │              │
-    │              │         GPIO Buttons (optional, DB-configured)
-    │              │         ┌──────────────────────┐
-    │  GPIO n  ●───┼─────────┤ Button (NO)          │
-    │  (config)    │         │   ┌──┐               │
-    │              │         │   │  │──► GND         │
-    │              │         └───┴──┴───────────────┘
-    │              │         (internal pull-up, 200ms debounce)
-    │              │
+    Raspberry Pi 5                       PIR Sensor (HC-SR501)
+    ┌──────────────┐                     ┌────────────────────┐
+    │              │                     │                    │
+    │  GPIO23(16) ─┼─────────────────────┤── OUT              │
+    │              │                     │   Range:  ~7m      │
+    │    5V   (4) ─┼─────────────────────┤── VCC    Angle: 120°
+    │              │                     │                    │
+    │   GND   (6) ─┼──────────┬──────────┤── GND              │
+    │              │          │          └────────────────────┘
+    │              │          │
+    │              │          │           GPIO Buttons (optional)
+    │              │          │           ┌────────────────────┐
+    │   GPIO n   ──┼──────────┼───────────┤── Button (NO)      │
+    │  (DB config) │          └───────────┤── GND              │
+    │              │                      └────────────────────┘
+    │              │                      (internal pull-up, 200ms debounce)
     └──────────────┘
-          │
-          │ Network (HTTP)
-          ▼
+            │
+            │ Network (HTTP)
+            ▼
     ┌──────────────────────┐
     │  Philips Hue Bridge  │
     │  192.168.178.x       │
-    │                      │
-    │  REST API via HTTP    │
-    │  /api/<username>/...  │
+    │  REST API            │
     └──────────────────────┘
 
-    Pin Mapping:
-    ┌──────────┬──────────┬─────────────────────────────────┐
-    │ Pi Pin   │ GPIO     │ Connection                      │
-    ├──────────┼──────────┼─────────────────────────────────┤
-    │ Pin 16   │ GPIO 23  │ PIR sensor OUT                  │
-    │ Pin 4    │ 5V       │ PIR sensor VCC                  │
-    │ Pin 6    │ GND      │ PIR sensor GND / Button GND     │
-    │ varies   │ DB config│ Optional GPIO buttons            │
-    └──────────┴──────────┴─────────────────────────────────┘
+    PIR: auto night detection (sunset/sunrise) · 30s cooldown
+    Buttons: gpiozero · single + double press support
 
-    PIR: HC-SR501, auto night detection, 30s cooldown
-    Buttons: gpiozero, pull-up, single/double press support
+    ┌──────────┬──────────┬──────────────────────────────────┐
+    │ Pi Pin   │ GPIO     │ Connection                       │
+    ├──────────┼──────────┼──────────────────────────────────┤
+    │ Pin 16   │ GPIO 23  │ PIR sensor OUT                   │
+    │ Pin 4    │ 5V       │ PIR sensor VCC                   │
+    │ Pin 6    │ GND      │ PIR sensor + button GND          │
+    │ varies   │ DB config│ Optional GPIO buttons (NO)       │
+    └──────────┴──────────┴──────────────────────────────────┘
 ```
 
 > **Note:** The PIR sensor triggers garden lights automatically at night (sunset/sunrise detection). GPIO button pins are configured dynamically via MySQL database.
