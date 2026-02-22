@@ -17,9 +17,61 @@ A smart Philips Hue lighting controller for Raspberry Pi with web interface, mot
 - **Motion Detection** — PIR sensor integration for automatic lighting based on room occupancy
 - **Disco Mode** — Synchronized light effects with music via audio processing
 - **Effect Builder** — Create and save custom lighting effects and sequences
-- **GPIO Control** — Direct hardware integration via Raspberry Pi GPIO pins
+- **GPIO Buttons** — Physical buttons for quick light control (configurable via DB)
 - **Smart Error Handling** — Resilient error recovery with system health monitoring
 - **Database Logging** — MySQL-backed event logging and analytics
+
+## Wiring Diagram
+
+```
+    Raspberry Pi 5
+    ┌──────────────┐
+    │              │         PIR Motion Sensor (HC-SR501)
+    │              │         ┌──────────────────────┐
+    │   GPIO 23 ●──┼─────────┤ OUT                  │
+    │   (Pin 16)   │         │                      │
+    │              │         │  Detection range:     │
+    │      5V  ●───┼─────────┤ VCC    ~7m, 120°     │
+    │   (Pin 4)    │         │                      │
+    │              │         │                      │
+    │      GND ●───┼─────────┤ GND                  │
+    │   (Pin 6)    │         └──────────────────────┘
+    │              │
+    │              │         GPIO Buttons (optional, DB-configured)
+    │              │         ┌──────────────────────┐
+    │  GPIO n  ●───┼─────────┤ Button (NO)          │
+    │  (config)    │         │   ┌──┐               │
+    │              │         │   │  │──► GND         │
+    │              │         └───┴──┴───────────────┘
+    │              │         (internal pull-up, 200ms debounce)
+    │              │
+    └──────────────┘
+          │
+          │ Network (HTTP)
+          ▼
+    ┌──────────────────────┐
+    │  Philips Hue Bridge  │
+    │  192.168.178.x       │
+    │                      │
+    │  REST API via HTTP    │
+    │  /api/<username>/...  │
+    └──────────────────────┘
+
+    Pin Mapping:
+    ┌──────────┬──────────┬─────────────────────────────────┐
+    │ Pi Pin   │ GPIO     │ Connection                      │
+    ├──────────┼──────────┼─────────────────────────────────┤
+    │ Pin 16   │ GPIO 23  │ PIR sensor OUT                  │
+    │ Pin 4    │ 5V       │ PIR sensor VCC                  │
+    │ Pin 6    │ GND      │ PIR sensor GND / Button GND     │
+    │ varies   │ DB config│ Optional GPIO buttons            │
+    └──────────┴──────────┴─────────────────────────────────┘
+
+    PIR: HC-SR501, auto night detection, 30s cooldown
+    Buttons: gpiozero, pull-up, single/double press support
+```
+
+> **Note:** The PIR sensor triggers garden lights automatically at night (sunset/sunrise detection). GPIO button pins are configured dynamically via MySQL database.
 
 ## Quick Start
 
@@ -57,7 +109,7 @@ python app_lite.py
 - **Backend** — Python 3.11, Flask, Flask-SocketIO
 - **Frontend** — HTML5, CSS3, JavaScript (vanilla)
 - **Database** — MySQL
-- **Hardware** — Philips Hue Bridge API, PIR sensor (GPIO)
+- **Hardware** — Philips Hue Bridge API, PIR sensor (HC-SR501), GPIO buttons (gpiozero)
 - **Process Manager** — PM2
 
 ## Architecture
@@ -69,8 +121,8 @@ hue-controller/
 ├── disco_mode.py         # Disco effect engine
 ├── effect_builder.py     # Custom effect creation
 ├── error_handler.py      # Smart error recovery
-├── gpio_manager.py       # GPIO pin management
-├── pir_manager.py        # Motion sensor handler
+├── gpio_manager.py       # GPIO button management
+├── pir_manager.py        # PIR motion sensor handler
 ├── public/               # Web UI assets
 │   ├── index.html        # Main dashboard
 │   └── onboarding.html   # Setup wizard
