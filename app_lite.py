@@ -45,7 +45,7 @@ app = Flask(__name__, template_folder='public')
 CORS(app)
 
 # Konfiguration mit Umgebungsvariablen
-HUE_BRIDGE_IP = os.getenv('HUE_BRIDGE_IP', '192.168.2.35')
+HUE_BRIDGE_IP = os.getenv('HUE_BRIDGE_IP', '192.168.178.29')
 HUE_USERNAME = os.getenv('HUE_USERNAME', '1trezWogQDPyNuC19bcyOHp8BsNCMZr6wKfXwe6w')
 
 # MySQL Konfiguration

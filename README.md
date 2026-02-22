@@ -46,7 +46,7 @@ A smart Philips Hue lighting controller for Raspberry Pi with web interface, mot
             ▼
     ┌──────────────────────┐
     │  Philips Hue Bridge  │
-    │  192.168.178.x       │
+    │  192.168.178.29       │
     │  REST API            │
     └──────────────────────┘
 
@@ -63,7 +63,7 @@ A smart Philips Hue lighting controller for Raspberry Pi with web interface, mot
     └──────────┴──────────┴──────────────────────────────────┘
 ```
 
-> **Note:** The PIR sensor triggers garden lights automatically at night (sunset/sunrise detection). GPIO button pins are configured dynamically via MySQL database.
+> **Note:** The PIR sensor triggers garden lights (Hue group 86) automatically at night using sunset/sunrise calculation for Berlin. 3-minute auto-off timer, 30-second cooldown between triggers. GPIO button pins are configured dynamically via MySQL database.
 
 ## Quick Start
 
@@ -78,7 +78,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Configure Hue Bridge IP in .env
-echo "HUE_BRIDGE_IP=192.168.x.x" > .env
+cp .env.example .env
+# Edit .env with your Hue Bridge IP and username
 
 # Start the application
 python app_lite.py
@@ -95,6 +96,9 @@ python app_lite.py
 | `/api/effects` | GET | List saved effects |
 | `/api/disco/start` | POST | Start disco mode |
 | `/api/disco/stop` | POST | Stop disco mode |
+| `/api/pir/status` | GET | PIR sensor status and daylight info |
+| `/api/pir/test` | POST | Manually trigger garden lights |
+| `/api/pir/settings` | PUT | Enable/disable motion detection |
 
 ## Tech Stack
 

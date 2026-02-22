@@ -6,7 +6,7 @@ import requests
 import json
 
 # Configuration
-HUE_BRIDGE_IP = '192.168.2.35'
+HUE_BRIDGE_IP = '192.168.178.29'
 HUE_USERNAME = '1trezWogQDPyNuC19bcyOHp8BsNCMZr6wKfXwe6w'
 BASE_URL = f'http://{HUE_BRIDGE_IP}/api/{HUE_USERNAME}'
 
