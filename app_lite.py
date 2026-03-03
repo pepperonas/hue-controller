@@ -26,7 +26,7 @@ from gpio_manager import GPIOManager
 from pir_manager import PIRManager
 
 # Disco Mode System
-from disco_mode import DiscoMode
+# Lazy import: from disco_mode import DiscoMode (saves ~78MB RAM)
 
 # .env Datei laden falls vorhanden
 def load_env():
@@ -55,7 +55,7 @@ MYSQL_CONFIG = {
     'password': os.getenv('DB_PASSWORD', ''),
     'database': os.getenv('DB_NAME', 'hue_monitoring'),
     'pool_name': 'hue_pool',
-    'pool_size': 5,
+    'pool_size': 2,
     'pool_reset_session': True
 }
 
@@ -1374,6 +1374,7 @@ def start_disco_mode():
         print("Starting Disco Mode...")
         
         if disco_mode is None:
+            from disco_mode import DiscoMode
             print("Creating new DiscoMode instance...")
             disco_mode = DiscoMode(HUE_BRIDGE_IP, HUE_USERNAME)
         
