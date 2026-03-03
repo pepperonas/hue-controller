@@ -51,7 +51,7 @@ class PIRManager:
         self.db_pool = db_pool
         
         # PIR Configuration
-        self.pir_pin = 23  # GPIO Pin für PIR Sensor (working pin confirmed by detect.py test)
+        self.pir_pin = 26  # GPIO Pin für PIR Sensor (working pin confirmed by detect.py test)
         self.garden_group_id = "86"  # Garten Gruppe ID
         self.light_duration = 180  # 3 Minuten in Sekunden
         
