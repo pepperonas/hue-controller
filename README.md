@@ -1,5 +1,11 @@
 # Hue Controller
 
+> **⚡ Update 2026-06 — Stack & UI**
+>
+> - **Backend:** Python/**Flask** — jetzt als **systemd-Service** `hue-controller` (war PM2 mit Port-5000-Crash-Loop, behoben). 
+> - **UI:** **Material Design 3 Expressive** + Animationen (Header-Drop, Tab-Fade, pulsierende Status-Dots, Hover-Lift).
+> - **Deploy:** `git pull && sudo systemctl restart hue-controller`
+
 <div align="center">
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
