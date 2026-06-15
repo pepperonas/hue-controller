@@ -3540,7 +3540,21 @@
                 font-size: 1rem;
             }
         }
-    </style>
+    
+/* ===== MD3 Expressive Motion (konservativ — hue baut Karten dynamisch um) ===== */
+@keyframes md-drop{0%{opacity:0;transform:translateY(-20px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes md-fadein{0%{opacity:0;transform:translateY(10px) scale(.985)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes md-pulse-ring{0%{box-shadow:0 0 0 0 var(--accent-green,#7ddfa6)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes md-breathe{0%,100%{filter:brightness(1)}50%{filter:brightness(1.15)}}
+h1,.header,header{animation:md-drop .55s var(--ease-emph,cubic-bezier(.2,0,0,1)) backwards}
+.tab-content.active{animation:md-fadein .42s var(--ease-emph,cubic-bezier(.2,0,0,1))}
+.status-dot{animation:md-pulse-ring 2.2s ease-out infinite}
+.btn.active,button.active,.tab.active,.tab-button.active{animation:md-breathe 2.4s ease-in-out infinite}
+.card{transition:transform .35s var(--ease-spring,cubic-bezier(.2,0,0,1)),box-shadow .25s,border-color .2s,background .2s}
+.card:hover{transform:translateY(-3px) scale(1.008)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+
+</style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
