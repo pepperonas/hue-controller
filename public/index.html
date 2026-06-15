@@ -75,15 +75,21 @@
     
     <style>
         :root {
-            /* Farbschema */
-            --background-dark: #2B2E3B;
-            --background-darker: #252830;
-            --card-background: #343845;
-            --accent-blue: #688db1;
-            --accent-green: #9cb68f;
-            --accent-red: #e16162;
-            --text-primary: #d1d5db;
-            --text-secondary: #9ca3af;
+            /* Material Design 3 Expressive — dark, tonal, vibrant */
+            --background-dark: #121318;        /* surface */
+            --background-darker: #0c0e13;      /* container-lowest */
+            --card-background: #1c1d23;        /* surface-container */
+            --surface-high: #26272d;
+            --surface-highest: #303137;
+            --outline: #46474f;
+            --accent-blue: #b3c5ff;            /* primary (vibrant) */
+            --on-primary: #0a285a;
+            --accent-green: #7ddfa6;
+            --accent-red: #ffb4ab;
+            --text-primary: #e4e2e9;           /* on-surface */
+            --text-secondary: #c5c6d0;         /* on-surface-variant */
+            --ease-spring: linear(0,0.009 1.2%,0.035 2.5%,0.158 6%,0.793 18.4%,0.984 23%,1.07 27%,1.104 31.5%,1.103 35%,1.07 41%,1.013 50%,0.991 57%,0.998 75%,1);
+            --ease-emph: cubic-bezier(0.2,0,0,1);
 
             /* Schatten */
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
@@ -100,11 +106,11 @@
             --spacing-12: 3rem;
             --spacing-16: 4rem;
 
-            /* Rundungen */
-            --radius-sm: 0.25rem;
-            --radius: 0.5rem;
-            --radius-lg: 0.75rem;
-            --radius-xl: 1rem;
+            /* Rundungen — MD3 shape scale */
+            --radius-sm: 0.75rem;
+            --radius: 1rem;
+            --radius-lg: 1.5rem;
+            --radius-xl: 1.75rem;
 
             /* Typografie */
             --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
