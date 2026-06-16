@@ -3554,6 +3554,49 @@ h1,.header,header{animation:md-drop .55s var(--ease-emph,cubic-bezier(.2,0,0,1))
 .card:hover{transform:translateY(-3px) scale(1.008)}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 
+/* MD3 Expressive Animations (2026-06-16) */
+:root { --md-ease-spatial: linear(0,0.009 1.2%,0.035 2.5%,0.158 6%,0.793 18.4%,0.984 23%,1.07 27%,1.104 31.5%,1.103 35%,1.07 41%,1.013 50%,0.991 57%,0.998 75%,1); --md-ease-effects: cubic-bezier(0.2,0,0,1); }
+@keyframes md-breathe2 { 0%,100%{box-shadow:0 0 0 0 rgba(170,199,255,0)} 50%{box-shadow:0 0 26px 2px rgba(170,199,255,.35)} }
+@keyframes md-pulse2 { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.7)} }
+/* Buttons: hover-lift + active-squash */
+.btn, .btn-on, .btn-off {
+  transition: transform .4s var(--md-ease-spatial), box-shadow .2s var(--md-ease-effects), filter .2s var(--md-ease-effects);
+}
+.btn:active, .btn-on:active, .btn-off:active { transform: scale(.95); }
+.btn:hover, .btn-on:hover, .btn-off:hover { transform: translateY(-2px); filter: brightness(1.06); }
+/* An-/aktive Zustände: breathe */
+.btn.active, .btn-on, .card.light-on { animation: md-breathe2 2.6s ease-in-out infinite; }
+/* Status-/Online-Dots: pulse */
+.status-dot.online { animation: md-pulse2 2s ease-in-out infinite; }
+/* Slider-Thumb (Switch-Äquivalent): spring */
+.slider::-webkit-slider-thumb { transition: transform .5s var(--md-ease-spatial); }
+.slider::-moz-range-thumb { transition: transform .5s var(--md-ease-spatial); }
+@media (prefers-reduced-motion: reduce) {
+  .btn, .btn-on, .btn-off, .btn.active, .card.light-on, .status-dot.online,
+  .slider::-webkit-slider-thumb, .slider::-moz-range-thumb { animation: none !important; transition: none !important; }
+}
+
+/* ===== Obsessive-Detail Politur (2026-06-16) — additiv, kein Umbau =====
+   Klammer: tonale MD3-Flächen, die unter dem Cursor Licht fangen. ===== */
+:root{ --ease-quick:cubic-bezier(.2,0,0,1); }
+button:focus-visible,a[href]:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[role="button"]:focus-visible,[tabindex]:not([tabindex="-1"]):focus-visible{
+  outline:2px solid var(--accent-blue, var(--md-primary, var(--primary, #aac7ff)))!important; outline-offset:3px!important;
+}
+button:focus:not(:focus-visible),a:focus:not(:focus-visible),[role="button"]:focus:not(:focus-visible){ outline:none; }
+h1,h2,h3{ text-wrap:balance; }
+@media (pointer:coarse){ button,.btn,[role="button"]{ min-height:44px; } }
+@media (hover:hover) and (pointer:fine){
+  .card{ position:relative; }
+  .card::after{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    opacity:0; transition:opacity 240ms var(--ease-quick);
+    background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%),
+      color-mix(in srgb, var(--accent-blue, var(--md-primary, var(--primary,#aac7ff))) 13%, transparent), transparent 60%); }
+  .card:hover::after{ opacity:1; }
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important; }
+  .card::after{ display:none!important; }
+}
 </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -9605,5 +9648,18 @@ h1,.header,header{animation:md-drop .55s var(--ease-emph,cubic-bezier(.2,0,0,1))
     <footer style="text-align: center; padding: 20px; margin-top: 40px; color: rgba(255, 255, 255, 0.6); font-size: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
         Made with ❤️ by Martin Pfeffer
     </footer>
+<script>/* cursor-sheen (gated, rAF-throttled, additiv) */
+(function(){try{
+  if(!matchMedia('(hover:hover) and (pointer:fine)').matches) return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var sel='.card',el=null,x=0,y=0,q=false;
+  function f(){q=false;if(!el)return;var r=el.getBoundingClientRect();
+    el.style.setProperty('--mx',((x-r.left)/r.width*100)+'%');
+    el.style.setProperty('--my',((y-r.top)/r.height*100)+'%');}
+  document.addEventListener('pointermove',function(e){
+    var c=e.target.closest?e.target.closest(sel):null;el=c;x=e.clientX;y=e.clientY;
+    if(c&&!q){q=true;requestAnimationFrame(f);}
+  },{passive:true});
+}catch(_){}})();</script>
 </body>
 </html>
