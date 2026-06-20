@@ -112,7 +112,7 @@ python app_lite.py
 - **Frontend** — HTML5, CSS3, JavaScript (vanilla)
 - **Database** — MySQL
 - **Hardware** — Philips Hue Bridge API, PIR sensor (HC-SR501), GPIO buttons (gpiozero)
-- **Process Manager** — PM2
+- **Process Manager** — systemd (`hue-controller.service`)
 
 ## Architecture
 
@@ -128,7 +128,7 @@ hue-controller/
 ├── public/               # Web UI assets
 │   ├── index.html        # Main dashboard
 │   └── onboarding.html   # Setup wizard
-└── ecosystem.config.js   # PM2 configuration
+└── ecosystem.config.js   # legacy PM2 config (unused — runs under systemd)
 ```
 
 ## Author
