@@ -48,26 +48,26 @@
     <meta name="mobile-web-app-status-bar-style" content="black-translucent">
 
     <!-- Primary Icons (Samsung Browser S24 Ultra priority) with cache busting -->
-    <link rel="shortcut icon" href="/favicon.ico?v=2025080701" type="image/x-icon">
-    <link rel="icon" href="/favicon.ico?v=2025080701" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico?v=2025080701" type="image/x-icon">
+    <link rel="icon" href="favicon.ico?v=2025080701" type="image/x-icon">
     
     <!-- Apple Touch Icons for iOS and Samsung fallback -->
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2025080701">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=2025080701">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2025080701">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2025080701">
     
     <!-- Samsung Browser S24 Ultra specific icons -->
-    <link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
-    <link rel="mask-icon" href="/apple-touch-icon.png" color="#2c2e3b">
+    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+    <link rel="mask-icon" href="apple-touch-icon.png" color="#2c2e3b">
     
     <!-- Standard sizes for broad compatibility -->
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="144x144" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="144x144" href="apple-touch-icon.png">
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="/static/manifest.json">
+    <link rel="manifest" href="static/manifest.json">
     
     <!-- Microsoft Tiles -->
     <meta name="msapplication-TileColor" content="#2c2e3b">
@@ -4675,7 +4675,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         class HueControllerPro {
             constructor() {
-                this.baseUrl = window.location.origin;
+                this.baseUrl = '.';  // relative base -> works behind /app/hue/ proxy AND direct on :5000
                 this.activeTab = 'lights';
                 this.updateInterval = null;
                 this.effectsUpdateInterval = null;
@@ -5556,7 +5556,7 @@ h1,h2,h3{ text-wrap:balance; }
                 try {
                     console.log('🔄 Loading detailed power data for:', timeframe, retryCount > 0 ? `(retry ${retryCount})` : '');
                     
-                    const response = await fetch(`/api/power/detailed/${timeframe}`, {
+                    const response = await fetch(`api/power/detailed/${timeframe}`, {
                         headers: {
                             'Accept': 'application/json',
                             'Cache-Control': 'no-cache'
@@ -5776,7 +5776,7 @@ h1,h2,h3{ text-wrap:balance; }
                 document.getElementById('chart-title').textContent = 'Wochentags-Analyse';
                 
                 try {
-                    const response = await fetch('/api/power/weekly');
+                    const response = await fetch('api/power/weekly');
                     const data = await response.json();
                     
                     if (data && data.weekday_summary) {
@@ -5986,7 +5986,7 @@ h1,h2,h3{ text-wrap:balance; }
                 document.getElementById('chart-title').textContent = 'Monatsvergleich';
                 
                 try {
-                    const response = await fetch('/api/power/monthly');
+                    const response = await fetch('api/power/monthly');
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
@@ -6133,7 +6133,7 @@ h1,h2,h3{ text-wrap:balance; }
                 document.getElementById('chart-title').textContent = 'Sommer vs. Winter Verbrauch';
                 
                 try {
-                    const response = await fetch('/api/power/seasonal');
+                    const response = await fetch('api/power/seasonal');
                     const data = await response.json();
                     
                     this.renderSeasonalPieChart(data.seasonal_comparison);
@@ -6539,7 +6539,7 @@ h1,h2,h3{ text-wrap:balance; }
 
             async loadLampSelection() {
                 try {
-                    const response = await fetch('/api/lights');
+                    const response = await fetch('api/lights');
                     const lightsObj = await response.json();
                     
                     console.log('📡 Raw lights response:', lightsObj);
@@ -6602,7 +6602,7 @@ h1,h2,h3{ text-wrap:balance; }
                 try {
                     // Fetch data for selected lamps
                     const promises = selectedLamps.map(lamp => 
-                        fetch(`/api/power/lamp/${lamp.id}/${timeframe}`)
+                        fetch(`api/power/lamp/${lamp.id}/${timeframe}`)
                             .then(res => res.json())
                             .then(data => ({ ...lamp, data: data }))
                             .catch(err => ({ ...lamp, data: null, error: err }))
@@ -7902,10 +7902,10 @@ h1,h2,h3{ text-wrap:balance; }
                     sensorsResponse,
                     bridgeResponse
                 ] = await Promise.all([
-                    fetch('/api/status'),
-                    fetch('/api/lights'),
-                    fetch('/api/groups'),
-                    fetch('/api/sensors'),
+                    fetch('api/status'),
+                    fetch('api/lights'),
+                    fetch('api/groups'),
+                    fetch('api/sensors'),
                     fetch(`http://${hue.hue_bridge_ip}/api/${hue.hue_username}/config`)
                 ]);
 
@@ -8525,11 +8525,12 @@ h1,h2,h3{ text-wrap:balance; }
             cards.forEach(cardId => {
                 const content = document.getElementById(cardId + '-content');
                 const icon = document.getElementById(cardId + '-icon');
+                if (!content) return;   // card not present in this layout → skip (no crash)
                 const savedState = localStorage.getItem('card-' + cardId);
-                
+
                 if (savedState === 'collapsed') {
                     content.classList.add('collapsed');
-                    icon.classList.add('collapsed');
+                    if (icon) icon.classList.add('collapsed');
                     content.style.maxHeight = '0';
                 } else {
                     // Default to expanded
@@ -8803,7 +8804,7 @@ h1,h2,h3{ text-wrap:balance; }
             try {
                 switch (action) {
                     case 'all_on':
-                        await fetch('/api/global/all-lights', {
+                        await fetch('api/global/all-lights', {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ on: true, bri: 254 })
@@ -8812,7 +8813,7 @@ h1,h2,h3{ text-wrap:balance; }
                         break;
 
                     case 'all_off':
-                        await fetch('/api/global/all-lights', {
+                        await fetch('api/global/all-lights', {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ on: false })
@@ -8821,7 +8822,7 @@ h1,h2,h3{ text-wrap:balance; }
                         break;
 
                     case 'emergency_off':
-                        await fetch('/api/global/emergency-off', {
+                        await fetch('api/global/emergency-off', {
                             method: 'POST'
                         });
                         showToast('Notaus ausgeführt', 'success');
@@ -8843,7 +8844,7 @@ h1,h2,h3{ text-wrap:balance; }
                         break;
 
                     case 'effect_colorloop':
-                        await fetch('/api/global/all-lights', {
+                        await fetch('api/global/all-lights', {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ on: true, effect: 'colorloop' })
@@ -8852,7 +8853,7 @@ h1,h2,h3{ text-wrap:balance; }
                         break;
 
                     case 'effect_stop_all':
-                        const stopResponse = await fetch('/api/effects/stop-all', {
+                        const stopResponse = await fetch('api/effects/stop-all', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' }
                         });
@@ -8881,7 +8882,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function loadButtonConfigurations() {
             try {
-                const response = await fetch('/api/buttons/configurations');
+                const response = await fetch('api/buttons/configurations');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -8899,7 +8900,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function loadButtonStatus() {
             try {
-                const response = await fetch('/api/buttons/status');
+                const response = await fetch('api/buttons/status');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -8912,7 +8913,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function loadGroupsForButtons() {
             try {
-                const response = await fetch('/api/groups');
+                const response = await fetch('api/groups');
                 const data = await response.json();
                 
                 // Handle direct Hue API response (data is the groups object)
@@ -9063,7 +9064,7 @@ h1,h2,h3{ text-wrap:balance; }
                     requestData.strobo_mode = stroboMode;
                 }
                 
-                const response = await fetch('/api/buttons/configurations', {
+                const response = await fetch('api/buttons/configurations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestData)
@@ -9100,7 +9101,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function testButton(gpioPin) {
             try {
-                const response = await fetch(`/api/buttons/test/${gpioPin}`, {
+                const response = await fetch(`api/buttons/test/${gpioPin}`, {
                     method: 'POST'
                 });
                 
@@ -9120,7 +9121,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function deleteButtonConfiguration(configId) {
             try {
-                const response = await fetch(`/api/buttons/configurations/${configId}`, {
+                const response = await fetch(`api/buttons/configurations/${configId}`, {
                     method: 'DELETE'
                 });
                 
@@ -9141,7 +9142,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function loadButtonLogs() {
             try {
-                const response = await fetch('/api/buttons/logs?limit=20');
+                const response = await fetch('api/buttons/logs?limit=20');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -9288,7 +9289,7 @@ h1,h2,h3{ text-wrap:balance; }
         
         async function populateEditGroupsDropdown(selectedGroupId) {
             try {
-                const response = await fetch('/api/groups');
+                const response = await fetch('api/groups');
                 const data = await response.json();
                 
                 const select = document.getElementById('edit-button-group');
@@ -9349,7 +9350,7 @@ h1,h2,h3{ text-wrap:balance; }
             }
             
             try {
-                const response = await fetch(`/api/buttons/configurations/${configId}`, {
+                const response = await fetch(`api/buttons/configurations/${configId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestData)
@@ -9383,7 +9384,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function loadPIRStatus() {
             try {
-                const response = await fetch('/api/pir/status');
+                const response = await fetch('api/pir/status');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -9451,7 +9452,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function testPIRMotion() {
             try {
-                const response = await fetch('/api/pir/test', {
+                const response = await fetch('api/pir/test', {
                     method: 'POST'
                 });
                 
@@ -9471,7 +9472,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function togglePIRMonitoring() {
             try {
-                const response = await fetch('/api/pir/toggle', {
+                const response = await fetch('api/pir/toggle', {
                     method: 'POST'
                 });
                 
@@ -9491,7 +9492,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function updatePIRConfig(setting, value) {
             try {
-                const response = await fetch('/api/pir/config', {
+                const response = await fetch('api/pir/config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ [setting]: value })
@@ -9524,7 +9525,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function viewSunriseDetails() {
             try {
-                const response = await fetch('/api/pir/sunrise-sunset?days=7');
+                const response = await fetch('api/pir/sunrise-sunset?days=7');
                 const data = await response.json();
                 
                 if (data.success) {
@@ -9587,7 +9588,7 @@ h1,h2,h3{ text-wrap:balance; }
     </script>
     <script>
     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/static/service-worker.js")
+        navigator.serviceWorker.register("static/service-worker.js")
             .then(reg => console.log("Service Worker registered"))
             .catch(err => console.log("Service Worker registration failed"));
     }
