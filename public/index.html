@@ -3597,13 +3597,172 @@ h1,h2,h3{ text-wrap:balance; }
   *,*::before,*::after{ animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important; }
   .card::after{ display:none!important; }
 }
+/* ============================================================
+   Material 3 Expressive — reskin polish + physics/motion (additive overlay)
+   Appended last so it overrides earlier rules without editing them.
+   Tokens reused: --accent-blue (primary), --on-primary, --accent-green,
+   --accent-red, --text-primary/-secondary, --card-background, --surface-*,
+   --background-dark/-darker, --outline, --radius*.  v: md3-expressive 2026-06
+   ============================================================ */
+:root {
+  --on-secondary: #06351f;       /* dark text on the light green */
+  --on-error: #690005;           /* dark text on the light red */
+  /* MD3 Expressive spring + emphasized motion */
+  --md-spring:        linear(0,0.009 1.2%,0.035 2.5%,0.158 6%,0.793 18.4%,0.984 23%,1.07 27%,1.104 31.5%,1.103 35%,1.07 41%,1.013 50%,0.991 57%,0.998 75%,1);
+  --md-spring-snappy: linear(0,0.043 3.1%,0.17 6.4%,0.36 9.9%,0.793 18%,0.985 24%,1.07 29%,1.093 33%,1.066 40%,1.003 53%,0.99 62%,1.001 79%,1);
+  --md-emph:        cubic-bezier(0.2,0,0,1);
+  --md-emph-decel:  cubic-bezier(0.05,0.7,0.1,1);
+  --md-emph-accel:  cubic-bezier(0.3,0,0.8,0.15);
+  --md-state:        color-mix(in srgb, var(--text-primary) 9%, transparent);
+  --md-state-strong: color-mix(in srgb, var(--text-primary) 14%, transparent);
+}
+
+/* ---- Light palette ---- */
+:root[data-theme="light"] {
+  --background-dark: #faf8ff;
+  --background-darker: #ebedf4;
+  --card-background: #ffffff;
+  --surface-high: #f1f0f8;
+  --surface-highest: #e8e7f1;
+  --outline: #c4c5d0;
+  --accent-blue: #3a5bbf;
+  --on-primary: #ffffff;
+  --accent-green: #1f7a4d;
+  --on-secondary: #ffffff;
+  --accent-red: #ba1a1a;
+  --on-error: #ffffff;
+  --text-primary: #1a1b21;
+  --text-secondary: #45464f;
+  --md-state:        color-mix(in srgb, #1a1b21 8%, transparent);
+  --md-state-strong: color-mix(in srgb, #1a1b21 12%, transparent);
+  --shadow-sm: 0 1px 2px 0 rgba(60,64,80,.12);
+  --shadow:    0 4px 10px -2px rgba(60,64,80,.16), 0 2px 4px -1px rgba(60,64,80,.10);
+  --shadow-lg: 0 14px 30px -8px rgba(60,64,80,.22);
+}
+:root[data-theme="light"] body { background: radial-gradient(1200px 800px at 80% -10%, #eef1ff, var(--background-dark)); }
+body { transition: background-color .45s var(--md-emph), color .35s var(--md-emph); }
+
+/* ============================================================
+   View-Transitions circular theme reveal (MD3 Expressive)
+   ============================================================ */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+html.theme-anim::view-transition-new(root) { animation: md-theme-reveal 1.15s var(--md-emph-decel); }
+@keyframes md-theme-reveal { from { clip-path: circle(0% at var(--rx,50%) var(--ry,0%)); } to { clip-path: circle(150% at var(--rx,50%) var(--ry,0%)); } }
+
+/* ============================================================
+   Buttons — full-round, on-color text (AAA), state-layer hover, spring press
+   ============================================================ */
+.btn { border-radius: 999px; font-weight: 600; position: relative; overflow: hidden;
+  transition: transform .42s var(--md-spring-snappy), box-shadow .22s var(--md-emph), background-color .2s var(--md-emph), color .2s var(--md-emph); }
+.btn:active { transform: scale(.955); }
+.btn-primary { background-color: var(--accent-blue); color: var(--on-primary); }
+.btn-secondary { background-color: var(--accent-green); color: var(--on-secondary); }
+.btn.danger, .btn-danger { background-color: var(--accent-red); color: var(--on-error); }
+.btn::after { content:""; position:absolute; inset:0; background:transparent; transition: background .2s var(--md-emph); pointer-events:none; }
+.btn:hover::after { background: var(--md-state); }
+.btn:active::after { background: var(--md-state-strong); }
+.btn-primary:hover, .btn-secondary:hover, .btn.danger:hover, .btn-danger:hover {
+  background-color: var(--accent-blue); transform: translateY(-2px); box-shadow: var(--shadow); }
+.btn-secondary:hover { background-color: var(--accent-green); }
+.btn.danger:hover, .btn-danger:hover { background-color: var(--accent-red); }
+
+/* Material ripple (added by JS) */
+.md-ripple { position:absolute; border-radius:50%; transform:scale(0); pointer-events:none;
+  background: currentColor; opacity:.28; animation: md-ripple .58s var(--md-emph) forwards; }
+@keyframes md-ripple { to { transform: scale(2.6); opacity:0; } }
+
+/* ============================================================
+   Toggle switches — MD3 spring knob (overshoot + squash), tonal track
+   ============================================================ */
+.toggle-slider:before { transition: transform .5s var(--md-spring-snappy), width .22s var(--md-emph), border-radius .22s var(--md-emph) !important; }
+.toggle-switch:active .toggle-slider:before { width: 26px; border-radius: 11px; }
+input:checked + .toggle-slider { background: var(--accent-blue) !important; }
+/* state-reactive: an "on" lamp toggle breathes a soft glow (:has, no JS) */
+.toggle-switch:has(input:checked) { border-radius: 999px; }
+.toggle-switch:has(input:checked) .toggle-slider { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-blue) 60%, transparent); animation: md-breathe-on 2.8s ease-in-out infinite; }
+@keyframes md-breathe-on { 0%,100%{ box-shadow:0 0 0 0 color-mix(in srgb,var(--accent-blue) 0%,transparent);} 50%{ box-shadow:0 0 14px 1px color-mix(in srgb,var(--accent-blue) 45%,transparent);} }
+
+/* ============================================================
+   Sliders — filled active track + expressive thumb halo + spring
+   ============================================================ */
+.slider::-webkit-slider-thumb { transition: transform .5s var(--md-spring-snappy), box-shadow .3s var(--md-emph), background .2s var(--md-emph); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-blue) 40%, transparent); }
+.slider:hover::-webkit-slider-thumb { transform: scale(1.12); background: var(--accent-blue); box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent-blue) 18%, transparent); }
+.slider:active::-webkit-slider-thumb { transform: scale(1.22); box-shadow: 0 0 0 12px color-mix(in srgb, var(--accent-blue) 24%, transparent); }
+.slider:hover::-moz-range-thumb { box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent-blue) 18%, transparent); }
+.slider { transition: background .12s linear; }   /* JS paints the filled portion */
+
+/* ============================================================
+   Tabs — sliding indicator (transform-only) + state layer; clip to avoid H-scrollbar
+   ============================================================ */
+.tabs { position: relative; }
+.tab { position: relative; transition: color .25s var(--md-emph), background .2s var(--md-emph); }
+.tab:hover { background: var(--md-state); }
+.tab.active { border-bottom-color: transparent !important; }
+.tab-ind { position:absolute; bottom:0; left:0; height:3px; width:1px; opacity:0;
+  transform-origin:left center; will-change:transform; border-radius:3px 3px 0 0;
+  background: var(--accent-blue); pointer-events:none;
+  transition: transform .46s var(--md-spring-snappy), opacity .2s var(--md-emph); }
+
+/* ============================================================
+   Cards — XL corners + one-shot spring entrance for STATIC sections only.
+   (Dynamic lamp/group/scene cards rebuild on poll → they only get hover, no entrance.)
+   ============================================================ */
+.card { border-radius: var(--radius-xl); transition: transform .45s var(--md-spring), box-shadow .25s var(--md-emph), background .3s var(--md-emph), border-color .3s var(--md-emph); }
+.header, .card.md-static { animation: md-enter .6s var(--md-emph-decel) backwards; }
+.card.md-static:nth-of-type(2){ animation-delay:.06s } .card.md-static:nth-of-type(3){ animation-delay:.12s }
+@keyframes md-enter { from{ opacity:0; transform: translateY(22px) scale(.97);} to{ opacity:1; transform:none;} }
+
+/* App-shell hero entrance on load (spring) */
+@keyframes md-hero { 0%{opacity:0; transform: translateY(26px) scale(.985);} 60%{opacity:1;} 100%{opacity:1; transform:none;} }
+.md-hero { animation: md-hero .7s var(--md-spring) both; }
+
+/* ============================================================
+   State-reactive flourishes
+   ============================================================ */
+/* number/stat pop when JS swaps the value */
+.md-pop { animation: md-pop .5s var(--md-spring-snappy); }
+@keyframes md-pop { 0%{transform:scale(1);} 35%{transform:scale(1.16);} 100%{transform:scale(1);} }
+/* power-ring bloom on action buttons */
+.md-ring { position:relative; }
+.md-ring::before { content:""; position:absolute; inset:-4px; border-radius:inherit; border:2px solid var(--accent-blue); opacity:0; pointer-events:none; }
+.md-ring.fire::before { animation: md-power-ring .75s var(--md-spring-snappy); }
+@keyframes md-power-ring { 0%{opacity:.8; transform:scale(.94);} 100%{opacity:0; transform:scale(1.5);} }
+
+/* ============================================================
+   Theme toggle button (header)
+   ============================================================ */
+.theme-toggle { position:absolute; top:14px; right:14px;
+  width:44px; height:44px; border:none; border-radius:50%; cursor:pointer;
+  background: var(--surface-high); color: var(--text-primary); font-size:1.25rem; line-height:1;
+  display:inline-flex; align-items:center; justify-content:center; z-index:3;
+  box-shadow: var(--shadow-sm);
+  transition: transform .42s var(--md-spring-snappy), background .2s var(--md-emph); }
+.theme-toggle:hover { background: var(--surface-highest); }
+.theme-toggle:active { transform: scale(.9); }
+.header { position: relative; }
+
+/* ============================================================
+   Reduced motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, .btn, .toggle-slider:before, .slider::-webkit-slider-thumb, .tab-ind, .card { animation: none !important; transition-duration: .01ms !important; }
+  html.theme-anim::view-transition-new(root) { animation: none !important; }
+  .toggle-switch:has(input:checked) .toggle-slider { animation: none !important; }
+}
+
 </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="theme-color" content="#121318">
+    <script>(function(){try{var t=localStorage.getItem('hue-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🏠Philips Hue Controller</h1>
+            <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Theme wechseln" title="Hell/Dunkel umschalten" onclick="toggleHueTheme(event)">☀️</button>
+
             <div class="power-display">
                 <span id="current-power">Lade Stromverbrauch...</span>
             </div>
@@ -9662,5 +9821,95 @@ h1,h2,h3{ text-wrap:balance; }
     if(c&&!q){q=true;requestAnimationFrame(f);}
   },{passive:true});
 }catch(_){}})();</script>
+<script>
+/* Material 3 Expressive motion drivers — ripple · sliding tab indicator ·
+   theme toggle (circular reveal) · slider fill · confirm ring. Additive; the
+   shell hero is one-shot so it stays safe with the app's dynamic card rebuilds. */
+(function () {
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* hero entrance — shell only, one-shot */
+  var shell = document.querySelector('.container');
+  if (shell && !reduce) {
+    shell.classList.add('md-hero');
+    shell.addEventListener('animationend', function h() { shell.classList.remove('md-hero'); shell.removeEventListener('animationend', h); });
+  }
+
+  /* Material ripple on buttons / tabs */
+  document.addEventListener('pointerdown', function (e) {
+    var el = e.target.closest && e.target.closest('.btn, .tab, .theme-toggle, .guide-nav-btn');
+    if (!el || reduce) return;
+    var r = el.getBoundingClientRect();
+    var d = Math.max(r.width, r.height) * 1.1;
+    var ink = document.createElement('span'); ink.className = 'md-ripple';
+    ink.style.width = ink.style.height = d + 'px';
+    ink.style.left = (e.clientX - r.left - d / 2) + 'px';
+    ink.style.top = (e.clientY - r.top - d / 2) + 'px';
+    var cs = getComputedStyle(el);
+    if (cs.position === 'static') el.style.position = 'relative';
+    if (cs.overflow !== 'hidden') el.style.overflow = 'hidden';
+    el.appendChild(ink);
+    ink.addEventListener('animationend', function () { ink.remove(); });
+  }, { passive: true });
+
+  /* sliding tab indicator (transform-only: translateX + scaleX on a 1px base) */
+  document.querySelectorAll('.tabs').forEach(function (container) {
+    var ind = document.createElement('div'); ind.className = 'tab-ind';
+    container.appendChild(ind);
+    function move() {
+      var a = container.querySelector('.tab.active');
+      if (!a || !a.offsetWidth) { ind.style.opacity = 0; return; }
+      ind.style.opacity = 1;
+      ind.style.transform = 'translateX(' + (a.offsetLeft + 1) + 'px) scaleX(' + Math.max(1, a.offsetWidth - 2) + ')';
+    }
+    container.addEventListener('click', function () { requestAnimationFrame(move); });
+    if ('ResizeObserver' in window) new ResizeObserver(move).observe(container);
+    requestAnimationFrame(move);
+  });
+
+  /* slider filled active track (repaint covers poll/programmatic value changes) */
+  function paint(s) {
+    var min = +s.min || 0, max = (s.max === '' ? 100 : +s.max), v = +s.value;
+    if (max <= min) return;
+    var pct = Math.max(0, Math.min(100, (v - min) / (max - min) * 100));
+    s.style.background = 'linear-gradient(90deg, var(--accent-blue) ' + pct + '%, var(--background-darker) ' + pct + '%)';
+  }
+  function paintAll() { document.querySelectorAll('input.slider').forEach(paint); }
+  document.addEventListener('input', function (e) { if (e.target.classList && e.target.classList.contains('slider')) paint(e.target); });
+  paintAll(); setInterval(paintAll, 400);
+
+  /* confirm power-ring on primary/secondary/danger button clicks */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('.btn-primary, .btn-secondary, .btn.danger, .btn-danger');
+    if (!b || reduce) return;
+    b.classList.add('md-ring'); b.classList.add('fire');
+    setTimeout(function () { b.classList.remove('fire'); }, 780);
+  }, true);
+
+  /* theme toggle with MD3 circular reveal (View Transitions API) */
+  window.toggleHueTheme = function (origin) {
+    var cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    var next = cur === 'light' ? 'dark' : 'light';
+    var apply = function () {
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('hue-theme', next); } catch (_) {}
+      var btn = document.getElementById('theme-toggle'); if (btn) btn.textContent = next === 'light' ? '🌙' : '☀️';
+    };
+    var rx = '50%', ry = '0%';
+    if (origin && origin.clientX != null) { rx = origin.clientX + 'px'; ry = origin.clientY + 'px'; }
+    document.documentElement.style.setProperty('--rx', rx);
+    document.documentElement.style.setProperty('--ry', ry);
+    if (reduce || !document.startViewTransition) { apply(); return; }
+    document.documentElement.classList.add('theme-anim');
+    var t = document.startViewTransition(apply);
+    t.finished.finally(function () { document.documentElement.classList.remove('theme-anim'); });
+  };
+
+  /* reflect the current theme on the toggle button at load */
+  var tb = document.getElementById('theme-toggle');
+  if (tb) tb.textContent = document.documentElement.getAttribute('data-theme') === 'light' ? '🌙' : '☀️';
+})();
+</script>
+
 </body>
 </html>
