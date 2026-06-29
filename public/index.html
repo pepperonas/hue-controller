@@ -3752,6 +3752,97 @@ input:checked + .toggle-slider { background: var(--accent-blue) !important; }
   .toggle-switch:has(input:checked) .toggle-slider { animation: none !important; }
 }
 
+/* ============================================================
+   REDESIGN LAYER (2026-06) — calm MD3, live-color cards, max usability
+   ============================================================ */
+:root { --on-primary:#0a285a; --hairline:rgba(255,255,255,.08); }
+
+/* Header + stats */
+.header { text-align:center; padding-bottom:.4rem; }
+.header h1 { font-size:clamp(1.45rem,4.5vw,2rem); font-weight:800; letter-spacing:-.02em; }
+.power-display { margin-top:.55rem; display:inline-flex; padding:.4rem 1rem; border-radius:9999px;
+  background:var(--surface-high); border:1px solid var(--hairline); color:var(--text-secondary); font-size:.88rem; }
+
+/* --- Quick control (replaces the red global control) --- */
+.qc { background:var(--card-background); border:1px solid var(--hairline); border-radius:var(--radius-xl);
+  padding:1.25rem; margin-bottom:1.5rem; }
+.qc-title { display:flex; align-items:center; gap:.45rem; font-size:.74rem; font-weight:700; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--text-secondary); margin-bottom:.9rem; }
+.qc-power { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; }
+.qc-seg { border:none; border-radius:9999px; padding:.85rem 1rem; font-weight:700; font-size:.98rem; cursor:pointer;
+  transition:filter .2s, background .2s, transform .12s; }
+.qc-seg:active { transform:scale(.97); }
+.qc-on { background:var(--accent-blue); color:var(--on-primary); }
+.qc-on:hover { filter:brightness(1.07); }
+.qc-off { background:var(--surface-high); color:var(--text-primary); }
+.qc-off:hover { background:var(--surface-highest); }
+.qc-disco { grid-column:1 / -1; margin-top:.1rem; border:none; border-radius:9999px; padding:.8rem; font-weight:700;
+  font-size:.98rem; cursor:pointer; background:var(--surface-high); color:var(--text-primary);
+  display:flex; align-items:center; justify-content:center; gap:.5rem; transition:all .25s; }
+.qc-disco:hover { background:var(--surface-highest); }
+.qc-disco.active, #disco-mode-btn.active { background:linear-gradient(90deg,#b3c5ff,#e0b0ff); color:var(--on-primary);
+  box-shadow:0 0 22px rgba(179,197,255,.45); }
+.qc-bright { margin-top:1.15rem; }
+.qc-bright-label { display:flex; justify-content:space-between; align-items:center; font-size:.9rem;
+  color:var(--text-secondary); margin-bottom:.55rem; }
+.qc-bright-label b { color:var(--text-primary); font-variant-numeric:tabular-nums; font-weight:700; }
+.qc-colors { display:grid; grid-template-columns:repeat(12,1fr); gap:.5rem; }
+@media (max-width:560px){ .qc-colors { grid-template-columns:repeat(6,1fr); } }
+.qc-chip { aspect-ratio:1; border-radius:50%; border:2px solid rgba(255,255,255,.14); background:var(--c);
+  cursor:pointer; padding:0; transition:transform .15s, box-shadow .15s; }
+.qc-chip:hover { transform:scale(1.14); box-shadow:0 0 14px var(--c); }
+.qc-chip:active { transform:scale(.94); }
+
+/* --- Live-color slider (quick control + lamp cards) --- */
+.qc-slider, .lc-slider { -webkit-appearance:none; appearance:none; width:100%; height:8px; border-radius:9999px; cursor:pointer; outline:none;
+  background:linear-gradient(90deg, var(--lc,var(--accent-blue)) var(--fill,100%), var(--surface-highest) var(--fill,100%)); }
+.qc-slider::-webkit-slider-thumb, .lc-slider::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px;
+  border-radius:50%; background:#fff; border:3px solid var(--lc,var(--accent-blue)); box-shadow:0 1px 4px rgba(0,0,0,.45); cursor:pointer; }
+.qc-slider::-moz-range-thumb, .lc-slider::-moz-range-thumb { width:20px; height:20px; border-radius:50%; background:#fff;
+  border:3px solid var(--lc,var(--accent-blue)); }
+.qc-slider:disabled, .lc-slider:disabled { opacity:.5; }
+
+/* --- Lamp / group live-color cards --- */
+#lights-container, #groups-container { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; }
+.lampcard { background:var(--card-background); border:1px solid var(--hairline); border-radius:var(--radius-lg);
+  padding:1.1rem 1.15rem; transition:border-color .25s, box-shadow .25s, opacity .25s; }
+.lampcard.on { border-color:color-mix(in srgb, var(--lc) 50%, transparent);
+  box-shadow:0 0 26px -8px color-mix(in srgb, var(--lc) 65%, transparent); }
+.lampcard.unreachable { opacity:.5; }
+.lc-head { display:flex; align-items:center; gap:.7rem; }
+.lc-dot { width:18px; height:18px; border-radius:50%; flex:0 0 auto; background:var(--lc); box-shadow:0 0 10px var(--lc);
+  transition:background .25s, box-shadow .25s; }
+.lampcard.off .lc-dot, .lampcard.unreachable .lc-dot { background:var(--surface-highest); box-shadow:none; }
+.lc-name { font-weight:700; font-size:1.02rem; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lc-switch { position:relative; width:52px; height:30px; border-radius:9999px; border:none; background:var(--surface-highest);
+  cursor:pointer; flex:0 0 auto; padding:0; transition:background .22s; }
+.lc-switch::after { content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%;
+  background:#cdd0d8; transition:transform .22s cubic-bezier(.34,1.4,.5,1), background .2s; }
+.lampcard.on .lc-switch { background:var(--lc); }
+.lampcard.on .lc-switch::after { transform:translateX(22px); background:#fff; }
+.lc-switch:disabled { opacity:.5; cursor:not-allowed; }
+.lc-bright { display:flex; align-items:center; gap:.75rem; margin-top:1rem; }
+.lc-pct { font-size:.85rem; color:var(--text-secondary); font-variant-numeric:tabular-nums; min-width:40px; text-align:right; }
+.lampcard.off .lc-bright, .lampcard.unreachable .lc-bright { opacity:.45; }
+.lc-more { margin-top:.85rem; width:100%; background:transparent; border:none; color:var(--text-secondary); font-size:.85rem;
+  font-weight:600; cursor:pointer; padding:.45rem; border-radius:.7rem; transition:background .2s; }
+.lc-more:hover { background:var(--surface-high); }
+.lc-extra { margin-top:.7rem; padding-top:.85rem; border-top:1px solid var(--hairline); }
+.lc-colors { display:grid; grid-template-columns:repeat(6,1fr); gap:.5rem; margin-bottom:.8rem; }
+.lc-chip { aspect-ratio:1; border-radius:50%; border:2px solid rgba(255,255,255,.14); cursor:pointer; padding:0; transition:transform .15s; }
+.lc-chip:hover { transform:scale(1.16); }
+.lc-strobe { display:flex; gap:.5rem; align-items:center; }
+.lc-strobe .form-select { flex:1; }
+.lc-strobe .btn.warning { flex:0 0 auto; }
+
+/* --- Scenes as tonal chips --- */
+#scenes-container { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.65rem; }
+.scene-btn { background:var(--surface-high); border:1px solid var(--hairline); border-radius:var(--radius); padding:1rem .9rem;
+  text-align:center; font-weight:600; cursor:pointer; transition:transform .18s, background .2s, border-color .2s; }
+.scene-btn:hover { background:var(--surface-highest); transform:translateY(-2px); border-color:var(--accent-blue); }
+.scene-btn:active { transform:scale(.97); }
+
+@media (prefers-reduced-motion:reduce){ .lc-switch::after, .lampcard, .qc-chip, .lc-chip, .scene-btn, .qc-seg, .qc-disco { transition:none !important; } }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta name="theme-color" content="#121318">
@@ -3771,58 +3862,46 @@ input:checked + .toggle-slider { background: var(--accent-blue) !important; }
         <div id="messages"></div>
 
 
-        <div class="global-controls collapsible-card">
-            <div class="collapsible-header" onclick="toggleCard('globalcontrols')">
-                <h3>🚨 Globale Steuerung</h3>
-                <span class="collapse-icon" id="globalcontrols-icon">▼</span>
+        <section class="qc" id="quickcontrol">
+            <div class="qc-title">⚡ Schnellsteuerung</div>
+            <div class="qc-power">
+                <button class="qc-seg qc-on" onclick="globalControl('all-on')">Alles An</button>
+                <button class="qc-seg qc-off" onclick="globalControl('all-off')">Alles Aus</button>
+                <button class="qc-disco" id="disco-mode-btn" onclick="toggleDiscoMode()">
+                    <span id="disco-icon">🕺</span> Disco-Modus
+                </button>
             </div>
-            <div class="collapsible-content" id="globalcontrols-content">
-                <div class="effect-controls">
-                    <button class="btn" onclick="globalControl('all-on')">Alles An</button>
-                    <button class="btn danger" onclick="globalControl('all-off')">Alles Aus</button>
-                    <button class="btn" id="disco-mode-btn" onclick="toggleDiscoMode()">
-                        <span id="disco-icon">🕺</span> Disko-Modus
-                    </button>
-                </div>
-                
-                <!-- Frequency Display for Disco Mode -->
-                <div id="frequency-display" style="display: none; margin-top: 16px;">
-                    <h4>🎵 Frequenz-Analyse</h4>
-                    <div class="freq-bands"></div>
-                </div>
-                
-                <!-- Globaler Helligkeitsregler -->
-                <div class="control-group" style="margin-top: 16px;">
-                    <div class="slider-container">
-                        <div class="slider-label">
-                            <span>Helligkeit alle Lampen</span>
-                            <span class="slider-value" id="global-brightness-value">100%</span>
-                        </div>
-                        <input type="range" class="slider" id="global-brightness-slider" min="1" max="254" value="254" 
-                               oninput="document.getElementById('global-brightness-value').textContent = Math.round(this.value / 254 * 100) + '%'; debouncedGlobalBrightnessChange(this.value)">
-                    </div>
-                </div>
 
-                <!-- Globale Farbauswahl -->
-                <div class="control-group" style="margin-top: 20px;">
-                    <h4>Beliebte Farben</h4>
-                    <div class="color-quick-selection">
-                        <button class="color-btn" style="background: #ff0000;" onclick="setGlobalColorHex('#ff0000')" title="Rot"></button>
-                        <button class="color-btn" style="background: #00ff00;" onclick="setGlobalColorHex('#00ff00')" title="Grün"></button>
-                        <button class="color-btn" style="background: #0066ff;" onclick="setGlobalColorHex('#0066ff')" title="Blau"></button>
-                        <button class="color-btn" style="background: #ffff00;" onclick="setGlobalColorHex('#ffff00')" title="Gelb"></button>
-                        <button class="color-btn" style="background: #ff00ff;" onclick="setGlobalColorHex('#ff00ff')" title="Magenta"></button>
-                        <button class="color-btn" style="background: #00ffff;" onclick="setGlobalColorHex('#00ffff')" title="Cyan"></button>
-                        <button class="color-btn" style="background: #ff8000;" onclick="setGlobalColorHex('#ff8000')" title="Orange"></button>
-                        <button class="color-btn" style="background: #8000ff;" onclick="setGlobalColorHex('#8000ff')" title="Violett"></button>
-                        <button class="color-btn" style="background: #fff2cc; color: black;" onclick="setGlobalColorHex('#fff2cc')" title="Warmweiß"></button>
-                        <button class="color-btn" style="background: #ffffff; color: black;" onclick="setGlobalColorHex('#ffffff')" title="Kaltweiß"></button>
-                        <button class="color-btn" style="background: #f5f5f5; color: black;" onclick="setGlobalColorHex('#f5f5f5')" title="Neutralweiß"></button>
-                        <button class="color-btn" style="background: #fffacd; color: black;" onclick="setGlobalColorHex('#fffacd')" title="Tageslicht"></button>
-                    </div>
+            <!-- Frequency Display for Disco Mode -->
+            <div id="frequency-display" style="display: none; margin-top: 16px;">
+                <div class="qc-title" style="margin-bottom:.5rem;">🎵 Frequenz-Analyse</div>
+                <div class="freq-bands"></div>
+            </div>
+
+            <div class="qc-bright">
+                <div class="qc-bright-label"><span>Helligkeit · alle Lampen</span><b id="global-brightness-value">100%</b></div>
+                <input type="range" class="qc-slider" id="global-brightness-slider" min="1" max="254" value="254" style="--fill:100%;"
+                       oninput="this.style.setProperty('--fill', Math.round(this.value/254*100)+'%'); document.getElementById('global-brightness-value').textContent = Math.round(this.value/254*100) + '%'; debouncedGlobalBrightnessChange(this.value)">
+            </div>
+
+            <div class="qc-bright">
+                <div class="qc-bright-label"><span>Farben</span></div>
+                <div class="qc-colors">
+                    <button class="qc-chip" style="--c:#ff0000;" onclick="setGlobalColorHex('#ff0000')" title="Rot"></button>
+                    <button class="qc-chip" style="--c:#00ff00;" onclick="setGlobalColorHex('#00ff00')" title="Grün"></button>
+                    <button class="qc-chip" style="--c:#0066ff;" onclick="setGlobalColorHex('#0066ff')" title="Blau"></button>
+                    <button class="qc-chip" style="--c:#ffff00;" onclick="setGlobalColorHex('#ffff00')" title="Gelb"></button>
+                    <button class="qc-chip" style="--c:#ff00ff;" onclick="setGlobalColorHex('#ff00ff')" title="Magenta"></button>
+                    <button class="qc-chip" style="--c:#00ffff;" onclick="setGlobalColorHex('#00ffff')" title="Cyan"></button>
+                    <button class="qc-chip" style="--c:#ff8000;" onclick="setGlobalColorHex('#ff8000')" title="Orange"></button>
+                    <button class="qc-chip" style="--c:#8000ff;" onclick="setGlobalColorHex('#8000ff')" title="Violett"></button>
+                    <button class="qc-chip" style="--c:#fff2cc;" onclick="setGlobalColorHex('#fff2cc')" title="Warmweiß"></button>
+                    <button class="qc-chip" style="--c:#ffffff;" onclick="setGlobalColorHex('#ffffff')" title="Kaltweiß"></button>
+                    <button class="qc-chip" style="--c:#f5f5f5;" onclick="setGlobalColorHex('#f5f5f5')" title="Neutralweiß"></button>
+                    <button class="qc-chip" style="--c:#fffacd;" onclick="setGlobalColorHex('#fffacd')" title="Tageslicht"></button>
                 </div>
             </div>
-        </div>
+        </section>
 
         <div class="tabs">
             <button class="tab active" onclick="switchTab('lights')">Lichter</button>
@@ -5117,95 +5196,36 @@ input:checked + .toggle-slider { background: var(--accent-blue) !important; }
                 const isOn = type === 'light' && state.on_display !== undefined ? state.on_display : state.on;
                 const brightness = Math.round((state.bri || 0) / 254 * 100);
                 const supportsColor = type === 'light' ? (item.capabilities?.control?.colorgamut !== undefined) : true;
-                
-                // Set card classes based on reachability and light state
-                let cardClasses = 'card';
-                if (!isReachable) {
-                    cardClasses += ' unreachable';
-                } else if (isOn) {
-                    cardClasses += ' light-on';
-                }
-                card.className = cardClasses;
+                const color = (supportsColor && isReachable) ? this.hueToHex(state.hue || 0, state.sat || 0) : '#b3c5ff';
 
-                // Apply actual light color as glow effect for active lights
-                if (isReachable && isOn && supportsColor) {
-                    const hue = state.hue || 0;
-                    const sat = state.sat || 0;
-                    const currentColor = this.hueToHex(hue, sat);
-                    const [r, g, b] = [
-                        parseInt(currentColor.slice(1, 3), 16),
-                        parseInt(currentColor.slice(3, 5), 16),
-                        parseInt(currentColor.slice(5, 7), 16)
-                    ];
-                    
-                    card.style.boxShadow = `0 0 20px rgba(${r}, ${g}, ${b}, 0.3), 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15)`;
-                    card.style.borderColor = `rgba(${r}, ${g}, ${b}, 0.4)`;
-                }
+                let cardClasses = 'lampcard';
+                if (!isReachable) cardClasses += ' unreachable';
+                else cardClasses += isOn ? ' on' : ' off';
+                card.className = cardClasses;
+                card.style.setProperty('--lc', color);
+
+                const palette = ['#ff0000','#00ff00','#0066ff','#ffff00','#ff00ff','#00ffff','#ff8000','#8000ff','#fff2cc','#ffffff','#f5f5f5','#fffacd'];
+                const colorGrid = supportsColor ? `<div class="lc-colors">${palette.map(c => `<button class="lc-chip" style="background:${c};" onclick="hue.setColor('${id}', '${c}', '${type}')" title="${c}"></button>`).join('')}</div>` : '';
+                const strobeModes = [['classic','Classic Strobe'],['double_flash','Double Flash'],['random_chaos','Random Chaos'],['color_strobe','Color Strobe'],['pulse_wave','Pulse Wave'],['lightning_strike','Lightning Strike']];
+                const selMode = this.selectedStrobeModes[`${type}_${id}`] || 'classic';
+                const strobe = `<div class="lc-strobe"><div class="select-wrapper"><select id="strobe-mode-${type}-${id}" class="form-select" onchange="hue.saveStrobeMode('${type}', '${id}', this.value)">${strobeModes.map(([v,l]) => `<option value="${v}" ${selMode===v?'selected':''}>${l}</option>`).join('')}</select></div><button class="btn warning" id="strobe-btn-${type}-${id}" onclick="hue.toggleStrobe('${id}', '${type}')" ${!isReachable ? 'disabled' : ''}>⚡ Strobo</button></div>`;
+                const extra = isReachable ? `
+                    <button class="lc-more" onclick="const e=this.nextElementSibling; e.hidden=!e.hidden; this.textContent=e.hidden?'Farben + Effekte ▾':'Weniger ▴';">Farben + Effekte ▾</button>
+                    <div class="lc-extra" hidden>${colorGrid}${strobe}</div>` : '';
 
                 card.innerHTML = `
-                    <div class="card-title">
-                        ${item.name} 
-                        ${isReachable ? (isOn ? '💡' : '🔆') : '❌'}
+                    <div class="lc-head">
+                        <span class="lc-dot"></span>
+                        <span class="lc-name">${item.name}</span>
+                        <button class="lc-switch" aria-pressed="${isOn}" onclick="hue.toggle('${id}', ${!isOn}, '${type}')" ${!isReachable ? 'disabled' : ''} title="${isReachable ? (isOn ? 'Ausschalten' : 'Einschalten') : 'Nicht erreichbar'}"></button>
                     </div>
-                    
-                    <button class="btn ${this.getButtonClass(isOn, isReachable)}" 
-                            onclick="hue.toggle('${id}', ${!isOn}, '${type}')"
-                            ${!isReachable ? 'disabled' : ''}>
-                        ${this.getButtonText(isOn, isReachable)}
-                    </button>
-                    
-                    <div class="control-group" style="margin-top: 16px;">
-                        <div class="slider-container">
-                            <div class="slider-label">
-                                <span>Helligkeit</span>
-                                <span class="slider-value">${brightness}%</span>
-                            </div>
-                            <input type="range" class="slider" min="1" max="254" value="${state.bri || 254}" 
-                                   oninput="this.nextElementSibling.textContent = Math.round(this.value / 254 * 100) + '%'; hue.updateLightPreview('${id}', this.value, '${type}'); hue.debouncedSetBrightness('${id}', this.value, '${type}')"
-                                   ${!isReachable ? 'disabled' : ''}>
-                            <div style="display: none;"></div>
-                        </div>
+                    <div class="lc-bright">
+                        <input type="range" class="lc-slider" min="1" max="254" value="${state.bri || 254}" style="--lc:${color}; --fill:${brightness}%;"
+                               oninput="this.style.setProperty('--fill', Math.round(this.value/254*100)+'%'); this.nextElementSibling.textContent = Math.round(this.value/254*100)+'%'; hue.updateLightPreview('${id}', this.value, '${type}'); hue.debouncedSetBrightness('${id}', this.value, '${type}')"
+                               ${!isReachable ? 'disabled' : ''}>
+                        <span class="lc-pct">${brightness}%</span>
                     </div>
-                    
-                    ${supportsColor && isReachable ? `
-                    <div class="control-group">
-                        <h4>Beliebte Farben</h4>
-                        <div class="color-quick-selection">
-                            <button class="color-btn" style="background: #ff0000;" onclick="hue.setColor('${id}', '#ff0000', '${type}')" title="Rot"></button>
-                            <button class="color-btn" style="background: #00ff00;" onclick="hue.setColor('${id}', '#00ff00', '${type}')" title="Grün"></button>
-                            <button class="color-btn" style="background: #0066ff;" onclick="hue.setColor('${id}', '#0066ff', '${type}')" title="Blau"></button>
-                            <button class="color-btn" style="background: #ffff00;" onclick="hue.setColor('${id}', '#ffff00', '${type}')" title="Gelb"></button>
-                            <button class="color-btn" style="background: #ff00ff;" onclick="hue.setColor('${id}', '#ff00ff', '${type}')" title="Magenta"></button>
-                            <button class="color-btn" style="background: #00ffff;" onclick="hue.setColor('${id}', '#00ffff', '${type}')" title="Cyan"></button>
-                            <button class="color-btn" style="background: #ff8000;" onclick="hue.setColor('${id}', '#ff8000', '${type}')" title="Orange"></button>
-                            <button class="color-btn" style="background: #8000ff;" onclick="hue.setColor('${id}', '#8000ff', '${type}')" title="Violett"></button>
-                            <button class="color-btn" style="background: #fff2cc; color: black;" onclick="hue.setColor('${id}', '#fff2cc', '${type}')" title="Warmweiß"></button>
-                            <button class="color-btn" style="background: #ffffff; color: black;" onclick="hue.setColor('${id}', '#ffffff', '${type}')" title="Kaltweiß"></button>
-                            <button class="color-btn" style="background: #f5f5f5; color: black;" onclick="hue.setColor('${id}', '#f5f5f5', '${type}')" title="Neutralweiß"></button>
-                            <button class="color-btn" style="background: #fffacd; color: black;" onclick="hue.setColor('${id}', '#fffacd', '${type}')" title="Tageslicht"></button>
-                        </div>
-                    </div>
-                    ` : ''}
-                    
-                    <div class="control-group">
-                        <h4>Schnellaktionen</h4>
-                        <div class="strobe-speed-control" style="margin-bottom: 8px;">
-                            <label for="strobe-mode-${type}-${id}" style="font-size: 12px; color: rgba(255, 255, 255, 0.8);">Strobo-Modus:</label>
-                            <div class="select-wrapper">
-                                <select id="strobe-mode-${type}-${id}" class="form-select" onchange="hue.saveStrobeMode('${type}', '${id}', this.value)">
-                                    <option value="classic" ${this.selectedStrobeModes[`${type}_${id}`] === 'classic' || !this.selectedStrobeModes[`${type}_${id}`] ? 'selected' : ''}>Classic Strobe</option>
-                                    <option value="double_flash" ${this.selectedStrobeModes[`${type}_${id}`] === 'double_flash' ? 'selected' : ''}>Double Flash</option>
-                                    <option value="random_chaos" ${this.selectedStrobeModes[`${type}_${id}`] === 'random_chaos' ? 'selected' : ''}>Random Chaos</option>
-                                    <option value="color_strobe" ${this.selectedStrobeModes[`${type}_${id}`] === 'color_strobe' ? 'selected' : ''}>Color Strobe</option>
-                                    <option value="pulse_wave" ${this.selectedStrobeModes[`${type}_${id}`] === 'pulse_wave' ? 'selected' : ''}>Pulse Wave</option>
-                                    <option value="lightning_strike" ${this.selectedStrobeModes[`${type}_${id}`] === 'lightning_strike' ? 'selected' : ''}>Lightning Strike</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="effect-controls">
-                            <button class="btn warning" onclick="hue.toggleStrobe('${id}', '${type}')" ${!isReachable ? 'disabled' : ''} id="strobe-btn-${type}-${id}">⚡ Strobo</button>
-                        </div>
-                    </div>
+                    ${extra}
                 `;
 
                 return card;
