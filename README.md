@@ -3,7 +3,7 @@
 > **⚡ Update 2026-06 — Stack & UI**
 >
 > - **Backend:** Python/**Flask** — jetzt als **systemd-Service** `hue-controller` (war PM2 mit Port-5000-Crash-Loop, behoben). 
-> - **UI:** **Material Design 3 Expressive** + Animationen (Header-Drop, Tab-Fade, pulsierende Status-Dots, Hover-Lift).
+> - **UI (2026-06, von Grund auf neu):** **Material Design 3 Expressive** — ruhige **„⚡ Schnellsteuerung"** (ersetzt die alarmierende rote „🚨 Globale Steuerung"): blaues „Alles An" / neutrales „Alles Aus", Disco-Toggle, gefüllter Helligkeits-Slider, runde Farb-Chips. **Live-Farb-Lampenkarten** — echter Lampen-Farbton als Akzent (Dot + Glow + Slider-Track), **MD3-An/Aus-Switch**, Inline-Helligkeit, ausklappbare Farben/Effekte; klare an/aus/nicht-erreichbar-Zustände, responsives Grid. Plus Animationen (Tab-Fade, Status-Dots, Hover-Lift). Service-Worker-Cache `app-v2`.
 > - **Deploy:** `git pull && sudo systemctl restart hue-controller`
 
 <div align="center">
