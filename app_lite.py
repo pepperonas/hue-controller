@@ -13,6 +13,10 @@ import mysql.connector
 from mysql.connector import pooling
 from dataclasses import asdict
 
+# Silence pyaudio's ALSA/JACK enumeration spam (2026-07)
+from audio_quiet import install_alsa_silencer
+install_alsa_silencer()
+
 # Smart Error Handling System
 from error_handler import smart_error_handler, log_system_error, get_system_health, get_error_stats
 
@@ -3045,8 +3049,10 @@ def get_audio_devices():
     """Liste verfügbare Audio-Geräte"""
     try:
         from audio_processor import AudioProcessor
-        processor = AudioProcessor()
-        devices = processor.get_audio_devices()
+        from audio_quiet import quiet
+        with quiet():  # suppress JACK/ALSA enumeration chatter (2026-07)
+            processor = AudioProcessor()
+            devices = processor.get_audio_devices()
         return jsonify({'devices': devices, 'success': True})
     except ImportError:
         return jsonify({
