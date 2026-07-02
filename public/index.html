@@ -3843,6 +3843,76 @@ input:checked + .toggle-slider { background: var(--accent-blue) !important; }
 .scene-btn:active { transform:scale(.97); }
 
 @media (prefers-reduced-motion:reduce){ .lc-switch::after, .lampcard, .qc-chip, .lc-chip, .scene-btn, .qc-seg, .qc-disco { transition:none !important; } }
+
+/* ===== MD3 Expressive redesign — Phase 1: 4-destination nav + view router ===== */
+.tabs { display:none !important; }
+.nav-item { display:none !important; }
+body { padding-bottom: 96px !important; }
+.m3nav { position:fixed; left:0; right:0; bottom:0; z-index:200; display:flex; justify-content:space-around; gap:.25rem;
+  padding:.5rem .5rem calc(.5rem + env(safe-area-inset-bottom,0px));
+  background:color-mix(in srgb, var(--card-background,#1c1d23) 90%, transparent); backdrop-filter:blur(16px) saturate(1.4);
+  border-top:1px solid rgba(255,255,255,.09); }
+.m3nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; border:none; background:transparent;
+  color:var(--text-secondary,#c5c6d0); font-size:.7rem; font-weight:600; padding:.35rem .3rem; cursor:pointer;
+  transition:color .2s var(--md-emph,cubic-bezier(.2,0,0,1)); }
+.m3nav-ico { font-size:1.35rem; line-height:1; padding:.25rem 1.25rem; border-radius:9999px;
+  transition:background .3s var(--md-emph,cubic-bezier(.2,0,0,1)), border-radius .25s var(--md-spring,cubic-bezier(.2,0,0,1)), box-shadow .3s, transform .2s; }
+.m3nav-item.active { color:var(--text-primary,#e4e2e9); }
+.m3nav-item.active .m3nav-ico { background:var(--dynamic,var(--accent-blue,#b3c5ff)); color:#08203f; box-shadow:0 6px 20px var(--dynamic-dim,rgba(179,197,255,.28)); }
+.m3nav-item:active .m3nav-ico { transform:scale(.9); border-radius:14px; }
+@media (min-width:900px){
+  .m3nav { flex-direction:column; justify-content:flex-start; top:0; bottom:0; right:auto; width:104px; gap:.4rem;
+    border-top:none; border-right:1px solid rgba(255,255,255,.09); padding-top:1.5rem; }
+  .m3nav-item { flex:0 0 auto; }
+  body { padding-bottom:0 !important; padding-left:104px !important; }
+}
+@media (prefers-reduced-motion:reduce){ .m3nav-ico { transition:none !important; } }
+
+/* ===== MD3 Expressive redesign — Phase 2: dynamic color · hero rooms · shape morph ===== */
+:root { --dynamic: var(--accent-blue,#b3c5ff); --dynamic-dim: rgba(179,197,255,.28); }
+
+/* Section headers → rooms-first hierarchy on Home */
+.m3-section { font-size:.76rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--text-secondary,#c5c6d0);
+  margin:1.5rem .3rem .8rem; display:flex; align-items:center; gap:.55rem; }
+.m3-section::after { content:""; flex:1; height:1px; background:linear-gradient(90deg,var(--dynamic-dim),transparent); }
+
+/* Header title: gentle dynamic tint on the last word */
+.header h1 { background:linear-gradient(100deg,var(--text-primary,#e4e2e9) 60%,var(--dynamic,#b3c5ff));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; transition:filter .4s; }
+
+/* Hero room / lamp cards: tonal wash from the live lamp color when on */
+.lampcard { transition: transform .4s var(--md-spring,cubic-bezier(.2,0,0,1)), box-shadow .3s var(--md-emph,cubic-bezier(.2,0,0,1)),
+  background .5s var(--md-emph,cubic-bezier(.2,0,0,1)), border-color .3s; }
+.lampcard.on { background:
+    radial-gradient(130% 150% at 0% 0%, color-mix(in srgb, var(--lc) 22%, transparent), transparent 62%),
+    var(--card-background,#1c1d23);
+  box-shadow:0 8px 26px -10px color-mix(in srgb, var(--lc) 55%, transparent); }
+.lampcard.on:hover { transform:translateY(-3px); box-shadow:0 14px 34px -10px color-mix(in srgb, var(--lc) 62%, transparent); }
+.lampcard:active { transform:scale(.985); }
+.lampcard.on .lc-dot { animation:m3-dot-breathe 3.2s ease-in-out infinite; }
+@keyframes m3-dot-breathe { 0%,100%{ box-shadow:0 0 8px var(--lc);} 50%{ box-shadow:0 0 18px var(--lc);} }
+.lc-name { font-size:1.08rem; font-weight:750; letter-spacing:-.01em; }
+
+/* Rooms = the hero: bigger cards + name than plain lamps */
+#groups-container.controls-grid { grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); }
+#groups-container .lampcard { padding:1.4rem 1.3rem; border-radius:var(--radius-xl,1.75rem); }
+#groups-container .lc-name { font-size:1.24rem; font-weight:800; }
+#groups-container .lc-dot { width:22px; height:22px; }
+
+/* Shape morphing — MD3 Expressive signature: pill → squircle on press */
+.qc-seg, .scene-btn, .lc-switch { transition:border-radius .25s var(--md-spring,cubic-bezier(.2,0,0,1)), transform .2s var(--md-spring,cubic-bezier(.2,0,0,1)), background .3s, box-shadow .3s; }
+.qc-seg:active { border-radius:16px !important; transform:scale(.96); }
+.scene-btn:active { border-radius:26px; transform:scale(.97); }
+.lc-switch:active { border-radius:12px; }
+
+/* Quick control primary segment + scene hover follow the lamps' dynamic color */
+.qc-seg.qc-on { background:var(--dynamic,#b3c5ff); color:#08203f; box-shadow:0 6px 18px var(--dynamic-dim); }
+.scene-btn:hover { border-color:var(--dynamic,#b3c5ff) !important; }
+
+@media (prefers-reduced-motion:reduce){
+  .lampcard,.qc-seg,.scene-btn,.lc-switch,.lampcard.on .lc-dot,.header h1 { transition:none !important; animation:none !important; }
+}
+
 </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta name="theme-color" content="#121318">
@@ -9930,6 +10000,69 @@ input:checked + .toggle-slider { background: var(--accent-blue) !important; }
   if (tb) tb.textContent = document.documentElement.getAttribute('data-theme') === 'light' ? '🌙' : '☀️';
 })();
 </script>
+
+
+    <nav class="m3nav" id="m3nav" role="navigation" aria-label="Hauptnavigation">
+      <button class="m3nav-item active" data-view="home" onclick="switchView('home')"><span class="m3nav-ico">🏠</span><span>Zuhause</span></button>
+      <button class="m3nav-item" data-view="scenes" onclick="switchView('scenes')"><span class="m3nav-ico">🎨</span><span>Szenen</span></button>
+      <button class="m3nav-item" data-view="automations" onclick="switchView('automations')"><span class="m3nav-ico">⏱️</span><span>Automation</span></button>
+      <button class="m3nav-item" data-view="more" onclick="switchView('more')"><span class="m3nav-ico">⚙️</span><span>Mehr</span></button>
+    </nav>
+
+    <script>
+    (function(){
+      var VIEWS = { home:['groups','lights'], scenes:['scenes'], automations:['effects','timers','sensors','buttons'], more:['power','debug','guide'] };
+      window.switchView = function(v){
+        var tabs = VIEWS[v] || ['groups'];
+        document.querySelectorAll('.tab-content').forEach(function(el){ el.classList.remove('active'); });
+        tabs.forEach(function(t){ var el=document.getElementById(t+'-tab'); if(el) el.classList.add('active'); });
+        document.querySelectorAll('.m3nav-item').forEach(function(n){ n.classList.toggle('active', n.dataset.view===v); });
+        var qc=document.getElementById('quickcontrol'); if(qc) qc.style.display=(v==='home')?'':'none';
+        if(v==='more' && window.hue && hue.switchPowerView){ try{ hue.switchPowerView(hue.currentPowerView||'today'); }catch(e){} }
+        try{ window.__updateDynamicColor && window.__updateDynamicColor(); }catch(e){}
+        window.scrollTo(0,0);
+        try{ localStorage.setItem('hue-view', v); }catch(e){}
+      };
+
+      // --- rooms-first layout + section headers (idempotent) ---
+      function initHomeLayout(){
+        var gt=document.getElementById('groups-tab'), lt=document.getElementById('lights-tab');
+        if(gt&&lt&&lt.parentNode){ lt.parentNode.insertBefore(gt, lt); }   // rooms above lamps
+        var gc=document.getElementById('groups-container');
+        if(gt&&gc&&!gt.querySelector('.m3-section')){ var h1=document.createElement('h2'); h1.className='m3-section'; h1.textContent='🏠 Räume'; gt.insertBefore(h1, gc); }
+        var lc=document.getElementById('lights-container');
+        if(lt&&lc&&!lt.querySelector('.m3-section')){ var h2=document.createElement('h2'); h2.className='m3-section'; h2.textContent='💡 Alle Lampen'; lt.insertBefore(h2, lc); }
+      }
+
+      // --- Dynamic Color: tint the UI from the most vivid lamp that's on ---
+      function hexToRgb(h){ h=(h||'').trim().replace('#',''); if(h.length===3) h=h.split('').map(function(c){return c+c;}).join(''); if(h.length<6) return null; var n=parseInt(h,16); if(isNaN(n)) return null; return [(n>>16)&255,(n>>8)&255,n&255]; }
+      function satOf(rgb){ var mx=Math.max(rgb[0],rgb[1],rgb[2]), mn=Math.min(rgb[0],rgb[1],rgb[2]); return mx===0?0:(mx-mn)/mx; }
+      function updateDynamicColor(){
+        var root=document.documentElement.style;
+        var on=document.querySelectorAll('.lampcard.on');
+        var best=null, bestS=-1;
+        on.forEach(function(c){ var lc=getComputedStyle(c).getPropertyValue('--lc'); var rgb=hexToRgb(lc); if(!rgb) return; var s=satOf(rgb); if(s>bestS){ bestS=s; best=rgb; } });
+        if(!best || bestS<0.14){ root.removeProperty('--dynamic'); root.removeProperty('--dynamic-dim'); return; }  // all-white → clean default
+        var r=best[0],g=best[1],b=best[2];
+        // lift toward a legible, vivid accent
+        var mx=Math.max(r,g,b)||1, boost=Math.min(1.4, 220/mx);
+        r=Math.min(255,Math.round(r*boost)); g=Math.min(255,Math.round(g*boost)); b=Math.min(255,Math.round(b*boost));
+        var hex='#'+[r,g,b].map(function(x){return ('0'+x.toString(16)).slice(-2);}).join('');
+        root.setProperty('--dynamic', hex);
+        root.setProperty('--dynamic-dim', 'rgba('+r+','+g+','+b+',.28)');
+      }
+      window.__updateDynamicColor = updateDynamicColor;
+
+      window.addEventListener('load', function(){
+        setTimeout(function(){
+          initHomeLayout();
+          ['lights-container','groups-container'].forEach(function(id){ var el=document.getElementById(id); if(el){ try{ new MutationObserver(updateDynamicColor).observe(el,{childList:true,subtree:true,attributes:true,attributeFilter:['style','class']}); }catch(e){} } });
+          updateDynamicColor(); setInterval(updateDynamicColor, 3000);
+          var v='home'; try{ v=localStorage.getItem('hue-view')||'home'; }catch(e){} switchView(v);
+        }, 400);
+      });
+    })();
+    </script>
 
 </body>
 </html>
