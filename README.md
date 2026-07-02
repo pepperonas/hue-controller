@@ -8,10 +8,16 @@
 
 <div align="center">
 
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Python](https://img.shields.io/badge/Python-3.11-3776AB.svg?logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-3.0-000000.svg?logo=flask&logoColor=white)
-![Platform](https://img.shields.io/badge/Platform-Raspberry%20Pi-C51A4A.svg?logo=raspberrypi&logoColor=white)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/downloads/release/python-3110/)
+[![Flask](https://img.shields.io/badge/Flask-3.0-000000.svg?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Philips Hue](https://img.shields.io/badge/Philips%20Hue-API%20v1-008000.svg?logo=philips&logoColor=white)](https://developers.meethue.com/)
+[![Platform: Raspberry Pi](https://img.shields.io/badge/Platform-Raspberry%20Pi-C51A4A.svg?logo=raspberrypi&logoColor=white)](https://www.raspberrypi.com/)
+[![systemd](https://img.shields.io/badge/Process%20Manager-systemd-0D597F.svg?logo=linux&logoColor=white)](https://systemd.io/)
+[![PWA](https://img.shields.io/badge/PWA-enabled-5A0FC8.svg?logo=googlechrome&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
+[![Tests](https://img.shields.io/badge/Tests-81%20passed-brightgreen.svg?logo=pytest&logoColor=white)](tests/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/pepperonas/hue-controller/pulls)
+[![Made with ❤️](https://img.shields.io/badge/Made%20with-%E2%9D%A4%EF%B8%8F-red.svg)](https://celox.io)
 
 A smart Philips Hue lighting controller for Raspberry Pi with web interface, motion detection, disco mode, and custom effect builder.
 
@@ -130,6 +136,34 @@ hue-controller/
 │   └── onboarding.html   # Setup wizard
 └── ecosystem.config.js   # legacy PM2 config (unused — runs under systemd)
 ```
+
+## Tests
+
+Pure-logic unit tests run without any hardware (GPIO, audio, MySQL, Flask are all
+mocked). 81 tests covering colour/audio maths, power estimation, effect validation,
+sunrise/sunset calculation, colour palettes, BPM estimation, and error categorisation.
+
+```bash
+# Install dev dependencies
+python3 -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements-dev.txt
+
+# Run all tests
+pytest tests/ -v
+
+# Quick summary only
+pytest tests/ -q
+```
+
+| Module | Functions covered |
+|---|---|
+| `audio_processor.py` | `frequency_to_hue`, `amplitude_to_brightness`, `tempo_to_effect_speed`, `TempoEstimator.estimate_bpm` |
+| `effect_builder.py` | `EffectBuilder.create_effect`, `add_step`, `remove_step`, `reorder_steps`, `validate_effect`, `generate_preview_colors`, `get_templates`, `create_from_template` |
+| `pir_manager.py` | `PIRManager.calculate_sunrise_sunset_berlin` |
+| `disco_mode.py` | `DiscoMode.simple_volume_color` |
+| `error_handler.py` | `SmartErrorHandler.categorize_error` |
+| `app_lite.py` (inline) | Power estimation (`brightness→watts`, `monthly_kwh`, `monthly_cost_eur`), colour palettes |
 
 ## Author
 
