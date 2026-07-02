@@ -53,3 +53,4 @@ hue-config.json
 CLAUDE.md
 CLAUDE.local.md
 .onboarding_completed
+public/*.bak-*

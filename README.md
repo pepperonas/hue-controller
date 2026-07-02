@@ -3,7 +3,8 @@
 > **⚡ Update 2026-06 — Stack & UI**
 >
 > - **Backend:** Python/**Flask** — jetzt als **systemd-Service** `hue-controller` (war PM2 mit Port-5000-Crash-Loop, behoben). 
-> - **UI (2026-06, von Grund auf neu):** **Material Design 3 Expressive** — ruhige **„⚡ Schnellsteuerung"** (ersetzt die alarmierende rote „🚨 Globale Steuerung"): blaues „Alles An" / neutrales „Alles Aus", Disco-Toggle, gefüllter Helligkeits-Slider, runde Farb-Chips. **Live-Farb-Lampenkarten** — echter Lampen-Farbton als Akzent (Dot + Glow + Slider-Track), **MD3-An/Aus-Switch**, Inline-Helligkeit, ausklappbare Farben/Effekte; klare an/aus/nicht-erreichbar-Zustände, responsives Grid. Plus Animationen (Tab-Fade, Status-Dots, Hover-Lift). Service-Worker-Cache `app-v2`.
+> - **UI (2026-06, von Grund auf neu):** **Material Design 3 Expressive** — ruhige **„⚡ Schnellsteuerung"** (ersetzt die alarmierende rote „🚨 Globale Steuerung"): blaues „Alles An" / neutrales „Alles Aus", Disco-Toggle, gefüllter Helligkeits-Slider, runde Farb-Chips. **Live-Farb-Lampenkarten** — echter Lampen-Farbton als Akzent (Dot + Glow + Slider-Track), **MD3-An/Aus-Switch**, Inline-Helligkeit, ausklappbare Farben/Effekte; klare an/aus/nicht-erreichbar-Zustände, responsives Grid. Plus Animationen (Tab-Fade, Status-Dots, Hover-Lift). Service-Worker-Cache `app-v3`.
+> - **UI 2.0 (2026-07, MD3-Expressive-Redesign von Grund auf):** 4-Ziele-**Bottom-Navigation** (Zuhause · Szenen · Automation · Mehr; ab 900 px linke Rail), **Räume-first** mit Sektions-Headern („Räume“ / „Alle Lampen“), **Dynamic Color** — die UI tönt sich mit der Farbe der eingeschalteten Lampen (Nav-Pille, Buttons, Akzente), **tonale Hero-Raum-Karten** (Farbwash + Glow aus dem Lampen-Ton, größer als Lampen), **Shape-Morphing** (Pille→Squircle beim Drücken), atmende Farb-Dots. Additiv (Markup/Handler unberührt), `prefers-reduced-motion`-geguarded.
 > - **Deploy:** `git pull && sudo systemctl restart hue-controller`
 
 <div align="center">
