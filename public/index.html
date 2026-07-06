@@ -3913,6 +3913,57 @@ body { padding-bottom: 96px !important; }
   .lampcard,.qc-seg,.scene-btn,.lc-switch,.lampcard.on .lc-dot,.header h1 { transition:none !important; animation:none !important; }
 }
 
+
+/* ===== Rooms optimization (2026-07): icons · status · scene-per-room · expandable member lamps · entertainment split ===== */
+.room-icon { font-size:1.45rem; line-height:1; flex:0 0 auto; width:2.7rem; height:2.7rem; display:grid; place-items:center;
+  border-radius:15px; background:color-mix(in srgb, var(--lc,#b3c5ff) 20%, var(--surface-high,#26272d));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05); transition:background .35s var(--md-emph,cubic-bezier(.2,0,0,1)); }
+.lampcard.off .room-icon, .lampcard.unreachable .room-icon { background:var(--surface-high,#26272d); }
+.room-titles { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.room-status { font-size:.77rem; color:var(--text-secondary,#c5c6d0); font-weight:650; letter-spacing:.005em;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lampcard.on .room-status { color:color-mix(in srgb, var(--lc,#7ddfa6) 78%, var(--text-primary)); }
+
+.room-actions { display:flex; gap:.55rem; margin-top:1rem; }
+.room-act { flex:1; border:1px solid var(--outline,#46474f); background:transparent; color:var(--text-secondary,#c5c6d0);
+  border-radius:9999px; padding:.6rem .55rem; font-size:.83rem; font-weight:750; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:.35rem; white-space:nowrap;
+  transition:border-radius .25s var(--md-spring,cubic-bezier(.2,0,0,1)), transform .18s var(--md-spring,cubic-bezier(.2,0,0,1)), background .25s, color .25s, border-color .25s; }
+.room-act:hover { background:var(--surface-high,#26272d); color:var(--text-primary,#e4e2e9); border-color:var(--lc,#b3c5ff); }
+.room-act:active { border-radius:14px; transform:scale(.96); }
+.room-act.active { background:var(--lc,#b3c5ff); color:#08203f; border-color:transparent; box-shadow:0 6px 16px -6px var(--lc,#b3c5ff); }
+
+.room-scenes, .room-lamps { margin-top:.9rem; overflow:hidden; }
+.room-scenes { display:none; }
+.room-scenes.open { display:block; animation:md-room-reveal .35s var(--md-emph,cubic-bezier(.2,0,0,1)); }
+.room-lamps { display:none; }
+.room-lamps.open { display:grid; gap:.7rem; grid-template-columns:1fr; animation:md-room-reveal .35s var(--md-emph,cubic-bezier(.2,0,0,1)); }
+@keyframes md-room-reveal { from{ opacity:0; transform:translateY(-8px); } to{ opacity:1; transform:none; } }
+
+.room-scene-chips { display:flex; flex-wrap:wrap; gap:.5rem; }
+.room-scene-chip { border:1px solid var(--outline,#46474f); background:var(--surface-high,#26272d); color:var(--text-primary,#e4e2e9);
+  border-radius:9999px; padding:.5rem .95rem; font-size:.85rem; font-weight:650; cursor:pointer;
+  transition:transform .18s var(--md-spring,cubic-bezier(.2,0,0,1)), background .25s, border-color .25s, box-shadow .25s; }
+.room-scene-chip:hover { border-color:var(--lc,#b3c5ff); transform:translateY(-2px); box-shadow:0 6px 16px -8px var(--lc,#b3c5ff); }
+.room-scene-chip:active { transform:scale(.94); border-radius:16px; }
+.room-scenes-empty { font-size:.82rem; color:var(--text-secondary,#c5c6d0); opacity:.75; padding:.35rem .15rem; }
+
+/* nested member-lamp cards sit a shade higher for depth */
+.room-lamps .lampcard { background:var(--surface-high,#26272d); border-radius:var(--radius-lg,1.5rem); }
+.room-lamps .lampcard.on { background:
+  radial-gradient(130% 150% at 0% 0%, color-mix(in srgb, var(--lc) 20%, transparent), transparent 62%),
+  var(--surface-high,#26272d); }
+
+/* Entertainment section (separated from real rooms) */
+.ent-section { margin-top:1.7rem; }
+.ent-card { display:flex !important; align-items:center; gap:.8rem; padding:1rem 1.15rem; }
+.ent-card .lc-name { flex:1; font-weight:750; }
+.ent-card .room-icon { width:2.3rem; height:2.3rem; font-size:1.2rem; }
+
+@media (prefers-reduced-motion:reduce){
+  .room-act,.room-scene-chip,.room-scenes,.room-lamps,.room-icon { transition:none !important; animation:none !important; }
+}
+
 </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta name="theme-color" content="#121318">
@@ -10060,6 +10111,172 @@ body { padding-bottom: 96px !important; }
           updateDynamicColor(); setInterval(updateDynamicColor, 3000);
           var v='home'; try{ v=localStorage.getItem('hue-view')||'home'; }catch(e){} switchView(v);
         }, 400);
+      });
+    })();
+    </script>
+
+
+    <script>
+    /* ===== Hue Rooms optimization (2026-07) — additive: overrides renderGroups + refreshCurrentTab,
+       caches lights/scenes. All original handlers (hue.toggle/setColor/debouncedSetBrightness) reused. ===== */
+    (function(){
+      var ROOM_ICONS = { 'Living room':'🛋️','Bedroom':'🛏️','Kitchen':'🍳','Bathroom':'🛁',
+        'Hallway':'🚪','Garden':'🌳','Toilet':'🚽','Office':'💻','Dining':'🍽️',
+        'Kids bedroom':'🧸','Nursery':'🍼','Recreation':'🎮','Garage':'🚗','Terrace':'🪴',
+        'Gym':'🏋️','Living Room':'🛋️','Front door':'🚪','Carport':'🚗' };
+      function roomIcon(cls, type){ if(type==='Entertainment') return '🎬'; return ROOM_ICONS[cls] || '💡'; }
+      function cleanName(n){ return String(n||'').replace(/^\.+/,'').trim() || String(n||''); }
+      function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+      function hexToRgb(h){ h=String(h||'').trim().replace('#',''); if(h.length===3) h=h.split('').map(function(c){return c+c;}).join(''); if(h.length<6) return null; var n=parseInt(h,16); return isNaN(n)?null:[(n>>16)&255,(n>>8)&255,n&255]; }
+      function satOf(r){ var mx=Math.max(r[0],r[1],r[2]),mn=Math.min(r[0],r[1],r[2]); return mx===0?0:(mx-mn)/mx; }
+
+      function getHue(){ try{ if(typeof hue!=='undefined' && hue) return hue; }catch(e){} return window.hue||null; }
+      function waitForHue(cb){ var h=getHue(); if(h && h.renderGroups && h.createLightCard){ cb(); } else setTimeout(function(){ waitForHue(cb); }, 150); }
+
+      waitForHue(function(){
+        hue._lights = hue._lights || {};
+        hue._scenes = hue._scenes || {};
+        hue._openRoomPanel = hue._openRoomPanel || {};   // roomId -> 'scenes' | 'lamps' | null
+
+        // --- cache lights + scenes (wrap loaders; keep original render) ---
+        hue.loadLights = async function(){
+          try{ var r=await fetch(this.baseUrl+'/api/lights'); var l=await r.json(); this._lights=l; this.renderLights(l); }
+          catch(e){ console.error('loadLights',e); }
+        };
+        hue.loadScenes = async function(){
+          try{ var r=await fetch(this.baseUrl+'/api/scenes'); var s=await r.json(); this._scenes=s; this.renderScenes(s); }
+          catch(e){ console.error('loadScenes',e); }
+        };
+
+        // --- apply a Hue scene scoped to one room ---
+        hue.applySceneToRoom = async function(sceneId, roomId){
+          try{
+            await fetch(this.baseUrl+'/api/scenes/'+sceneId+'/recall', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ group: String(roomId) }) });
+            setTimeout(function(){ hue.loadGroups(); }, 500);
+          }catch(e){ this.showMessage('Szene fehlgeschlagen: '+e.message,'error'); }
+        };
+
+        // --- expandable panels (scenes / member lamps) with cross-poll persistence ---
+        hue.toggleRoomPanel = function(roomId, which){
+          var cur=this._openRoomPanel[roomId];
+          this._openRoomPanel[roomId] = (cur===which) ? null : which;
+          this.applyRoomPanels();
+        };
+        hue.applyRoomPanels = function(){
+          var self=this;
+          document.querySelectorAll('#groups-container .room-card').forEach(function(card){
+            var rid=card.dataset.room, want=self._openRoomPanel[rid];
+            var sc=card.querySelector('.room-scenes'), lp=card.querySelector('.room-lamps');
+            var bS=card.querySelector('.room-act[data-panel="scenes"]'), bL=card.querySelector('.room-act[data-panel="lamps"]');
+            if(sc) sc.classList.toggle('open', want==='scenes');
+            if(lp){ lp.classList.toggle('open', want==='lamps'); if(want==='lamps' && !lp.children.length) self.fillRoomLamps(card); }
+            if(bS) bS.classList.toggle('active', want==='scenes');
+            if(bL) bL.classList.toggle('active', want==='lamps');
+          });
+        };
+        hue.fillRoomLamps = function(card){
+          var lp=card.querySelector('.room-lamps'); if(!lp) return;
+          var ids=(card.dataset.lights||'').split(',').filter(Boolean);
+          lp.innerHTML='';
+          var self=this;
+          ids.forEach(function(lid){ var lt=self._lights[lid]; if(lt){ try{ lp.appendChild(self.createLightCard(lid, lt, 'light')); }catch(e){} } });
+          if(!lp.children.length) lp.innerHTML='<div class="room-scenes-empty">Keine Lampendaten …</div>';
+        };
+
+        // --- one enhanced room card ---
+        hue.buildRoomCard = function(gid, g){
+          var action=g.action||{}, st=g.state||{}, lightIds=g.lights||[];
+          var color=this.hueToHex(action.hue||0, action.sat||0);
+          var onCount=0, known=0, self=this;
+          lightIds.forEach(function(id){ var lt=self._lights[id]; if(lt){ known++; if(lt.state && lt.state.on) onCount++; } });
+          var anyOn=st.any_on, bri=Math.round((action.bri||0)/254*100);
+          var statusTxt = known
+            ? (onCount+' von '+lightIds.length+' an' + (anyOn?(' · '+bri+'%'):''))
+            : (st.all_on?'Alle an':(anyOn?('Teilweise an · '+bri+'%'):'Aus'));
+
+          var card=document.createElement('div');
+          card.className='lampcard room-card'+(anyOn?' on':' off');
+          card.dataset.room=gid; card.dataset.lights=lightIds.join(',');
+          card.style.setProperty('--lc', color);
+
+          var seen={}, roomScenes=Object.keys(this._scenes||{})
+            .map(function(sid){ return [sid, self._scenes[sid]]; })
+            .filter(function(e){ return String(e[1].group)===String(gid); })
+            .filter(function(e){ var k=e[1].name; if(seen[k])return false; seen[k]=1; return true; });
+          var sceneChips = roomScenes.length
+            ? '<div class="room-scene-chips">'+roomScenes.map(function(e){ return '<button class="room-scene-chip" onclick="hue.applySceneToRoom(\''+e[0]+'\',\''+gid+'\')">'+esc(e[1].name)+'</button>'; }).join('')+'</div>'
+            : '<div class="room-scenes-empty">Keine Szenen für diesen Raum</div>';
+
+          card.innerHTML =
+            '<div class="lc-head">'+
+              '<span class="room-icon">'+roomIcon(g.class,g.type)+'</span>'+
+              '<div class="room-titles"><span class="lc-name">'+esc(cleanName(g.name))+'</span><span class="room-status">'+statusTxt+'</span></div>'+
+              '<button class="lc-switch" aria-pressed="'+anyOn+'" onclick="hue.toggle(\''+gid+'\', '+(!anyOn)+', \'group\')" title="'+(anyOn?'Raum aus':'Raum an')+'"></button>'+
+            '</div>'+
+            '<div class="lc-bright">'+
+              '<input type="range" class="lc-slider" min="1" max="254" value="'+(action.bri||254)+'" style="--lc:'+color+'; --fill:'+bri+'%;" '+
+                'oninput="this.style.setProperty(\'--fill\', Math.round(this.value/254*100)+\'%\'); this.nextElementSibling.textContent=Math.round(this.value/254*100)+\'%\'; hue.updateLightPreview(\''+gid+'\', this.value, \'group\'); hue.debouncedSetBrightness(\''+gid+'\', this.value, \'group\')">'+
+              '<span class="lc-pct">'+bri+'%</span>'+
+            '</div>'+
+            '<div class="room-actions">'+
+              '<button class="room-act" data-panel="scenes" onclick="hue.toggleRoomPanel(\''+gid+'\',\'scenes\')">🎬 Szenen</button>'+
+              '<button class="room-act" data-panel="lamps" onclick="hue.toggleRoomPanel(\''+gid+'\',\'lamps\')">💡 '+lightIds.length+' Lampe'+(lightIds.length===1?'':'n')+'</button>'+
+            '</div>'+
+            '<div class="room-scenes">'+sceneChips+'</div>'+
+            '<div class="room-lamps"></div>';
+          return card;
+        };
+
+        // --- renderGroups override: real rooms vs entertainment ---
+        hue.renderGroups = function(groups){
+          var container=document.getElementById('groups-container'); if(!container) return;
+          var groupsTab=document.getElementById('groups-tab');
+          var ent=document.getElementById('entertainment-container');
+          if(!ent && groupsTab){
+            var wrap=document.createElement('div'); wrap.className='ent-section';
+            wrap.innerHTML='<h2 class="m3-section">🎬 Entertainment</h2><div id="entertainment-container" class="controls-grid"></div>';
+            groupsTab.appendChild(wrap); ent=document.getElementById('entertainment-container');
+          }
+          container.innerHTML=''; if(ent) ent.innerHTML='';
+          var self=this;
+          Object.keys(groups).forEach(function(gid){
+            var g=groups[gid];
+            if(g.name==='Lightset 0') return;
+            if(g.type==='Entertainment'){
+              if(!ent) return;
+              var anyOn=g.state&&g.state.any_on;
+              var c=document.createElement('div');
+              c.className='lampcard ent-card'+(anyOn?' on':' off');
+              c.style.setProperty('--lc', self.hueToHex((g.action||{}).hue||0,(g.action||{}).sat||0));
+              c.innerHTML='<span class="room-icon">🎬</span><span class="lc-name">'+esc(cleanName(g.name))+'</span>'+
+                '<button class="lc-switch" aria-pressed="'+anyOn+'" onclick="hue.toggle(\''+gid+'\', '+(!anyOn)+', \'group\')"></button>';
+              ent.appendChild(c);
+            } else {
+              container.appendChild(self.buildRoomCard(gid, g));
+            }
+          });
+          var sec = ent ? ent.closest('.ent-section') : null;
+          if(sec) sec.style.display = ent.children.length ? '' : 'none';
+          this.applyRoomPanels();
+          try{ window.__updateDynamicColor && window.__updateDynamicColor(); }catch(e){}
+        };
+
+        // --- live-refresh fix: on Home refresh BOTH groups + lights (original only polled activeTab);
+        //     pause the groups rebuild while a member-lamp panel is open so interaction stays stable ---
+        hue.refreshCurrentTab = async function(){
+          try{
+            var v='home'; try{ v=localStorage.getItem('hue-view')||'home'; }catch(e){}
+            if(v==='home'){
+              var lampOpen=false, self=this;
+              Object.keys(this._openRoomPanel).forEach(function(k){ if(self._openRoomPanel[k]==='lamps') lampOpen=true; });
+              if(!lampOpen) await this.loadGroups();
+              await this.loadLights();
+            } else if(v==='scenes'){ await this.loadScenes(); }
+          }catch(e){ console.error('refreshCurrentTab',e); }
+        };
+
+        // re-render immediately with the new renderer
+        hue.loadScenes(); hue.loadLights(); hue.loadGroups();
       });
     })();
     </script>
