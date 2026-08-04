@@ -8107,10 +8107,13 @@ h1,h2,h3{ text-wrap:balance; }
                         <div id="system-info" class="info-content">
                             <div class="info-grid">
                                 <div class="info-item">
-                                    <strong>Verbindung:</strong> <span class="status-badge reachable">✅ ${data.status.hue_connected ? 'Verbunden' : '❌ Getrennt'}</span>
+                                    <!-- Der Zustand bestimmt Klasse UND Zeichen. Vorher standen beide fest
+                                         ausserhalb der Bedingung: eine getrennte Bridge zeigte
+                                         "✅ ❌ Getrennt" im gruenen "reachable"-Badge. -->
+                                    <strong>Verbindung:</strong> <span class="status-badge ${data.status.hue_connected ? 'reachable' : 'unreachable'}">${data.status.hue_connected ? '✅ live' : '❌ offline'}</span>
                                 </div>
                                 <div class="info-item">
-                                    <strong>Datenbank:</strong> <span class="status-badge reachable">✅ ${data.status.database === 'enabled' ? 'Verfügbar' : '❌ Nicht verfügbar'}</span>
+                                    <strong>Datenbank:</strong> <span class="status-badge ${data.status.database === 'enabled' ? 'reachable' : 'unreachable'}">${data.status.database === 'enabled' ? '✅ verfügbar' : '❌ nicht verfügbar'}</span>
                                 </div>
                                 <div class="info-item">
                                     <strong>Aktive Effekte:</strong> ${data.status.active_effects || 0}
