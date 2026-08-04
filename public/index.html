@@ -52,34 +52,36 @@
 <!-- Samsung Browser S24 Ultra specific icons -->
 <!-- Standard sizes for broad compatibility -->
 <!-- PWA Manifest -->
-    <link rel="manifest" href="/static/manifest.json">
+    <link rel="manifest" href="static/manifest.json">
     
     <!-- Microsoft Tiles -->
     <meta name="msapplication-TileColor" content="#2c2e3b">
     <meta name="msapplication-TileImage" content="/android-chrome-192x192.png">
     
-    <style>
+    <link rel="stylesheet" href="/shared/theme.css">
+<style>
         :root {
             /* Material Design 3 Expressive — dark, tonal, vibrant */
-            --background-dark: #121318;        /* surface */
-            --background-darker: #0c0e13;      /* container-lowest */
-            --card-background: #1c1d23;        /* surface-container */
-            --surface-high: #26272d;
-            --surface-highest: #303137;
-            --outline: #46474f;
-            --accent-blue: #b3c5ff;            /* primary (vibrant) */
-            --on-primary: #0a285a;
-            --accent-green: #7ddfa6;
-            --accent-red: #ffb4ab;
-            --text-primary: #e4e2e9;           /* on-surface */
-            --text-secondary: #c5c6d0;         /* on-surface-variant */
+            --background-dark: var(--sh-bg);        /* surface */
+            --background-darker: var(--sh-bg2);      /* container-lowest */
+            --card-background: var(--sh-surface);        /* surface-container */
+            --surface-high: var(--sh-surface2);
+            --surface-highest: var(--sh-surface2);
+            --outline: var(--sh-outline);
+            --accent-blue: var(--sh-primary);            /* primary (vibrant) */
+            --on-primary: var(--sh-on-primary);
+            --accent-green: var(--sh-ok);
+            --accent-red: var(--sh-loud);
+            --text-primary: var(--sh-text);           /* on-surface */
+            --text-secondary: var(--sh-text2);         /* on-surface-variant */
             --ease-spring: linear(0,0.009 1.2%,0.035 2.5%,0.158 6%,0.793 18.4%,0.984 23%,1.07 27%,1.104 31.5%,1.103 35%,1.07 41%,1.013 50%,0.991 57%,0.998 75%,1);
-            --ease-emph: cubic-bezier(0.2,0,0,1);
+            --ease-emph: var(--sh-ease);
 
             /* Schatten */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+            /* Stillgelegt: Höhe entsteht über Kontur und Flächenton. */
+            --shadow-sm: none;
+            --shadow: none;
+            --shadow-lg: none;
 
             /* Abstände */
             --spacing-1: 0.25rem;
@@ -92,13 +94,13 @@
             --spacing-16: 4rem;
 
             /* Rundungen — MD3 shape scale */
-            --radius-sm: 0.75rem;
-            --radius: 1rem;
-            --radius-lg: 1.5rem;
-            --radius-xl: 1.75rem;
+            --radius-sm: var(--sh-radius-sm);
+            --radius: var(--sh-radius);
+            --radius-lg: var(--sh-radius);
+            --radius-xl: var(--sh-radius);
 
             /* Typografie */
-            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            --font-family: var(--sh-font);
         }
 
         * {
@@ -107,39 +109,42 @@
             box-sizing: border-box;
         }
 
+        /* Grund, Schrift, Polster und Zeilenhöhe kommen aus shared/theme.css. */
         body {
-            font-family: var(--font-family);
-            background-color: var(--background-dark);
             color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
-            padding: var(--spacing-4);
         }
 
+        /* 1200 px OHNE seitliches Polster — das sitzt am body. Der große untere
+           Abstand bleibt: die Bottom-Navigation der UI 2.0 liegt darüber und
+           würde den letzten Eintrag sonst verdecken. */
         .container {
-            max-width: 1400px;
+            max-width: var(--sh-measure);
             margin: 0 auto;
-            padding: var(--spacing-6);
-            padding-bottom: 100px; /* Space for bottom nav */
+            padding: 0;
+            padding-bottom: 100px; /* Platz für die Bottom-Nav */
         }
 
+        /* Kein Sticky-Kärtchen mehr: der Kopf ist Teil der Seite, linksbündig
+           und ohne eigene Fläche — wie in der dB-Analyse. */
         .header {
-            background-color: var(--background-darker);
-            padding: var(--spacing-6);
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            text-align: center;
-            margin-bottom: var(--spacing-6);
-            border-radius: var(--radius-xl);
+            background-color: transparent;
+            padding: var(--sh-pad-top) 0 0;
+            box-shadow: none;
+            position: static;
+            text-align: left;
+            margin-bottom: var(--sh-gap-lg);
+            border-radius: 0;
         }
 
+        /* Auf Klassenebene, weil `.header h1` den Element-Grundstil aus
+           shared/theme.css schlägt — lautlos. */
         .header h1 {
-            font-size: 1.875rem;
-            font-weight: 700;
+            font-size: clamp(1.85rem, 5vw, 2.55rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
             color: var(--text-primary);
-            margin-bottom: var(--spacing-2);
+            margin-bottom: 0;
         }
 
         .power-display {
@@ -8523,10 +8528,18 @@ h1,h2,h3{ text-wrap:balance; }
                 const content = document.getElementById(cardId + '-content');
                 const icon = document.getElementById(cardId + '-icon');
                 const savedState = localStorage.getItem('card-' + cardId);
-                
+
+                // 'quickaccess-content' gibt es nicht (das Element heisst
+                // 'global-quick-access-content'). Ungeprueft warf die Schleife
+                // beim ersten Durchlauf und riss den gesamten
+                // DOMContentLoaded-Handler mit — sichtbar wurde das erst, als
+                // der Parse-Fehler weiter oben behoben war und dieser Code
+                // ueberhaupt zur Ausfuehrung kam.
+                if (!content) return;
+
                 if (savedState === 'collapsed') {
                     content.classList.add('collapsed');
-                    icon.classList.add('collapsed');
+                    if (icon) icon.classList.add('collapsed');
                     content.style.maxHeight = '0';
                 } else {
                     // Default to expanded
@@ -8805,7 +8818,7 @@ h1,h2,h3{ text-wrap:balance; }
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ on: true, bri: 254 })
                         });
-                        showToast('Alle Lichter eingeschaltet', 'success`);
+                        showToast('Alle Lichter eingeschaltet', 'success');
                         break;
 
                     case 'all_off':
@@ -8814,14 +8827,14 @@ h1,h2,h3{ text-wrap:balance; }
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ on: false })
                         });
-                        showToast('Alle Lichter ausgeschaltet', 'success`);
+                        showToast('Alle Lichter ausgeschaltet', 'success');
                         break;
 
                     case 'emergency_off':
                         await fetch(`${window.HUE_API_BASE}/api/global/emergency-off`, {
                             method: 'POST'
                         });
-                        showToast('Notaus ausgeführt', 'success`);
+                        showToast('Notaus ausgeführt', 'success');
                         break;
 
                     case 'scene_relax':
@@ -8845,7 +8858,7 @@ h1,h2,h3{ text-wrap:balance; }
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ on: true, effect: 'colorloop' })
                         });
-                        showToast('Farbschleife gestartet', 'success`);
+                        showToast('Farbschleife gestartet', 'success');
                         break;
 
                     case 'effect_stop_all':
@@ -8855,7 +8868,7 @@ h1,h2,h3{ text-wrap:balance; }
                         });
                         const stopData = await stopResponse.json();
                         if (stopData.success) {
-                            showToast(stopData.message || 'Alle Effekte gestoppt', 'success`);
+                            showToast(stopData.message || 'Alle Effekte gestoppt', 'success');
                         } else {
                             showToast('Fehler beim Stoppen der Effekte', 'error');
                         }
@@ -9069,7 +9082,7 @@ h1,h2,h3{ text-wrap:balance; }
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast('Button-Konfiguration hinzugefügt', 'success`);
+                    showToast('Button-Konfiguration hinzugefügt', 'success');
                     
                     // Clear form
                     document.getElementById('gpio-pin').value = '';
@@ -9455,7 +9468,7 @@ h1,h2,h3{ text-wrap:balance; }
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast('PIR Motion Test ausgeführt - Garten-Beleuchtung für 10 Min aktiviert', 'success`);
+                    showToast('PIR Motion Test ausgeführt - Garten-Beleuchtung für 10 Min aktiviert', 'success');
                     loadPIRStatus(); // Refresh status
                 } else {
                     showToast(`PIR Test fehlgeschlagen: ${data.error}`, 'error');
@@ -9475,7 +9488,7 @@ h1,h2,h3{ text-wrap:balance; }
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast(data.message, 'success`);
+                    showToast(data.message, 'success');
                     loadPIRStatus(); // Refresh status
                 } else {
                     showToast(`PIR Toggle Fehler: ${data.error}`, 'error');
@@ -9584,7 +9597,7 @@ h1,h2,h3{ text-wrap:balance; }
     </script>
     <script>
     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("/static/service-worker.js")
+        navigator.serviceWorker.register("static/service-worker.js")
             .then(reg => console.log("Service Worker registered"))
             .catch(err => console.log("Service Worker registration failed"));
     }
