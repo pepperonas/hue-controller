@@ -294,7 +294,7 @@
             }
 
             .quick-access-content {
-                padding: var(--spacing-6);
+                padding: var(--sh-card-pad);
                 transition: all 0.3s ease;
                 overflow: hidden;
             }
@@ -430,8 +430,9 @@
         .card {
             background-color: var(--card-background);
             border-radius: var(--radius-xl);
-            padding: var(--spacing-6);
-            margin-bottom: var(--spacing-6);
+            /* Polster aus den Tokens: 24 px gegen 18,4/19,2/16 im Massstab. */
+            padding: var(--sh-card-pad);
+            margin-bottom: var(--sh-gap-lg);
             box-shadow: var(--shadow);
             border: 1px solid var(--outline);
             transition: all 0.3s ease;
@@ -876,7 +877,7 @@
             background: var(--card-background);
             border: 1px solid var(--outline);
             border-radius: var(--radius-xl);
-            padding: var(--spacing-6);
+            padding: var(--sh-card-pad);
             margin-bottom: var(--spacing-6);
         }
 
@@ -999,7 +1000,7 @@
         .button-config-form {
             background: rgba(52, 56, 69, 0.7);
             border-radius: var(--radius-lg);
-            padding: var(--spacing-6);
+            padding: var(--sh-card-pad);
             margin-top: var(--spacing-4);
             border: 1px solid color-mix(in srgb, var(--accent-green) 30%, transparent);
         }
@@ -1540,7 +1541,7 @@
             border: 2px solid var(--accent-red);
             border-radius: var(--radius-xl);
             background: color-mix(in srgb, var(--accent-red) 10%, transparent);
-            padding: var(--spacing-6);
+            padding: var(--sh-card-pad);
             margin-top: var(--spacing-6);
         }
 
@@ -2016,7 +2017,7 @@
         .power-chart {
             background: var(--card-background);
             border-radius: var(--radius);
-            padding: var(--spacing-6);
+            padding: var(--sh-card-pad);
             margin-top: var(--spacing-6);
             min-height: 300px;
             max-height: 450px;
