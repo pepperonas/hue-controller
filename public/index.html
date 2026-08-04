@@ -6,7 +6,7 @@
     
     <!-- Primary Meta Tags -->
     <title>Hue Controller - Intelligente Lichtsteuerung</title>
-    <meta name="title" content="💡 Hue Controller - Intelligente Lichtsteuerung">
+    <meta name="title"content="Hue Controller - Intelligente Lichtsteuerung">
     <meta name="description" content="Philips Hue Smart Lighting Controller mit Effekten und Power Monitoring via Raspberry Pi.">
     <meta name="keywords" content="Hue, Philips Hue, Smart Lighting, LED Controller, Raspberry Pi, Home Automation">
     <meta name="author" content="Hue Control App">
@@ -129,7 +129,9 @@
            und ohne eigene Fläche — wie in der dB-Analyse. */
         .header {
             background-color: transparent;
-            padding: var(--sh-pad-top) 0 0;
+            /* Kein zweites Oberpolster: die 20 px zum Leistenrand kommen bereits
+               vom body — so macht es der Massstab. Beides zusammen ergab 40. */
+            padding: 0 0 var(--sh-gap-lg);
             box-shadow: none;
             position: static;
             text-align: left;
@@ -1619,7 +1621,7 @@
         }
         
         .lamp-checkbox:checked::after, .form-checkbox:checked::after, input[type="checkbox"]:checked::after {
-            content: '✓';
+            content: '';
             position: absolute;
             top: 50%;
             left: 50%;
@@ -3612,17 +3614,24 @@ h1,h2,h3{ text-wrap:balance; }
 .status-disconnected{ background:color-mix(in srgb, var(--sh-text) 3%, transparent);
                       color:var(--sh-text2); }
 .status-disconnected::before{ background:var(--sh-muted); box-shadow:none; }
+
+        /* Icons statt Emoji: gleiche Zeichnung wie in Leiste und Dashboard,
+           Farbe und Groesse vom Umfeld geerbt. */
+        .sh-i{display:inline-flex;align-items:center;justify-content:center;line-height:0}
+        .sh-i svg{width:1em;height:1em;display:block}
+        h1 .sh-i,h2 .sh-i,h3 .sh-i,h4 .sh-i,strong .sh-i{margin-right:.4rem;vertical-align:-.1em}
+        .btn .sh-i,button .sh-i{margin-right:.35rem;vertical-align:-.1em}
 </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/shared/icons.js?v=1" defer></script>
-    <script src="/shared/nav.js?v=7" defer></script>
+    <script src="/shared/icons.js?v=4" defer></script>
+    <script src="/shared/nav.js?v=9" defer></script>
     <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
     <link rel="apple-touch-icon" href="static/apple-touch-icon.png">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏠Philips Hue Controller</h1>
+            <h1><span class="sh-i" data-sh-icon="home" aria-hidden="true"></span>Philips Hue Controller</h1>
             <div class="power-display">
                 <span id="current-power">Lade Stromverbrauch...</span>
             </div>
@@ -3633,7 +3642,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         <div class="global-controls collapsible-card">
             <div class="collapsible-header" onclick="toggleCard('globalcontrols')">
-                <h3>🚨 Globale Steuerung</h3>
+                <h3><span class="sh-i" data-sh-icon="siren" aria-hidden="true"></span> Globale Steuerung</h3>
                 <span class="collapse-icon" id="globalcontrols-icon">▼</span>
             </div>
             <div class="collapsible-content" id="globalcontrols-content">
@@ -3641,13 +3650,13 @@ h1,h2,h3{ text-wrap:balance; }
                     <button class="btn" onclick="globalControl('all-on')">Alles An</button>
                     <button class="btn danger" onclick="globalControl('all-off')">Alles Aus</button>
                     <button class="btn" id="disco-mode-btn" onclick="toggleDiscoMode()">
-                        <span id="disco-icon">🕺</span> Disko-Modus
+                        <span id="disco-icon"><span class="sh-i" data-sh-icon="party" aria-hidden="true"></span></span> Disko-Modus
                     </button>
                 </div>
                 
                 <!-- Frequency Display for Disco Mode -->
                 <div id="frequency-display" style="display: none; margin-top: 16px;">
-                    <h4>🎵 Frequenz-Analyse</h4>
+                    <h4><span class="sh-i" data-sh-icon="music" aria-hidden="true"></span> Frequenz-Analyse</h4>
                     <div class="freq-bands"></div>
                 </div>
                 
@@ -3708,19 +3717,19 @@ h1,h2,h3{ text-wrap:balance; }
         <div id="scenes-tab" class="tab-content">
             <!-- Stimmungsszenen -->
             <div class="card">
-                <div class="card-title">🎭 Stimmungsszenen</div>
+                <div class="card-title"><span class="sh-i" data-sh-icon="mood" aria-hidden="true"></span> Stimmungsszenen</div>
                 <div id="mood-scenes-container"></div>
             </div>
             
             <!-- Klassische Hue Szenen -->
             <div class="card">
-                <div class="card-title">💡 Hue Szenen</div>
+                <div class="card-title"><span class="sh-i" data-sh-icon="bulb" aria-hidden="true"></span> Hue Szenen</div>
                 <div id="scenes-container" class="scene-grid"></div>
             </div>
             
             <!-- Musik-Synchronisation -->
             <div class="card">
-                <div class="card-title">🎵 Musik-Synchronisation</div>
+                <div class="card-title"><span class="sh-i" data-sh-icon="music" aria-hidden="true"></span> Musik-Synchronisation</div>
                 <div id="audio-sync-container">
                     <div class="control-group">
                         <h4>Audio-Gerät</h4>
@@ -3766,20 +3775,20 @@ h1,h2,h3{ text-wrap:balance; }
         <div id="effects-tab" class="tab-content">
             <!-- Erweiterte Effekte -->
             <div class="card">
-                <div class="card-title">🎨 Erweiterte Lichteffekte</div>
+                <div class="card-title"><span class="sh-i" data-sh-icon="palette" aria-hidden="true"></span> Erweiterte Lichteffekte</div>
                 <div class="advanced-effects">
                     <div class="effect-card" onclick="startAdvancedEffect('wave')">
-                        <span class="icon">🌊</span>
+                        <span class="icon"><span class="sh-i" data-sh-icon="wave" aria-hidden="true"></span></span>
                         <div class="name">Raumwelle</div>
                         <div class="description">Farben laufen durch alle Räume</div>
                     </div>
                     <div class="effect-card" onclick="startAdvancedEffect('pulse')">
-                        <span class="icon">💓</span>
+                        <span class="icon"><span class="sh-i" data-sh-icon="heart" aria-hidden="true"></span></span>
                         <div class="name">Pulsieren</div>
                         <div class="description">Rhythmisches Dimmen</div>
                     </div>
                     <div class="effect-card" onclick="startAdvancedEffect('rainbow')">
-                        <span class="icon">🌈</span>
+                        <span class="icon"><span class="sh-i" data-sh-icon="rainbow" aria-hidden="true"></span></span>
                         <div class="name">Regenbogen</div>
                         <div class="description">Sanfte Farbübergänge</div>
                     </div>
@@ -3789,7 +3798,7 @@ h1,h2,h3{ text-wrap:balance; }
                         <div class="description">Warme, flackernde Farben</div>
                     </div>
                     <div class="effect-card" onclick="startAdvancedEffect('sunset')">
-                        <span class="icon">🌅</span>
+                        <span class="icon"><span class="sh-i" data-sh-icon="sunrise" aria-hidden="true"></span></span>
                         <div class="name">Sonnenuntergang</div>
                         <div class="description">Automatische Farbtemperatur</div>
                     </div>
@@ -3799,7 +3808,7 @@ h1,h2,h3{ text-wrap:balance; }
                         <div class="description">Zufällige Blitzeffekte</div>
                     </div>
                     <div class="effect-card" onclick="startAdvancedEffect('breathe')">
-                        <span class="icon">💨</span>
+                        <span class="icon"><span class="sh-i" data-sh-icon="wave" aria-hidden="true"></span></span>
                         <div class="name">Atmen</div>
                         <div class="description">Sanftes Pulsieren</div>
                     </div>
@@ -3809,22 +3818,22 @@ h1,h2,h3{ text-wrap:balance; }
                         <div class="description">Zufällige Lichtfunken</div>
                     </div>
                     <div class="effect-card" onclick="startAdvancedEffect('disco')">
-                        <span class="icon">🪩</span>
+                        <span class="icon"><span class="sh-i" data-sh-icon="disco" aria-hidden="true"></span></span>
                         <div class="name">Disco</div>
                         <div class="description">Bunte Partystimmung</div>
                     </div>
                     <div class="effect-card" onclick="startAdvancedEffect('aurora')">
-                        <span class="icon">🌌</span>
+                        <span class="icon"><span class="sh-i" data-sh-icon="crystal" aria-hidden="true"></span></span>
                         <div class="name">Nordlicht</div>
                         <div class="description">Sanfte Farbwellen</div>
                     </div>
                     <div class="effect-card" onclick="startAdvancedEffect('sparkle')">
-                        <span class="icon">🌟</span>
+                        <span class="icon"><span class="sh-i" data-sh-icon="sparkle" aria-hidden="true"></span></span>
                         <div class="name">Glitzer</div>
                         <div class="description">Kurze Lichtblitze</div>
                     </div>
                     <div class="effect-card" onclick="startAdvancedEffect('comet')">
-                        <span class="icon">☄️</span>
+                        <span class="icon"><span class="sh-i" data-sh-icon="burst" aria-hidden="true"></span></span>
                         <div class="name">Komet</div>
                         <div class="description">Wandernder Lichtschweif</div>
                     </div>
@@ -3833,7 +3842,7 @@ h1,h2,h3{ text-wrap:balance; }
 
             <div class="controls-grid">
                 <div class="card">
-                    <div class="card-title">⚙️ Manuelle Effekte</div>
+                    <div class="card-title"><span class="sh-i" data-sh-icon="gear" aria-hidden="true"></span> Manuelle Effekte</div>
                     
                     <div class="control-group">
                         <h4>Ziel auswählen</h4>
@@ -3878,7 +3887,7 @@ h1,h2,h3{ text-wrap:balance; }
                             <input type="range" class="slider" id="strobe-brightness" min="50" max="254" value="254" oninput="updateSliderValue('strobe-brightness', this.value)">
                         </div>
                         <div class="color-selection-section">
-                            <h5>🎨 Strobo-Farbe</h5>
+                            <h5><span class="sh-i" data-sh-icon="palette" aria-hidden="true"></span> Strobo-Farbe</h5>
                             <div class="color-quick-selection">
                                 <button class="color-btn" style="background: #ff0000;" onclick="setNormalStroboColorHex('#ff0000')" title="Rot"></button>
                                 <button class="color-btn" style="background: #00ff00;" onclick="setNormalStroboColorHex('#00ff00')" title="Grün"></button>
@@ -3918,7 +3927,7 @@ h1,h2,h3{ text-wrap:balance; }
                 </div>
 
                 <div class="card">
-                    <div class="card-title">🎯 Aktive Effekte</div>
+                    <div class="card-title"><span class="sh-i" data-sh-icon="target" aria-hidden="true"></span> Aktive Effekte</div>
                     <div id="effects-list" class="effect-list">
                         <div>Keine aktiven Effekte</div>
                     </div>
@@ -3975,13 +3984,13 @@ h1,h2,h3{ text-wrap:balance; }
 
         <div id="debug-tab" class="tab-content">
             <div class="card">
-                <div class="card-title">🐛 Live Debug Monitor</div>
+                <div class="card-title"><span class="sh-i" data-sh-icon="bug" aria-hidden="true"></span> Live Debug Monitor</div>
                 
                 <div class="control-group">
                     <h4>System Informationen</h4>
                     <div class="debug-controls">
-                        <button class="btn" onclick="showSystemInfo()" style="background: var(--accent-green);">🔍 System-Info anzeigen</button>
-                        <button class="btn" onclick="refreshSystemInfo()">🔄 Aktualisieren</button>
+                        <button class="btn" onclick="showSystemInfo()" style="background: var(--accent-green);"><span class="sh-i" data-sh-icon="search" aria-hidden="true"></span> System-Info anzeigen</button>
+                        <button class="btn" onclick="refreshSystemInfo()"><span class="sh-i" data-sh-icon="refresh" aria-hidden="true"></span> Aktualisieren</button>
                     </div>
                     <div id="system-info-container" style="display: none; margin-top: var(--spacing-4);"></div>
                 </div>
@@ -4019,7 +4028,7 @@ h1,h2,h3{ text-wrap:balance; }
                     <h4>Bridge Status</h4>
                     <div class="status-grid">
                         <div class="status-item">
-                            <div class="status-value" id="debug-bridge-status">🔍</div>
+                            <div class="status-value" id="debug-bridge-status"><span class="sh-i" data-sh-icon="search" aria-hidden="true"></span></div>
                             <div class="status-label">Bridge Verbindung</div>
                         </div>
                         <div class="status-item">
@@ -4160,7 +4169,7 @@ h1,h2,h3{ text-wrap:balance; }
             <div class="card" style="margin-top: var(--spacing-6);">
                 <div class="card-title">Licht-Details</div>
                 <div style="padding: var(--spacing-3); background: color-mix(in srgb, var(--accent-red) 10%, transparent); border-radius: var(--radius); margin-bottom: var(--spacing-4); font-size: 0.875rem;">
-                    <strong>Hinweis:</strong> Nicht erreichbare Lichter (⚠️) verbrauchen weiterhin Strom, wenn sie eingeschaltet sind.
+                    <strong>Hinweis:</strong> Nicht erreichbare Lichter () verbrauchen weiterhin Strom, wenn sie eingeschaltet sind.
                 </div>
                 <div id="light-power-details"></div>
             </div>
@@ -4169,44 +4178,44 @@ h1,h2,h3{ text-wrap:balance; }
         <div id="guide-tab" class="tab-content">
             <div class="guide-container">
                 <div class="card">
-                    <div class="card-title">📚Philips Hue Controller - Vollständige Anleitung</div>
+                    <div class="card-title">Philips Hue Controller - Vollständige Anleitung</div>
                     <div class="guide-nav">
-                        <button class="guide-nav-btn active" onclick="showGuideSection('overview')">🏠 Übersicht</button>
-                        <button class="guide-nav-btn" onclick="showGuideSection('quickstart')">⚡ Schnellstart</button>
-                        <button class="guide-nav-btn" onclick="showGuideSection('lights')">💡 Lichtsteuerung</button>
-                        <button class="guide-nav-btn" onclick="showGuideSection('colors')">🎨 Farben & Szenen</button>
-                        <button class="guide-nav-btn" onclick="showGuideSection('effects')">🔥 Effekte</button>
-                        <button class="guide-nav-btn" onclick="showGuideSection('monitoring')">📊 Monitoring</button>
-                        <button class="guide-nav-btn" onclick="showGuideSection('advanced')">🛠️ Erweitert</button>
-                        <button class="guide-nav-btn" onclick="showGuideSection('troubleshooting')">❓ Hilfe</button>
+                        <button class="guide-nav-btn active" onclick="showGuideSection('overview')"><span class="sh-i" data-sh-icon="home" aria-hidden="true"></span> Übersicht</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('quickstart')"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Schnellstart</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('lights')"><span class="sh-i" data-sh-icon="bulb" aria-hidden="true"></span> Lichtsteuerung</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('colors')"><span class="sh-i" data-sh-icon="palette" aria-hidden="true"></span> Farben & Szenen</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('effects')"><span class="sh-i" data-sh-icon="flame" aria-hidden="true"></span> Effekte</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('monitoring')"><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> Monitoring</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('advanced')"><span class="sh-i" data-sh-icon="gear" aria-hidden="true"></span> Erweitert</button>
+                        <button class="guide-nav-btn" onclick="showGuideSection('troubleshooting')"><span class="sh-i" data-sh-icon="help" aria-hidden="true"></span> Hilfe</button>
                     </div>
                 </div>
 
                 <!-- Übersicht Section -->
                 <div id="guide-overview" class="guide-section active">
                     <div class="card">
-                        <div class="card-title">🏠 Was kannPhilips Hue Controller?</div>
+                        <div class="card-title"><span class="sh-i" data-sh-icon="home" aria-hidden="true"></span> Was kannPhilips Hue Controller?</div>
                         <div class="guide-content">
-                            <h3>✨ Hauptfunktionen:</h3>
+                            <h3><span class="sh-i" data-sh-icon="sparkle" aria-hidden="true"></span> Hauptfunktionen:</h3>
                             <ul>
-                                <li><strong>💡 Intelligente Lichtsteuerung</strong> - Ein/Aus, Helligkeit, Farben für alle Hue-Geräte</li>
-                                <li><strong>🎨 Kreative Szenen</strong> - Vordefinierte Stimmungen und eigene Kreationen</li>
-                                <li><strong>🔥 Spektakuläre Effekte</strong> - Strobo, Colorloop, Ultra-Blitz und mehr</li>
-                                <li><strong>📊 Power Monitoring</strong> - Echter Stromverbrauch und Kostenkontrolle</li>
-                                <li><strong>🏠 Gruppen-Management</strong> - Raumweise Steuerung aller Lichter</li>
-                                <li><strong>⏰ Timer & Automation</strong> - Zeitgesteuerte Aktionen</li>
+                                <li><strong><span class="sh-i" data-sh-icon="bulb" aria-hidden="true"></span> Intelligente Lichtsteuerung</strong> - Ein/Aus, Helligkeit, Farben für alle Hue-Geräte</li>
+                                <li><strong><span class="sh-i" data-sh-icon="palette" aria-hidden="true"></span> Kreative Szenen</strong> - Vordefinierte Stimmungen und eigene Kreationen</li>
+                                <li><strong><span class="sh-i" data-sh-icon="flame" aria-hidden="true"></span> Spektakuläre Effekte</strong> - Strobo, Colorloop, Ultra-Blitz und mehr</li>
+                                <li><strong><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> Power Monitoring</strong> - Echter Stromverbrauch und Kostenkontrolle</li>
+                                <li><strong><span class="sh-i" data-sh-icon="home" aria-hidden="true"></span> Gruppen-Management</strong> - Raumweise Steuerung aller Lichter</li>
+                                <li><strong><span class="sh-i" data-sh-icon="clock" aria-hidden="true"></span>Timer &amp; Automation</strong> - Zeitgesteuerte Aktionen</li>
                             </ul>
                             
-                            <h3>🚀 Performance Features:</h3>
+                            <h3><span class="sh-i" data-sh-icon="rocket" aria-hidden="true"></span> Performance Features:</h3>
                             <ul>
-                                <li><strong>⚡ Ultra-schnelle Reaktion</strong> - Optimierte API-Calls mit Smart Caching</li>
-                                <li><strong>🎯 Debouncing-System</strong> - Keine Verzögerungen bei Slider-Bewegungen</li>
-                                <li><strong>📱 Mobile-Optimiert</strong> - Touch-freundliche Bedienung</li>
-                                <li><strong>🌐 Offline-Fähig</strong> - Progressive Web App Technology</li>
+                                <li><strong><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Ultra-schnelle Reaktion</strong> - Optimierte API-Calls mit Smart Caching</li>
+                                <li><strong><span class="sh-i" data-sh-icon="target" aria-hidden="true"></span> Debouncing-System</strong> - Keine Verzögerungen bei Slider-Bewegungen</li>
+                                <li><strong><span class="sh-i" data-sh-icon="phone" aria-hidden="true"></span> Mobile-Optimiert</strong> - Touch-freundliche Bedienung</li>
+                                <li><strong><span class="sh-i" data-sh-icon="globe" aria-hidden="true"></span> Offline-Fähig</strong> - Progressive Web App Technology</li>
                             </ul>
 
                             <div class="warning-box">
-                                <strong>⚠️ Sicherheitshinweis:</strong><br>
+                                <strong> Sicherheitshinweis:</strong><br>
                                 Die Strobo-Effekte können bei photosensitiven Personen epileptische Anfälle auslösen. 
                                 Verwenden Sie hohe Frequenzen (>15Hz) nur mit äußerster Vorsicht!
                             </div>
@@ -4217,16 +4226,16 @@ h1,h2,h3{ text-wrap:balance; }
                 <!-- Schnellstart Section -->
                 <div id="guide-quickstart" class="guide-section">
                     <div class="card">
-                        <div class="card-title">⚡ In 3 Minuten einsatzbereit</div>
+                        <div class="card-title"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> In 3 Minuten einsatzbereit</div>
                         <div class="guide-content">
-                            <h3>🔧 Setup (einmalig):</h3>
+                            <h3><span class="sh-i" data-sh-icon="gear" aria-hidden="true"></span> Setup (einmalig):</h3>
                             <ol>
                                 <li><strong>Hue Bridge finden:</strong> App automatisch erkennt Bridge im Netzwerk</li>
                                 <li><strong>Bridge-Button drücken:</strong> Physischen Button an der Bridge drücken</li>
                                 <li><strong>Verbindung bestätigen:</strong> App erhält automatisch Zugriff</li>
                             </ol>
 
-                            <h3>🚀 Sofort loslegen:</h3>
+                            <h3><span class="sh-i" data-sh-icon="rocket" aria-hidden="true"></span> Sofort loslegen:</h3>
                             <div class="quick-actions">
                                 <div class="quick-action">
                                     <div class="quick-icon" data-sh-icon="hue"></div>
@@ -4258,12 +4267,12 @@ h1,h2,h3{ text-wrap:balance; }
                                 </div>
                             </div>
 
-                            <h3>⚡ Sofort-Aktionen:</h3>
+                            <h3><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Sofort-Aktionen:</h3>
                             <div class="shortcut-grid">
-                                <div class="shortcut-item">🌟 Alles An</div>
-                                <div class="shortcut-item">💡 Alles Aus</div>
-                                <div class="shortcut-item">🚨 Notfall-Stopp</div>
-                                <div class="shortcut-item">🎨 Schnell-Szenen</div>
+                                <div class="shortcut-item"><span class="sh-i" data-sh-icon="sparkle" aria-hidden="true"></span> Alles An</div>
+                                <div class="shortcut-item"><span class="sh-i" data-sh-icon="bulb" aria-hidden="true"></span> Alles Aus</div>
+                                <div class="shortcut-item"><span class="sh-i" data-sh-icon="siren" aria-hidden="true"></span> Notfall-Stopp</div>
+                                <div class="shortcut-item"><span class="sh-i" data-sh-icon="palette" aria-hidden="true"></span> Schnell-Szenen</div>
                             </div>
                         </div>
                     </div>
@@ -4272,16 +4281,16 @@ h1,h2,h3{ text-wrap:balance; }
                 <!-- Weitere Sections werden hier eingefügt... -->
                 <div id="guide-lights" class="guide-section">
                     <div class="card">
-                        <div class="card-title">💡 Lichtsteuerung Meistern</div>
+                        <div class="card-title"><span class="sh-i" data-sh-icon="bulb" aria-hidden="true"></span> Lichtsteuerung Meistern</div>
                         <div class="guide-content">
-                            <h3>🔧 Grundsteuerung:</h3>
+                            <h3><span class="sh-i" data-sh-icon="gear" aria-hidden="true"></span> Grundsteuerung:</h3>
                             <ul>
                                 <li><strong>Ein/Aus:</strong> Großer Button - sofortige Reaktion</li>
                                 <li><strong>Helligkeit:</strong> Slider bewegen - optimistische Updates</li>
                                 <li><strong>Farbe:</strong> Color Picker oder Farbpalette verwenden</li>
                             </ul>
 
-                            <h3>🎨 Farbauswahl:</h3>
+                            <h3><span class="sh-i" data-sh-icon="palette" aria-hidden="true"></span> Farbauswahl:</h3>
                             <div class="color-demo">
                                 <div class="color-method">
                                     <strong>1. Color Picker</strong><br>
@@ -4297,7 +4306,7 @@ h1,h2,h3{ text-wrap:balance; }
                                 </div>
                             </div>
 
-                            <h3>⚡ Performance-Tipps:</h3>
+                            <h3><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Performance-Tipps:</h3>
                             <ul>
                                 <li><strong>Slider:</strong> Bewegen Sie ruhig schnell - Debouncing verhindert Spam</li>
                                 <li><strong>Gruppen:</strong> Verwenden Sie Räume für bessere Performance</li>
@@ -4310,41 +4319,41 @@ h1,h2,h3{ text-wrap:balance; }
                 <!-- Effects Guide -->
                 <div id="guide-effects" class="guide-section">
                     <div class="card">
-                        <div class="card-title">🔥 Effekte & Strobo-Modi</div>
+                        <div class="card-title"><span class="sh-i" data-sh-icon="flame" aria-hidden="true"></span> Effekte & Strobo-Modi</div>
                         <div class="guide-content">
-                            <h3>💫 Standard-Effekte:</h3>
+                            <h3><span class="sh-i" data-sh-icon="sparkle" aria-hidden="true"></span> Standard-Effekte:</h3>
                             <div class="effects-grid">
                                 <div class="effect-card">
-                                    <div class="effect-name">🌈 Colorloop</div>
+                                    <div class="effect-name"><span class="sh-i" data-sh-icon="rainbow" aria-hidden="true"></span> Colorloop</div>
                                     <div class="effect-desc">Sanfter Farbverlauf durch das gesamte Spektrum</div>
                                 </div>
                                 <div class="effect-card">
-                                    <div class="effect-name">⚡ Normaler Strobo</div>
+                                    <div class="effect-name"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Normaler Strobo</div>
                                     <div class="effect-desc">1-10Hz, konfigurierbare Farben, unbegrenzte Dauer</div>
                                 </div>
                                 <div class="effect-card">
-                                    <div class="effect-name">🔥 Ultra-Strobo</div>
+                                    <div class="effect-name"><span class="sh-i" data-sh-icon="flame" aria-hidden="true"></span> Ultra-Strobo</div>
                                     <div class="effect-desc">10-25Hz, extrem aggressive Blitze</div>
                                 </div>
                             </div>
 
-                            <h3>🚨 Ultra-Strobo Modi:</h3>
+                            <h3><span class="sh-i" data-sh-icon="siren" aria-hidden="true"></span> Ultra-Strobo Modi:</h3>
                             <ul>
-                                <li><strong>⚡ ULTRA (15Hz):</strong> Kontinuierliche Blitze mit extremer Geschwindigkeit</li>
-                                <li><strong>💥 BURST:</strong> 4-5 schnelle Blitze, dann Pause</li>
-                                <li><strong>🚔 POLIZEI:</strong> Rot-Blau Wechsel mit Sirenen-Feeling</li>
-                                <li><strong>🪩 DISCO:</strong> Zufällige Farben und Frequenzen</li>
+                                <li><strong><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> ULTRA (15Hz):</strong> Kontinuierliche Blitze mit extremer Geschwindigkeit</li>
+                                <li><strong><span class="sh-i" data-sh-icon="burst" aria-hidden="true"></span> BURST:</strong> 4-5 schnelle Blitze, dann Pause</li>
+                                <li><strong><span class="sh-i" data-sh-icon="siren" aria-hidden="true"></span> POLIZEI:</strong> Rot-Blau Wechsel mit Sirenen-Feeling</li>
+                                <li><strong><span class="sh-i" data-sh-icon="disco" aria-hidden="true"></span> DISCO:</strong> Zufällige Farben und Frequenzen</li>
                             </ul>
 
                             <div class="warning-box">
-                                <strong>🚨 EPILEPSIE-WARNUNG!</strong><br>
+                                <strong> EPILEPSIE-WARNUNG!</strong><br>
                                 • Frequenzen >15Hz sind besonders gefährlich<br>
                                 • Sofortiger Notfall-Stopp verfügbar<br>
                                 • Unbegrenzte Dauer: 0 = ∞, sonst Sekunden<br>
                                 • Bei Problemen: Notfall-Stopp oder Browser schließen
                             </div>
 
-                            <h3>🎯 Strobo-Konfiguration:</h3>
+                            <h3><span class="sh-i" data-sh-icon="target" aria-hidden="true"></span> Strobo-Konfiguration:</h3>
                             <ul>
                                 <li><strong>Frequenz:</strong> 1-25Hz (Vorsicht bei >15Hz!)</li>
                                 <li><strong>Dauer:</strong> 0 = Unbegrenzt, 1-300 Sekunden</li>
@@ -4358,12 +4367,12 @@ h1,h2,h3{ text-wrap:balance; }
                 <!-- Troubleshooting -->
                 <div id="guide-troubleshooting" class="guide-section">
                     <div class="card">
-                        <div class="card-title">❓ Probleme lösen</div>
+                        <div class="card-title"><span class="sh-i" data-sh-icon="help" aria-hidden="true"></span> Probleme lösen</div>
                         <div class="guide-content">
-                            <h3>🐛 Häufige Probleme:</h3>
+                            <h3><span class="sh-i" data-sh-icon="bug" aria-hidden="true"></span> Häufige Probleme:</h3>
                             
                             <div class="problem-solution">
-                                <div class="problem">❌ Lichter reagieren nicht</div>
+                                <div class="problem"><span class="sh-i" data-sh-icon="close" aria-hidden="true"></span> Lichter reagieren nicht</div>
                                 <div class="solution">
                                     • Bridge-Verbindung prüfen (Debug-Tab)<br>
                                     • WLAN-Verbindung der Bridge überprüfen<br>
@@ -4372,7 +4381,7 @@ h1,h2,h3{ text-wrap:balance; }
                             </div>
 
                             <div class="problem-solution">
-                                <div class="problem">🐌 App reagiert langsam</div>
+                                <div class="problem"> App reagiert langsam</div>
                                 <div class="solution">
                                     • Browser-Cache leeren<br>
                                     • Andere Tabs schließen<br>
@@ -4382,7 +4391,7 @@ h1,h2,h3{ text-wrap:balance; }
                             </div>
 
                             <div class="problem-solution">
-                                <div class="problem">⚡ Strobo stoppt nicht</div>
+                                <div class="problem"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Strobo stoppt nicht</div>
                                 <div class="solution">
                                     • <strong>NOTFALL-STOPP</strong> Button verwenden<br>
                                     • Browser-Tab schließen<br>
@@ -4391,7 +4400,7 @@ h1,h2,h3{ text-wrap:balance; }
                                 </div>
                             </div>
 
-                            <h3>🔧 Debug-Tools verwenden:</h3>
+                            <h3><span class="sh-i" data-sh-icon="gear" aria-hidden="true"></span> Debug-Tools verwenden:</h3>
                             <ul>
                                 <li><strong>Debug-Tab:</strong> Live API-Requests verfolgen</li>
                                 <li><strong>Test-Funktionen:</strong> Bridge-Verbindung testen</li>
@@ -4399,7 +4408,7 @@ h1,h2,h3{ text-wrap:balance; }
                                 <li><strong>Error-Logs:</strong> Fehlerdetails einsehen</li>
                             </ul>
 
-                            <h3>📞 Support-Informationen:</h3>
+                            <h3><span class="sh-i" data-sh-icon="phone" aria-hidden="true"></span> Support-Informationen:</h3>
                             <div class="support-info">
                                 <strong>System-Informationen:</strong><br>
                                 • App:Philips Hue Controller<br>
@@ -4414,7 +4423,7 @@ h1,h2,h3{ text-wrap:balance; }
                 <!-- Weitere Sections placeholder -->
                 <div id="guide-colors" class="guide-section">
                     <div class="card">
-                        <div class="card-title">🎨 Farben & Szenen</div>
+                        <div class="card-title"><span class="sh-i" data-sh-icon="palette" aria-hidden="true"></span> Farben & Szenen</div>
                         <div class="guide-content">
                             <p>Detaillierte Anleitung zu Farben und Szenen kommt hier...</p>
                         </div>
@@ -4423,7 +4432,7 @@ h1,h2,h3{ text-wrap:balance; }
 
                 <div id="guide-monitoring" class="guide-section">
                     <div class="card">
-                        <div class="card-title">📊 Power Monitoring</div>
+                        <div class="card-title"><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> Power Monitoring</div>
                         <div class="guide-content">
                             <p>Stromverbrauch-Monitoring Anleitung kommt hier...</p>
                         </div>
@@ -4432,7 +4441,7 @@ h1,h2,h3{ text-wrap:balance; }
 
                 <div id="guide-advanced" class="guide-section">
                     <div class="card">
-                        <div class="card-title">🛠️ Erweiterte Features</div>
+                        <div class="card-title"><span class="sh-i" data-sh-icon="gear" aria-hidden="true"></span> Erweiterte Features</div>
                         <div class="guide-content">
                             <p>Profi-Features und API-Zugriff kommt hier...</p>
                         </div>
@@ -4443,7 +4452,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         <div id="buttons-tab" class="tab-content">
             <div class="card">
-                <div class="card-title">🔘 Custom Button Konfiguration</div>
+                <div class="card-title"><span class="sh-i" data-sh-icon="dot" aria-hidden="true"></span> Custom Button Konfiguration</div>
                 <div class="card-content">
                     <p>Konfiguriere physische Buttons (GPIO) zur direkten Steuerung von Hue-Gruppen.</p>
                     
@@ -4455,7 +4464,7 @@ h1,h2,h3{ text-wrap:balance; }
                     
                     <!-- Button hinzufügen -->
                     <div class="button-config-form">
-                        <h3>🆕 Neuen Button hinzufügen</h3>
+                        <h3><span class="sh-i" data-sh-icon="plus" aria-hidden="true"></span> Neuen Button hinzufügen</h3>
                         <div class="form-grid">
                             <div class="form-field">
                                 <label for="gpio-pin">GPIO Pin:</label>
@@ -4511,7 +4520,7 @@ h1,h2,h3{ text-wrap:balance; }
                             </div>
                         </div>
                         <button class="action-btn" onclick="addButtonConfiguration()">
-                            ➕ Button hinzufügen
+                             Button hinzufügen
                         </button>
                     </div>
                 </div>
@@ -4519,7 +4528,7 @@ h1,h2,h3{ text-wrap:balance; }
 
             <!-- Konfigurierte Buttons -->
             <div class="card">
-                <div class="card-title">⚙️ Aktuelle Konfiguration</div>
+                <div class="card-title"><span class="sh-i" data-sh-icon="gear" aria-hidden="true"></span> Aktuelle Konfiguration</div>
                 <div id="button-configurations" class="button-configs-container">
                     <div class="loading-spinner">Lade Konfigurationen...</div>
                 </div>
@@ -4527,7 +4536,7 @@ h1,h2,h3{ text-wrap:balance; }
 
             <!-- PIR Motion Sensor -->
             <div class="card">
-                <div class="card-title">🔍 PIR Bewegungsmelder</div>
+                <div class="card-title"><span class="sh-i" data-sh-icon="search" aria-hidden="true"></span> PIR Bewegungsmelder</div>
                 <div class="card-content">
                     <p>Automatische Garten-Beleuchtung bei Bewegungserkennung (GPIO Pin 23).</p>
                     
@@ -4552,11 +4561,11 @@ h1,h2,h3{ text-wrap:balance; }
                         </div>
                         <div class="info-item">
                             <strong>Timer aktiv:</strong>
-                            <span id="pir-timer-status">❌</span>
+                            <span id="pir-timer-status"><span class="sh-i" data-sh-icon="close" aria-hidden="true"></span></span>
                         </div>
                         <div class="info-item">
                             <strong>Status:</strong>
-                            <span id="pir-motion-status">🔍 Wartend</span>
+                            <span id="pir-motion-status"><span class="sh-i" data-sh-icon="search" aria-hidden="true"></span> Wartend</span>
                         </div>
                         <div class="info-item">
                             <strong>Sonnenaufgang:</strong>
@@ -4568,7 +4577,7 @@ h1,h2,h3{ text-wrap:balance; }
                         </div>
                         <div class="info-item">
                             <strong>Nachtmodus:</strong>
-                            <span id="pir-nightmode">🌙 Nacht</span>
+                            <span id="pir-nightmode"><span class="sh-i" data-sh-icon="moon" aria-hidden="true"></span> Nacht</span>
                         </div>
                     </div>
                     
@@ -4576,7 +4585,7 @@ h1,h2,h3{ text-wrap:balance; }
                     <div class="pir-settings">
                         <div class="setting-row">
                             <label for="motion-detection-toggle">
-                                <strong>🔍 Bewegungserkennung aktiviert:</strong>
+                                <strong> Bewegungserkennung aktiviert:</strong>
                             </label>
                             <div class="toggle-switch">
                                 <input type="checkbox" id="motion-detection-toggle" onchange="updatePIRConfig('motion_detection_enabled', this.checked)">
@@ -4585,7 +4594,7 @@ h1,h2,h3{ text-wrap:balance; }
                         </div>
                         <div class="setting-row">
                             <label for="daylight-detection-toggle">
-                                <strong>🌅 Nur nachts aktiv (Tageslichteerkennung):</strong>
+                                <strong> Nur nachts aktiv (Tageslichteerkennung):</strong>
                             </label>
                             <div class="toggle-switch">
                                 <input type="checkbox" id="daylight-detection-toggle" onchange="updatePIRConfig('daylight_detection_enabled', this.checked)">
@@ -4596,13 +4605,13 @@ h1,h2,h3{ text-wrap:balance; }
                     
                     <div class="pir-controls">
                         <button class="action-btn" onclick="testPIRMotion()" style="background: var(--accent-blue);">
-                            🧪 Motion Test
+                             Motion Test
                         </button>
                         <button class="action-btn" id="pir-toggle-btn" onclick="togglePIRMonitoring()">
-                            ⏸️ Monitoring pausieren
+                            <span class="sh-i" data-sh-icon="pause" aria-hidden="true"></span>Monitoring pausieren
                         </button>
                         <button class="action-btn" onclick="viewSunriseDetails()" style="background: var(--accent-green);">
-                            🌅 Sonnenzeiten
+                             Sonnenzeiten
                         </button>
                     </div>
                 </div>
@@ -4610,10 +4619,10 @@ h1,h2,h3{ text-wrap:balance; }
 
             <!-- Button-Logs -->
             <div class="card">
-                <div class="card-title">📋 Button Activity Log</div>
+                <div class="card-title"><span class="sh-i" data-sh-icon="edit" aria-hidden="true"></span> Button Activity Log</div>
                 <div class="button-logs-header">
-                    <button class="small-btn" onclick="loadButtonLogs()">🔄 Aktualisieren</button>
-                    <button class="small-btn" onclick="clearButtonLogs()" style="background: var(--accent-red);">🗑️ Logs löschen</button>
+                    <button class="small-btn" onclick="loadButtonLogs()"><span class="sh-i" data-sh-icon="refresh" aria-hidden="true"></span> Aktualisieren</button>
+                    <button class="small-btn" onclick="clearButtonLogs()" style="background: var(--accent-red);"><span class="sh-i" data-sh-icon="trash" aria-hidden="true"></span> Logs löschen</button>
                 </div>
                 <div id="button-logs" class="logs-container">
                     <div class="loading-spinner">Lade Logs...</div>
@@ -4624,7 +4633,7 @@ h1,h2,h3{ text-wrap:balance; }
         <!-- Schwebende Steuerungselemente -->
         <div class="floating-controls">
             <button class="floating-btn" onclick="globalControl('all-off')" title="Alles Aus" style="background: linear-gradient(135deg, #f44336 0%, #da190b 100%);><span data-sh-icon="hue"></span></button>
-            <button class="floating-btn" onclick="globalControl('all-on')" title="Alles An" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">🌟</button>
+            <button class="floating-btn" onclick="globalControl('all-on')" title="Alles An" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);"><span class="sh-i" data-sh-icon="sparkle" aria-hidden="true"></span></button>
         </div>
     </div>
 
@@ -4665,6 +4674,13 @@ h1,h2,h3{ text-wrap:balance; }
     </nav>
 
     <script>
+
+        /* Fuer Beschriftungen, die zur Laufzeit geschrieben werden. Platzhalter
+           im Markup nimmt der Beobachter in icons.js selbst mit. */
+        function shIcon(key){
+            var g = (window.SHIcons && SHIcons.svg) ? (SHIcons.svg(key) || '') : '';
+            return g ? '<span class="sh-i" aria-hidden="true">' + g + '</span>' : '';
+        }
         // Smart Debouncing System für Performance
         class SmartDebouncer {
             constructor() {
@@ -5013,7 +5029,7 @@ h1,h2,h3{ text-wrap:balance; }
                 card.innerHTML = `
                     <div class="card-title">
                         ${item.name} 
-                        ${isReachable ? (isOn ? '💡' : '🔆') : '❌'}
+                        ${isReachable ? (isOn ? '' : '') : ''}
                     </div>
                     
                     <button class="btn ${this.getButtonClass(isOn, isReachable)}" 
@@ -5071,7 +5087,7 @@ h1,h2,h3{ text-wrap:balance; }
                             </div>
                         </div>
                         <div class="effect-controls">
-                            <button class="btn warning" onclick="hue.toggleStrobe('${id}', '${type}')" ${!isReachable ? 'disabled' : ''} id="strobe-btn-${type}-${id}">⚡ Strobo</button>
+                            <button class="btn warning" onclick="hue.toggleStrobe('${id}', '${type}')" ${!isReachable ? 'disabled' : ''} id="strobe-btn-${type}-${id}"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Strobo</button>
                         </div>
                     </div>
                 `;
@@ -5085,8 +5101,8 @@ h1,h2,h3{ text-wrap:balance; }
             }
             
             getButtonText(isOn, isReachable) {
-                if (!isReachable) return '❌ Nicht verfügbar';
-                return isOn ? '⭕ Ausschalten' : '✅ Einschalten';
+                if (!isReachable) return 'Nicht verfügbar';
+                return isOn ? 'Ausschalten' : 'Einschalten';
             }
 
             async toggle(id, state, type) {
@@ -5256,7 +5272,7 @@ h1,h2,h3{ text-wrap:balance; }
                         await this.stopStrobe(strobeKey);
                         delete this.activeStrobes[strobeKey];
                         if (button) {
-                            button.textContent = '⚡ Strobo';
+                            button.textContent = 'Strobo';
                             button.classList.remove('btn-active');
                         }
                         if (card) {
@@ -5300,7 +5316,7 @@ h1,h2,h3{ text-wrap:balance; }
                         };
                         
                         if (button) {
-                            button.textContent = '⚡ Strobo AN';
+                            button.textContent = 'Strobo AN';
                             button.classList.add('btn-active');
                         }
                         
@@ -5482,13 +5498,13 @@ h1,h2,h3{ text-wrap:balance; }
                     document.getElementById('monthly-cost').textContent = data.estimated_monthly_cost_eur + '€';
                     
                     document.getElementById('current-power').textContent = 
-                        `💡 ${data.active_lights} Lichter • ⚡ ${data.total_watts}W • 💰 ~${data.estimated_monthly_cost_eur}€/Monat`;
+                        ` ${data.active_lights} Lichter •  ${data.total_watts}W •  ~${data.estimated_monthly_cost_eur}€/Monat`;
 
                     // Light details
                     const detailsContainer = document.getElementById('light-power-details');
                     detailsContainer.innerHTML = data.light_details.map(light => `
                         <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--outline);">
-                            <span>${light.name}${!light.reachable ? ' ⚠️ (nicht erreichbar)' : ''}</span>
+                            <span>${light.name}${!light.reachable ? ' <span class="sh-i" data-sh-icon="warning" aria-hidden="true"></span> (nicht erreichbar)' : ''}</span>
                             <span>${light.watts}W (${Math.round(light.brightness/254*100)}%)</span>
                         </div>
                     `).join('');
@@ -5535,7 +5551,7 @@ h1,h2,h3{ text-wrap:balance; }
             async switchPowerView(view) {
                 // Prevent concurrent requests for the same view
                 if (this.loadingStates[view]) {
-                    console.log('🚫 Already loading data for view:', view);
+                    console.log('Already loading data for view:', view);
                     return;
                 }
                 
@@ -5581,7 +5597,7 @@ h1,h2,h3{ text-wrap:balance; }
                 const maxRetries = 2;
                 
                 try {
-                    console.log('🔄 Loading detailed power data for:', timeframe, retryCount > 0 ? `(retry ${retryCount})` : '');
+                    console.log('Loading detailed power data for:', timeframe, retryCount > 0 ? `(retry ${retryCount})` : '');
                     
                     const response = await fetch(`${window.HUE_API_BASE}/api/power/detailed/${timeframe}`, {
                         headers: {
@@ -5604,7 +5620,7 @@ h1,h2,h3{ text-wrap:balance; }
                         throw new Error('Invalid JSON response from server');
                     }
                     
-                    console.log('📡 API response:', { 
+                    console.log('API response:', { 
                         timeframe, 
                         detailedDataLength: data.detailed_data?.length,
                         topLightsLength: data.top_lights?.length,
@@ -5620,7 +5636,7 @@ h1,h2,h3{ text-wrap:balance; }
                     
                     // Check if we got incomplete data and should retry
                     if ((!data.detailed_data || !Array.isArray(data.detailed_data)) && retryCount < maxRetries) {
-                        console.warn(`⚠️ Incomplete data received, retrying... (${retryCount + 1}/${maxRetries})`);
+                        console.warn(`Incomplete data received, retrying... (${retryCount + 1}/${maxRetries})`);
                         await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
                         return this.loadDetailedPowerData(timeframe, retryCount + 1);
                     }
@@ -5637,7 +5653,7 @@ h1,h2,h3{ text-wrap:balance; }
                     if (data.detailed_data && Array.isArray(data.detailed_data) && data.detailed_data.length > 0) {
                         this.renderDetailedChart(data.detailed_data, timeframe);
                     } else {
-                        console.warn('⚠️ No detailed data available for chart');
+                        console.warn('No detailed data available for chart');
                         this.showNoDataMessage('powerChart', 'Keine Daten für diesen Zeitraum verfügbar');
                     }
                     
@@ -5645,7 +5661,7 @@ h1,h2,h3{ text-wrap:balance; }
                     if (data.top_lights && Array.isArray(data.top_lights)) {
                         this.renderTopConsumers(data.top_lights);
                     } else {
-                        console.warn('⚠️ No top lights data available');
+                        console.warn('No top lights data available');
                         document.getElementById('top-consumers').innerHTML = '<div class="status-item"><div class="status-label">Keine Verbraucher-Daten verfügbar</div></div>';
                     }
                     
@@ -5671,14 +5687,14 @@ h1,h2,h3{ text-wrap:balance; }
             }
 
             renderDetailedChart(data, timeframe) {
-                console.log('🔄 renderDetailedChart called with:', { timeframe, dataLength: data?.length, data: data?.slice(0, 3) });
+                console.log('renderDetailedChart called with:', { timeframe, dataLength: data?.length, data: data?.slice(0, 3) });
                 
                 const ctx = document.getElementById('powerChart').getContext('2d');
                 
                 // Unified chart destruction - only check Chart.js registry
                 const existingChart = Chart.getChart('powerChart');
                 if (existingChart) {
-                    console.log('🗑️ Destroying existing chart');
+                    console.log('Destroying existing chart');
                     existingChart.destroy();
                 }
                 
@@ -5688,7 +5704,7 @@ h1,h2,h3{ text-wrap:balance; }
                 
                 // Data validation
                 if (!data || data.length === 0) {
-                    console.warn('⚠️ No data received for chart rendering');
+                    console.warn('No data received for chart rendering');
                     return;
                 }
                 
@@ -5697,7 +5713,7 @@ h1,h2,h3{ text-wrap:balance; }
                 const maxData = data.map(item => parseFloat(item.max_watts));
                 const minData = data.map(item => parseFloat(item.min_watts));
                 
-                console.log('📊 Chart data processed:', { 
+                console.log('Chart data processed:', { 
                     labels: labels.slice(0, 5), 
                     avgData: avgData.slice(0, 5),
                     maxData: maxData.slice(0, 5),
@@ -5809,13 +5825,13 @@ h1,h2,h3{ text-wrap:balance; }
                     if (data && data.weekday_summary) {
                         this.renderWeekdayChart(data.weekday_summary);
                     } else {
-                        console.warn('⚠️ No weekday_summary data received');
+                        console.warn('No weekday_summary data received');
                     }
                     
                     if (data && data.weekday_hourly) {
                         this.renderWeekdayHeatmap(data.weekday_hourly);
                     } else {
-                        console.warn('⚠️ No weekday_hourly data received');
+                        console.warn('No weekday_hourly data received');
                     }
                     
                 } catch (error) {
@@ -5832,7 +5848,7 @@ h1,h2,h3{ text-wrap:balance; }
                 
                 // Data validation
                 if (!weekdayData || !Array.isArray(weekdayData) || weekdayData.length === 0) {
-                    console.warn('⚠️ No weekday data received for chart rendering');
+                    console.warn('No weekday data received for chart rendering');
                     return;
                 }
                 
@@ -5922,7 +5938,7 @@ h1,h2,h3{ text-wrap:balance; }
                 
                 // Data validation
                 if (!weekdayHourlyData || weekdayHourlyData.length === 0) {
-                    console.warn('⚠️ No weekday hourly data received for heatmap');
+                    console.warn('No weekday hourly data received for heatmap');
                     return;
                 }
                 
@@ -6022,7 +6038,7 @@ h1,h2,h3{ text-wrap:balance; }
                     if (data && data.monthly_summary) {
                         this.renderMonthlyChart(data.monthly_summary);
                     } else {
-                        console.warn('⚠️ No monthly_summary data received');
+                        console.warn('No monthly_summary data received');
                         // Show a message to user that monthly data is not available
                         const ctx = document.getElementById('monthlyChart').getContext('2d');
                         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -6053,11 +6069,11 @@ h1,h2,h3{ text-wrap:balance; }
                 
                 // Data validation
                 if (!monthlyData || !Array.isArray(monthlyData) || monthlyData.length === 0) {
-                    console.warn('⚠️ No monthly data received for chart rendering');
+                    console.warn('No monthly data received for chart rendering');
                     return;
                 }
                 
-                console.log('📊 Monthly data received:', monthlyData);
+                console.log('Monthly data received:', monthlyData);
                 
                 const labels = monthlyData.map(item => item.month);
                 const kwhData = monthlyData.map(item => parseFloat(item.total_kwh));
@@ -6419,26 +6435,26 @@ h1,h2,h3{ text-wrap:balance; }
                 
                 // Status-Emojis basierend auf Effizienz
                 const getEfficiencyEmoji = (eff) => {
-                    if (eff > 80) return '🔥';
-                    if (eff > 60) return '⚡';
-                    if (eff > 40) return '💡';
-                    if (eff > 20) return '🌱';
-                    return '💤';
+                    if (eff > 80) return '';
+                    if (eff > 60) return '';
+                    if (eff > 40) return '';
+                    if (eff > 20) return '';
+                    return '';
                 };
                 
                 const getCostEmoji = (cost) => {
-                    if (cost < 1) return '💰';
-                    if (cost < 5) return '💳';
-                    if (cost < 10) return '💸';
-                    return '🔥💸';
+                    if (cost < 1) return '';
+                    if (cost < 5) return '';
+                    if (cost < 10) return '';
+                    return '';
                 };
                 
                 const getSavingsEmoji = (savings) => {
-                    if (savings > 80) return '🌟';
-                    if (savings > 60) return '🎯';
-                    if (savings > 40) return '👍';
-                    if (savings > 20) return '💚';
-                    return '⚠️';
+                    if (savings > 80) return '';
+                    if (savings > 60) return '';
+                    if (savings > 40) return '';
+                    if (savings > 20) return '';
+                    return '';
                 };
                 
                 statsContainer.innerHTML = `
@@ -6447,19 +6463,19 @@ h1,h2,h3{ text-wrap:balance; }
                         <div class="status-label">Effizienz-Score</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">⚡ ${avgWatts.toFixed(1)}W</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> ${avgWatts.toFixed(1)}W</div>
                         <div class="status-label">Ø Verbrauch ${labels[timeframe] || ''}</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">🔥 ${maxWatts.toFixed(1)}W</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="flame" aria-hidden="true"></span> ${maxWatts.toFixed(1)}W</div>
                         <div class="status-label">Spitzenlast</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">💡 ${avgActiveWatts.toFixed(1)}W</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="bulb" aria-hidden="true"></span> ${avgActiveWatts.toFixed(1)}W</div>
                         <div class="status-label">Ø wenn aktiv</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">⚡ ${totalKwh.toFixed(3)} kWh</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> ${totalKwh.toFixed(3)} kWh</div>
                         <div class="status-label">Gesamtverbrauch ${labels[timeframe] || ''}</div>
                     </div>
                     <div class="status-item highlight">
@@ -6467,40 +6483,40 @@ h1,h2,h3{ text-wrap:balance; }
                         <div class="status-label">Kosten ${labels[timeframe] || ''} (0,30€/kWh)</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">💰 ${economyCost.toFixed(2)}€</div>
+                        <div class="status-value"> ${economyCost.toFixed(2)}€</div>
                         <div class="status-label">Nachttarif (0,25€/kWh)</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">💳 ${premiumCost.toFixed(2)}€</div>
+                        <div class="status-value"> ${premiumCost.toFixed(2)}€</div>
                         <div class="status-label">Tagtarif (0,32€/kWh)</div>
                     </div>
                     ${timeframe === 'today' ? `
                     <div class="status-item eco">
-                        <div class="status-value">📈 ${costProjections.week.toFixed(2)}€</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> ${costProjections.week.toFixed(2)}€</div>
                         <div class="status-label">Hochrechnung Woche</div>
                     </div>
                     <div class="status-item eco">
-                        <div class="status-value">📈 ${costProjections.month.toFixed(2)}€</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> ${costProjections.month.toFixed(2)}€</div>
                         <div class="status-label">Hochrechnung Monat</div>
                     </div>
                     <div class="status-item eco">
-                        <div class="status-value">📈 ${costProjections.year.toFixed(2)}€</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> ${costProjections.year.toFixed(2)}€</div>
                         <div class="status-label">Hochrechnung Jahr</div>
                     </div>
                     ` : ''}
                     ${timeframe === 'week' ? `
                     <div class="status-item eco">
-                        <div class="status-value">📈 ${costProjections.month.toFixed(2)}€</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> ${costProjections.month.toFixed(2)}€</div>
                         <div class="status-label">Hochrechnung Monat</div>
                     </div>
                     <div class="status-item eco">
-                        <div class="status-value">📈 ${costProjections.year.toFixed(2)}€</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> ${costProjections.year.toFixed(2)}€</div>
                         <div class="status-label">Hochrechnung Jahr</div>
                     </div>
                     ` : ''}
                     ${timeframe === 'month' ? `
                     <div class="status-item eco">
-                        <div class="status-value">📈 ${costProjections.year.toFixed(2)}€</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> ${costProjections.year.toFixed(2)}€</div>
                         <div class="status-label">Hochrechnung Jahr</div>
                     </div>
                     ` : ''}
@@ -6509,27 +6525,27 @@ h1,h2,h3{ text-wrap:balance; }
                         <div class="status-label">Einsparung vs. Ø Haushalt</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">🕐 ${peakHour}:00</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="clock" aria-hidden="true"></span> ${peakHour}:00</div>
                         <div class="status-label">Peak-Zeit (${peakHourAvg}W)</div>
                     </div>
                     <div class="status-item">
-                        <div class="status-value">📊 ${activePercentage.toFixed(1)}%</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="chart" aria-hidden="true"></span> ${activePercentage.toFixed(1)}%</div>
                         <div class="status-label">Aktivitätszeit</div>
                     </div>
                     <div class="status-item eco">
-                        <div class="status-value">🌱 ${co2Savings.toFixed(1)}g</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="leaf" aria-hidden="true"></span> ${co2Savings.toFixed(1)}g</div>
                         <div class="status-label">CO₂ gespart vs. Halogen</div>
                     </div>
                     <div class="status-item eco">
-                        <div class="status-value">🌳 ${treesEquivalent.toFixed(2)}</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="leaf" aria-hidden="true"></span> ${treesEquivalent.toFixed(2)}</div>
                         <div class="status-label">Baum-Äquivalent</div>
                     </div>
                     <div class="status-item fun">
-                        <div class="status-value">📱 ${phoneCharges.toFixed(0)}x</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="phone" aria-hidden="true"></span> ${phoneCharges.toFixed(0)}x</div>
                         <div class="status-label">Smartphone-Ladungen</div>
                     </div>
                     <div class="status-item fun">
-                        <div class="status-value">💡 ${ledBulbHours.toFixed(0)}h</div>
+                        <div class="status-value"><span class="sh-i" data-sh-icon="bulb" aria-hidden="true"></span> ${ledBulbHours.toFixed(0)}h</div>
                         <div class="status-label">LED-Brenndauer</div>
                     </div>
                 `;
@@ -6569,7 +6585,7 @@ h1,h2,h3{ text-wrap:balance; }
                     const response = await fetch(`${window.HUE_API_BASE}/api/lights`);
                     const lightsObj = await response.json();
                     
-                    console.log('📡 Raw lights response:', lightsObj);
+                    console.log('Raw lights response:', lightsObj);
                     
                     // Convert lights object to array - handle all lights regardless of status
                     const lights = Object.entries(lightsObj)
@@ -6584,12 +6600,12 @@ h1,h2,h3{ text-wrap:balance; }
                         }))
                         .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
                     
-                    console.log(`🔍 Found ${lights.length} lights for selection:`, lights.map(l => `${l.name} (ID: ${l.id}, reachable: ${l.reachable})`));
+                    console.log(`Found ${lights.length} lights for selection:`, lights.map(l => `${l.name} (ID: ${l.id}, reachable: ${l.reachable})`));
                     
                     const container = document.getElementById('lamp-selection');
                     container.innerHTML = lights.map(light => {
                         const isUnreachable = !light.reachable;
-                        const statusIcon = isUnreachable ? '⚠️' : '💡';
+                        const statusIcon = isUnreachable ? '' : '';
                         const statusText = isUnreachable ? ' (nicht erreichbar)' : '';
                         
                         return `
@@ -6604,7 +6620,7 @@ h1,h2,h3{ text-wrap:balance; }
                         `;
                     }).join('');
                     
-                    console.log(`✅ Lamp selection loaded with ${lights.length} lamps`);
+                    console.log(`Lamp selection loaded with ${lights.length} lamps`);
                     
                 } catch (error) {
                     console.error('Error loading lamp selection:', error);
@@ -7239,7 +7255,7 @@ h1,h2,h3{ text-wrap:balance; }
                     // Update all strobe buttons to off state
                     document.querySelectorAll('.btn.warning').forEach(btn => {
                         if (btn.textContent.includes('Strobo AN')) {
-                            btn.textContent = '⚡ Strobo';
+                            btn.textContent = 'Strobo';
                             btn.classList.remove('btn-active');
                             // Remove glow effect from card
                             const card = btn.closest('.card');
@@ -7300,8 +7316,8 @@ h1,h2,h3{ text-wrap:balance; }
                     btn.style.background = 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57)';
                     btn.style.backgroundSize = '400% 400%';
                     btn.style.animation = 'disco-gradient 2s ease infinite';
-                    icon.textContent = '🎵';
-                    btn.innerHTML = `<span id="disco-icon">🎵</span> Disko AUS`;
+                    icon.textContent = '';
+                    btn.innerHTML = `<span id="disco-icon"><span class="sh-i" data-sh-icon="music" aria-hidden="true"></span></span> Disko AUS`;
                     
                     // Show frequency display
                     document.getElementById('frequency-display').style.display = 'block';
@@ -7338,8 +7354,8 @@ h1,h2,h3{ text-wrap:balance; }
                         btn.style.background = 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57)';
                         btn.style.backgroundSize = '400% 400%';
                         btn.style.animation = 'disco-gradient 2s ease infinite';
-                        btn.innerHTML = `<span id="disco-icon">🎵</span> Disko AUS`;
-                        hue.showMessage('🕺 Disko-Modus aktiviert! Mach Lärm!', 'success');
+                        btn.innerHTML = `<span id="disco-icon"><span class="sh-i" data-sh-icon="music" aria-hidden="true"></span></span> Disko AUS`;
+                        hue.showMessage('Disko-Modus aktiviert! Mach Lärm!', 'success');
                         
                         // Show frequency display
                         document.getElementById('frequency-display').style.display = 'block';
@@ -7353,8 +7369,8 @@ h1,h2,h3{ text-wrap:balance; }
                         btn.style.background = 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57)';
                         btn.style.backgroundSize = '400% 400%';
                         btn.style.animation = 'disco-gradient 2s ease infinite';
-                        btn.innerHTML = `<span id="disco-icon">🎵</span> Disko AUS`;
-                        hue.showMessage('🕺 Disko-Modus bereits aktiv!', 'info');
+                        btn.innerHTML = `<span id="disco-icon"><span class="sh-i" data-sh-icon="music" aria-hidden="true"></span></span> Disko AUS`;
+                        hue.showMessage('Disko-Modus bereits aktiv!', 'info');
                         
                         // Show frequency display
                         document.getElementById('frequency-display').style.display = 'block';
@@ -7377,12 +7393,12 @@ h1,h2,h3{ text-wrap:balance; }
                         btn.classList.remove('btn-active');
                         btn.style.background = '';
                         btn.style.animation = '';
-                        btn.innerHTML = `<span id="disco-icon">🕺</span> Disko-Modus`;
+                        btn.innerHTML = `<span id="disco-icon"><span class="sh-i" data-sh-icon="party" aria-hidden="true"></span></span> Disko-Modus`;
                         
                         // Hide frequency display
                         document.getElementById('frequency-display').style.display = 'none';
                         
-                        hue.showMessage('🔇 Disko-Modus deaktiviert', 'info');
+                        hue.showMessage('Disko-Modus deaktiviert', 'info');
                     } else {
                         hue.showMessage('Fehler beim Stoppen des Disko-Modus: ' + result.message, 'error');
                     }
@@ -7439,7 +7455,7 @@ h1,h2,h3{ text-wrap:balance; }
                     btn.classList.remove('btn-active');
                     btn.style.background = '';
                     btn.style.animation = '';
-                    btn.innerHTML = `<span id="disco-icon">🕺</span> Disko-Modus`;
+                    btn.innerHTML = `<span id="disco-icon"><span class="sh-i" data-sh-icon="party" aria-hidden="true"></span></span> Disko-Modus`;
                     
                     // Hide frequency display
                     document.getElementById('frequency-display').style.display = 'none';
@@ -7667,19 +7683,19 @@ h1,h2,h3{ text-wrap:balance; }
         function displayHealthStatus(health) {
             let healthHtml = `
                 <div class="health-status ${health.status}">
-                    <h4>🔧 System-Status: ${health.status.toUpperCase()}</h4>
+                    <h4><span class="sh-i" data-sh-icon="gear" aria-hidden="true"></span> System-Status: ${health.status.toUpperCase()}</h4>
                     <div class="health-checks">
             `;
             
             for (const [check, status] of Object.entries(health.checks)) {
-                const icon = status === 'ok' ? '✅' : '❌';
+                const icon = status === 'ok' ? '' : '';
                 healthHtml += `<div class="health-check">${icon} ${check}: ${status}</div>`;
             }
             
             healthHtml += '</div>';
             
             if (health.recommendations && health.recommendations.length > 0) {
-                healthHtml += '<div class="recommendations"><h5>🔍 Empfehlungen:</h5><ul>';
+                healthHtml += '<div class="recommendations"><h5><span class="sh-i" data-sh-icon="search" aria-hidden="true"></span> Empfehlungen:</h5><ul>';
                 health.recommendations.forEach(rec => {
                     healthHtml += `<li>${rec}</li>`;
                 });
@@ -7712,7 +7728,7 @@ h1,h2,h3{ text-wrap:balance; }
         function displayDiagnosis(diagnosis) {
             let diagnosisHtml = `
                 <div class="diagnosis-result">
-                    <h4>🔍 Diagnose: ${diagnosis.issue_type}</h4>
+                    <h4><span class="sh-i" data-sh-icon="search" aria-hidden="true"></span> Diagnose: ${diagnosis.issue_type}</h4>
                     <div class="diagnosis-tests">
             `;
             
@@ -7723,7 +7739,7 @@ h1,h2,h3{ text-wrap:balance; }
             diagnosisHtml += '</div>';
             
             if (diagnosis.solutions && diagnosis.solutions.length > 0) {
-                diagnosisHtml += '<div class="solutions"><h5>💡 Lösungsvorschläge:</h5><ul>';
+                diagnosisHtml += '<div class="solutions"><h5><span class="sh-i" data-sh-icon="bulb" aria-hidden="true"></span> Lösungsvorschläge:</h5><ul>';
                 diagnosis.solutions.forEach(solution => {
                     diagnosisHtml += `<li>${solution}</li>`;
                 });
@@ -7799,17 +7815,17 @@ h1,h2,h3{ text-wrap:balance; }
         function showSmartError(errorInfo) {
             const errorHtml = `
                 <div class="smart-error">
-                    <h4>❌ ${errorInfo.title}</h4>
+                    <h4><span class="sh-i" data-sh-icon="close" aria-hidden="true"></span> ${errorInfo.title}</h4>
                     <p class="error-message">${errorInfo.message}</p>
                     <div class="error-solutions">
-                        <h5>💡 Lösungsvorschläge:</h5>
+                        <h5><span class="sh-i" data-sh-icon="bulb" aria-hidden="true"></span> Lösungsvorschläge:</h5>
                         <ul>
                             ${errorInfo.solutions.map(solution => `<li>${solution}</li>`).join('')}
                         </ul>
                     </div>
                     <div class="error-actions">
                         <button onclick="diagnoseIssue('${errorInfo.category}')" class="btn secondary">
-                            🔍 Diagnose starten
+                             Diagnose starten
                         </button>
                         ${getRecoveryButton(errorInfo.category)}
                     </div>
@@ -7834,7 +7850,7 @@ h1,h2,h3{ text-wrap:balance; }
             const action = recoveryActions[category];
             if (action) {
                 return `<button onclick="performRecovery('${action}')" class="btn danger">
-                    🔧 Auto-Recovery
+                     Auto-Recovery
                 </button>`;
             }
             return '';
@@ -7870,8 +7886,8 @@ h1,h2,h3{ text-wrap:balance; }
                 
                 // Stats aktualisieren
                 document.getElementById('debug-bridge-status').textContent = 
-                    data.stats.bridge_status === 'connected' ? '✅' : 
-                    data.stats.bridge_status === 'error' ? '❌' : '🔍';
+                    data.stats.bridge_status === 'connected' ? '' : 
+                    data.stats.bridge_status === 'error' ? '' : '';
                 document.getElementById('debug-last-request').textContent = 
                     data.stats.last_request || '--';
                 document.getElementById('debug-request-count').textContent = 
@@ -7918,7 +7934,7 @@ h1,h2,h3{ text-wrap:balance; }
 
         async function loadSystemInfo() {
             const container = document.getElementById('system-info-container');
-            container.innerHTML = '<div class="loading-spinner">🔄 Lade System-Informationen...</div>';
+            container.innerHTML = '<div class="loading-spinner"><span class="sh-i" data-sh-icon="refresh" aria-hidden="true"></span> Lade System-Informationen...</div>';
 
             try {
                 // Parallel API calls for better performance
@@ -7951,7 +7967,7 @@ h1,h2,h3{ text-wrap:balance; }
                 });
 
             } catch (error) {
-                container.innerHTML = `<div class="debug-entry error">❌ Fehler beim Laden der System-Informationen: ${error.message}</div>`;
+                container.innerHTML = `<div class="debug-entry error"><span class="sh-i" data-sh-icon="close" aria-hidden="true"></span> Fehler beim Laden der System-Informationen: ${error.message}</div>`;
             }
         }
 
@@ -7981,7 +7997,7 @@ h1,h2,h3{ text-wrap:balance; }
                     <!-- Bridge Information -->
                     <div class="info-section">
                         <div class="info-header" onclick="toggleInfoSection('bridge-info')">
-                            🌉 <strong>Hue Bridge Information</strong>
+                             <strong>Hue Bridge Information</strong>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div id="bridge-info" class="info-content">
@@ -8020,7 +8036,7 @@ h1,h2,h3{ text-wrap:balance; }
                     <!-- Lights Information -->
                     <div class="info-section">
                         <div class="info-header" onclick="toggleInfoSection('lights-info')">
-                            💡 <strong>Lichter (${lightsArray.length} gesamt, ${reachableLights.length} erreichbar)</strong>
+                             <strong>Lichter (${lightsArray.length} gesamt, ${reachableLights.length} erreichbar)</strong>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div id="lights-info" class="info-content">
@@ -8032,7 +8048,7 @@ h1,h2,h3{ text-wrap:balance; }
                                         <div class="device-header">
                                             <strong>${light.name}</strong> 
                                             <span class="device-id">(ID: ${id})</span>
-                                            ${!isReachable ? '<span class="status-badge unreachable">❌ Nicht erreichbar</span>' : '<span class="status-badge reachable">✅ Erreichbar</span>'}
+                                            ${!isReachable ? '<span class="status-badge unreachable"><span class="sh-i" data-sh-icon="close" aria-hidden="true"></span> Nicht erreichbar</span>' : '<span class="status-badge reachable"><span class="sh-i" data-sh-icon="check" aria-hidden="true"></span> Erreichbar</span>'}
                                         </div>
                                         <div class="device-details">
                                             <span><strong>Typ:</strong> ${light.type || 'Unbekannt'}</span>
@@ -8050,7 +8066,7 @@ h1,h2,h3{ text-wrap:balance; }
                     <!-- Groups Information -->
                     <div class="info-section">
                         <div class="info-header" onclick="toggleInfoSection('groups-info')">
-                            👥 <strong>Gruppen (${groupsArray.length} gesamt)</strong>
+                             <strong>Gruppen (${groupsArray.length} gesamt)</strong>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div id="groups-info" class="info-content">
@@ -8059,7 +8075,7 @@ h1,h2,h3{ text-wrap:balance; }
                                     <div class="device-header">
                                         <strong>${group.name}</strong>
                                         <span class="device-id">(ID: ${id})</span>
-                                        <span class="status-badge ${group.state?.any_on ? 'active' : 'inactive'}">${group.state?.any_on ? '🟢 Aktiv' : '⚫ Inaktiv'}</span>
+                                        <span class="status-badge ${group.state?.any_on ? 'active' : 'inactive'}">${group.state?.any_on ? '<span class="sh-i" data-sh-icon="dot" aria-hidden="true"></span> Aktiv' : '<span class="sh-i" data-sh-icon="dot" aria-hidden="true"></span> Inaktiv'}</span>
                                     </div>
                                     <div class="device-details">
                                         <span><strong>Typ:</strong> ${group.type || 'Unbekannt'}</span>
@@ -8075,7 +8091,7 @@ h1,h2,h3{ text-wrap:balance; }
                     <!-- Sensors Information -->
                     <div class="info-section">
                         <div class="info-header" onclick="toggleInfoSection('sensors-info')">
-                            🔘 <strong>Sensoren/Switches (${sensorsArray.length} gesamt)</strong>
+                             <strong>Sensoren/Switches (${sensorsArray.length} gesamt)</strong>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div id="sensors-info" class="info-content">
@@ -8084,7 +8100,7 @@ h1,h2,h3{ text-wrap:balance; }
                                     <div class="device-header">
                                         <strong>${sensor.name}</strong>
                                         <span class="device-id">(ID: ${id})</span>
-                                        <span class="status-badge ${sensor.config?.on ? 'active' : 'inactive'}">${sensor.config?.on ? '🟢 Aktiv' : '⚫ Inaktiv'}</span>
+                                        <span class="status-badge ${sensor.config?.on ? 'active' : 'inactive'}">${sensor.config?.on ? '<span class="sh-i" data-sh-icon="dot" aria-hidden="true"></span> Aktiv' : '<span class="sh-i" data-sh-icon="dot" aria-hidden="true"></span> Inaktiv'}</span>
                                     </div>
                                     <div class="device-details">
                                         <span><strong>Typ:</strong> ${sensor.type || 'Unbekannt'}</span>
@@ -8101,7 +8117,7 @@ h1,h2,h3{ text-wrap:balance; }
                     <!-- System Status -->
                     <div class="info-section">
                         <div class="info-header" onclick="toggleInfoSection('system-info')">
-                            ⚙️ <strong>System-Status</strong>
+                             <strong>System-Status</strong>
                             <span class="toggle-icon">▼</span>
                         </div>
                         <div id="system-info" class="info-content">
@@ -8109,11 +8125,11 @@ h1,h2,h3{ text-wrap:balance; }
                                 <div class="info-item">
                                     <!-- Der Zustand bestimmt Klasse UND Zeichen. Vorher standen beide fest
                                          ausserhalb der Bedingung: eine getrennte Bridge zeigte
-                                         "✅ ❌ Getrennt" im gruenen "reachable"-Badge. -->
-                                    <strong>Verbindung:</strong> <span class="status-badge ${data.status.hue_connected ? 'reachable' : 'unreachable'}">${data.status.hue_connected ? '✅ live' : '❌ offline'}</span>
+                                         "Getrennt"im gruenen "reachable"-Badge. -->
+                                    <strong>Verbindung:</strong> <span class="status-badge ${data.status.hue_connected ? 'reachable' : 'unreachable'}">${data.status.hue_connected ? '<span class="sh-i" data-sh-icon="check" aria-hidden="true"></span> live' : '<span class="sh-i" data-sh-icon="close" aria-hidden="true"></span> offline'}</span>
                                 </div>
                                 <div class="info-item">
-                                    <strong>Datenbank:</strong> <span class="status-badge ${data.status.database === 'enabled' ? 'reachable' : 'unreachable'}">${data.status.database === 'enabled' ? '✅ verfügbar' : '❌ nicht verfügbar'}</span>
+                                    <strong>Datenbank:</strong> <span class="status-badge ${data.status.database === 'enabled' ? 'reachable' : 'unreachable'}">${data.status.database === 'enabled' ? '<span class="sh-i" data-sh-icon="check" aria-hidden="true"></span> verfügbar' : '<span class="sh-i" data-sh-icon="close" aria-hidden="true"></span> nicht verfügbar'}</span>
                                 </div>
                                 <div class="info-item">
                                     <strong>Aktive Effekte:</strong> ${data.status.active_effects || 0}
@@ -8122,7 +8138,7 @@ h1,h2,h3{ text-wrap:balance; }
                                     <strong>Aktive Timer:</strong> ${data.status.active_timers || 0}
                                 </div>
                                 <div class="info-item">
-                                    <strong>Onboarding:</strong> ${data.status.onboarding_completed ? '✅ Abgeschlossen' : '❌ Ausstehend'}
+                                    <strong>Onboarding:</strong> ${data.status.onboarding_completed ? 'Abgeschlossen' : 'Ausstehend'}
                                 </div>
                             </div>
                         </div>
@@ -8256,7 +8272,7 @@ h1,h2,h3{ text-wrap:balance; }
         async function startUltraStrobo(mode, frequency) {
             // Sicherheitswarnung bei hohen Frequenzen
             if (frequency > 15) {
-                const confirmed = confirm(`⚠️ WARNUNG: ${frequency}Hz kann bei photosensitiven Personen Anfälle auslösen!\n\nWirklich fortfahren?`);
+                const confirmed = confirm(`WARNUNG: ${frequency}Hz kann bei photosensitiven Personen Anfälle auslösen!\n\nWirklich fortfahren?`);
                 if (!confirmed) return;
             }
 
@@ -8285,7 +8301,7 @@ h1,h2,h3{ text-wrap:balance; }
                         intensity: 1.0
                     })
                 });
-                hue.showMessage(`🔥 ${mode.toUpperCase()}-STROBO gestartet (${frequency}Hz) - ∞ UNBEGRENZT`, 'success');
+                hue.showMessage(` ${mode.toUpperCase()}-STROBO gestartet (${frequency}Hz) - ∞ UNBEGRENZT`, 'success');
                 setTimeout(() => hue.updateActiveEffects(), 1000);
             } catch (error) {
                 hue.showMessage('Fehler beim Ultra-Strobo: ' + error.message, 'error');
@@ -8588,7 +8604,7 @@ h1,h2,h3{ text-wrap:balance; }
                 } else {
                     // Default to collapsed
                     globalQuickAccessContent.classList.add('collapsed');
-                    globalQuickAccessToggle.textContent = '▶';
+                    globalQuickAccessToggle.textContent = '▶︎';
                 }
             }
         }
@@ -8613,10 +8629,10 @@ h1,h2,h3{ text-wrap:balance; }
 
             // Extra Sicherheitswarnung
             if (frequency > 20) {
-                const confirmed = confirm(`🚨 EXTREME WARNUNG: ${frequency}Hz ist SEHR GEFÄHRLICH!\n\nKann schwere epileptische Anfälle auslösen!\n\nNur für Tests unter kontrollierten Bedingungen!\n\nFortfahren?`);
+                const confirmed = confirm(`EXTREME WARNUNG: ${frequency}Hz ist SEHR GEFÄHRLICH!\n\nKann schwere epileptische Anfälle auslösen!\n\nNur für Tests unter kontrollierten Bedingungen!\n\nFortfahren?`);
                 if (!confirmed) return;
             } else if (frequency > 15) {
-                const confirmed = confirm(`⚠️ WARNUNG: ${frequency}Hz kann bei photosensitiven Personen Anfälle auslösen!\n\nWirklich fortfahren?`);
+                const confirmed = confirm(`WARNUNG: ${frequency}Hz kann bei photosensitiven Personen Anfälle auslösen!\n\nWirklich fortfahren?`);
                 if (!confirmed) return;
             }
 
@@ -8642,7 +8658,7 @@ h1,h2,h3{ text-wrap:balance; }
                     })
                 });
                 const durationText = duration == 0 ? '∞ UNBEGRENZT' : `${duration}s`;
-                hue.showMessage(`🔥 CUSTOM ULTRA-STROBO gestartet (${frequency}Hz) - ${durationText} - ${currentStroboColor.name}`, 'warning');
+                hue.showMessage(`CUSTOM ULTRA-STROBO gestartet (${frequency}Hz) - ${durationText} - ${currentStroboColor.name}`, 'warning');
                 setTimeout(() => hue.updateActiveEffects(), 1000);
             } catch (error) {
                 hue.showMessage('Fehler beim Custom Ultra-Strobo: ' + error.message, 'error');
@@ -8657,15 +8673,15 @@ h1,h2,h3{ text-wrap:balance; }
             if (freq > 20) {
                 warningBox.style.background = 'rgba(211, 47, 47, 0.3)';
                 warningBox.style.borderColor = '#d32f2f';
-                warningBox.innerHTML = '🚨 <strong>EXTREME GEFAHR!</strong><br>Frequenz über 20Hz kann schwere epileptische Anfälle auslösen!<br>NUR für kontrollierte Tests!';
+                warningBox.innerHTML = ' <strong>EXTREME GEFAHR!</strong><br>Frequenz über 20Hz kann schwere epileptische Anfälle auslösen!<br>NUR für kontrollierte Tests!';
             } else if (freq > 15) {
                 warningBox.style.background = 'rgba(255, 68, 68, 0.3)';
                 warningBox.style.borderColor = '#ff4444';
-                warningBox.innerHTML = '⚠️ <strong>HOHE GEFAHR!</strong><br>Frequenz über 15Hz kann epileptische Anfälle auslösen!<br>Extreme Vorsicht geboten!';
+                warningBox.innerHTML = ' <strong>HOHE GEFAHR!</strong><br>Frequenz über 15Hz kann epileptische Anfälle auslösen!<br>Extreme Vorsicht geboten!';
             } else {
                 warningBox.style.background = 'rgba(255, 152, 0, 0.2)';
                 warningBox.style.borderColor = '#ff9800';
-                warningBox.innerHTML = '⚠️ <strong>EPILEPSIE-WARNUNG!</strong><br>Ultra-Strobo kann bei photosensitiven Personen Anfälle auslösen!<br>Frequenzen über 15Hz sind besonders gefährlich.';
+                warningBox.innerHTML = ' <strong>EPILEPSIE-WARNUNG!</strong><br>Ultra-Strobo kann bei photosensitiven Personen Anfälle auslösen!<br>Frequenzen über 15Hz sind besonders gefährlich.';
             }
         }
 
@@ -8784,7 +8800,7 @@ h1,h2,h3{ text-wrap:balance; }
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
             
-            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            const icon = type === 'success' ? '' : type === 'error' ? '' : 'ℹ';
             toast.innerHTML = `
                 <div class="toast-content">
                     <span class="toast-icon">${icon}</span>
@@ -8816,7 +8832,7 @@ h1,h2,h3{ text-wrap:balance; }
                 toggle.textContent = '▼';
             } else {
                 content.classList.add('collapsed');
-                toggle.textContent = '▶';
+                toggle.textContent = '▶︎';
             }
         }
 
@@ -8830,7 +8846,7 @@ h1,h2,h3{ text-wrap:balance; }
                 localStorage.setItem('global-quick-access-state', 'expanded');
             } else {
                 content.classList.add('collapsed');
-                toggle.textContent = '▶';
+                toggle.textContent = '▶︎';
                 localStorage.setItem('global-quick-access-state', 'collapsed');
             }
         }
@@ -8927,11 +8943,11 @@ h1,h2,h3{ text-wrap:balance; }
                     renderButtonConfigurations();
                 } else {
                     console.error('Failed to load button configurations:', data.error);
-                    showNotification('❌ Fehler beim Laden der Button-Konfigurationen', 'error');
+                    showNotification('Fehler beim Laden der Button-Konfigurationen', 'error');
                 }
             } catch (error) {
                 console.error('Error loading button configurations:', error);
-                showNotification('❌ Verbindungsfehler', 'error');
+                showNotification('Verbindungsfehler', 'error');
             }
         }
 
@@ -8985,7 +9001,7 @@ h1,h2,h3{ text-wrap:balance; }
             if (availableGroups.length === 0) {
                 const option = document.createElement('option');
                 option.value = '';
-                option.textContent = '❌ Keine Gruppen verfügbar';
+                option.textContent = 'Keine Gruppen verfügbar';
                 option.disabled = true;
                 select.appendChild(option);
                 return;
@@ -9027,26 +9043,26 @@ h1,h2,h3{ text-wrap:balance; }
                 <div class="button-config-item">
                     <div class="button-config-info">
                         <div class="button-config-title">
-                            🔘 ${config.button_name || `GPIO Pin ${config.gpio_pin}`}
+                             ${config.button_name || `GPIO Pin ${config.gpio_pin}`}
                         </div>
                         <div class="button-config-details">
                             Pin: ${config.gpio_pin} → ${config.group_name} (${config.action_type})
-                            ${config.enabled ? '✅ Aktiv' : '❌ Deaktiviert'}
-                            ${config.action_type === 'strobo_push' ? `<br>🎨 <span style="background: ${config.strobo_color}; padding: 1px 4px; color: white; border-radius: 2px;">${config.strobo_color}</span> | ${config.strobo_duration}s | ${config.strobo_mode}` : ''}
+                            ${config.enabled ? 'Aktiv' : 'Deaktiviert'}
+                            ${config.action_type === 'strobo_push' ? `<br><span class="sh-i" data-sh-icon="palette" aria-hidden="true"></span> <span style="background: ${config.strobo_color}; padding: 1px 4px; color: white; border-radius: 2px;">${config.strobo_color}</span> | ${config.strobo_duration}s | ${config.strobo_mode}` : ''}
                         </div>
                     </div>
                     <div class="button-config-actions">
                         <button class="small-btn" onclick="testButton(${config.gpio_pin})" 
                                 title="Button testen">
-                            🧪 Test
+                             Test
                         </button>
                         <button class="small-btn" onclick="editButtonConfiguration(${config.id})" 
                                 style="background: var(--accent-green);" title="Bearbeiten">
-                            ✏️ Edit
+                             Edit
                         </button>
                         <button class="small-btn" onclick="deleteButtonConfiguration(${config.id})" 
                                 style="background: var(--accent-red);" title="Löschen">
-                            🗑️ Del
+                             Del
                         </button>
                     </div>
                 </div>
@@ -9082,7 +9098,7 @@ h1,h2,h3{ text-wrap:balance; }
             }
             
             if (!gpioPin || !groupId) {
-                showNotification('❌ Bitte GPIO Pin und Gruppe auswählen', 'error');
+                showNotification('Bitte GPIO Pin und Gruppe auswählen', 'error');
                 return;
             }
             
@@ -9224,7 +9240,7 @@ h1,h2,h3{ text-wrap:balance; }
             // Find the configuration to edit
             const config = buttonConfigurations.find(c => c.id === configId);
             if (!config) {
-                showNotification('❌ Konfiguration nicht gefunden', 'error');
+                showNotification('Konfiguration nicht gefunden', 'error');
                 return;
             }
             
@@ -9238,7 +9254,7 @@ h1,h2,h3{ text-wrap:balance; }
                 <div id="edit-modal" class="modal-overlay" onclick="closeEditModal(event)">
                     <div class="modal-content" onclick="event.stopPropagation()">
                         <div class="modal-header">
-                            <h3>🔧 Button-Konfiguration bearbeiten</h3>
+                            <h3><span class="sh-i" data-sh-icon="gear" aria-hidden="true"></span> Button-Konfiguration bearbeiten</h3>
                             <button class="modal-close" onclick="closeEditModal()">&times;</button>
                         </div>
                         <div class="modal-body">
@@ -9293,7 +9309,7 @@ h1,h2,h3{ text-wrap:balance; }
                         </div>
                         <div class="modal-footer">
                             <button class="btn" onclick="closeEditModal()">Abbrechen</button>
-                            <button class="btn" style="background: var(--accent-green);" onclick="saveButtonConfiguration(${config.id})">💾 Speichern</button>
+                            <button class="btn" style="background: var(--accent-green);" onclick="saveButtonConfiguration(${config.id})"><span class="sh-i" data-sh-icon="save" aria-hidden="true"></span> Speichern</button>
                         </div>
                     </div>
                 </div>
@@ -9369,7 +9385,7 @@ h1,h2,h3{ text-wrap:balance; }
             const buttonName = document.getElementById('edit-button-name').value;
             
             if (!groupId) {
-                showNotification('❌ Bitte Gruppe auswählen', 'error');
+                showNotification('Bitte Gruppe auswählen', 'error');
                 return;
             }
             
@@ -9414,7 +9430,7 @@ h1,h2,h3{ text-wrap:balance; }
                 return;
             }
             
-            showNotification('🚧 Clear-Logs-Funktion wird implementiert...', 'info');
+            showNotification('Clear-Logs-Funktion wird implementiert...', 'info');
         }
 
         // ═══════════════════ PIR MOTION SENSOR FUNCTIONS ═══════════════════
@@ -9444,14 +9460,14 @@ h1,h2,h3{ text-wrap:balance; }
                 statusDot.classList.add('online');
                 statusText.textContent = status.gpio_available ? 'PIR Monitoring aktiv' : 'PIR Monitoring (Simulation)';
                 if (toggleBtn) {
-                    toggleBtn.innerHTML = '⏸️ Monitoring pausieren';
+                    toggleBtn.innerHTML = shIcon('pause') + 'Monitoring pausieren';
                     toggleBtn.style.background = 'var(--accent-red)';
                 }
             } else {
                 statusDot.classList.remove('online');
                 statusText.textContent = 'PIR Monitoring inaktiv';
                 if (toggleBtn) {
-                    toggleBtn.innerHTML = '▶️ Monitoring starten';
+                    toggleBtn.innerHTML = '▶︎ Monitoring starten';
                     toggleBtn.style.background = 'var(--accent-green)';
                 }
             }
@@ -9460,13 +9476,13 @@ h1,h2,h3{ text-wrap:balance; }
             document.getElementById('pir-target-group').textContent = `Garten (${status.garden_group_id})`;
             document.getElementById('pir-duration').textContent = `${status.light_duration_minutes} Minuten`;
             document.getElementById('pir-cooldown').textContent = `${status.motion_cooldown_seconds} Sekunden`;
-            document.getElementById('pir-timer-status').textContent = status.timer_active ? '✅ Aktiv' : '❌ Inaktiv';
+            document.getElementById('pir-timer-status').textContent = status.timer_active ? 'Aktiv' : 'Inaktiv';
             
             // Update NEW status items
             if (status.motion_active !== undefined) {
                 document.getElementById('pir-motion-status').textContent = status.motion_active ? 
-                    '🟢 Aktiv (Nacht)' : 
-                    (status.is_nighttime ? '🟡 Bereit (Nacht)' : '⏸️ Inaktiv (Tag)');
+                    'Aktiv (Nacht)' : 
+                    (status.is_nighttime ? 'Bereit (Nacht)' : 'Inaktiv (Tag)');
             }
             
             if (status.sunrise_today) {
@@ -9476,7 +9492,7 @@ h1,h2,h3{ text-wrap:balance; }
                 document.getElementById('pir-sunset').textContent = status.sunset_today;
             }
             
-            document.getElementById('pir-nightmode').textContent = status.is_nighttime ? '🌙 Nacht' : '☀️ Tag';
+            document.getElementById('pir-nightmode').textContent = status.is_nighttime ? 'Nacht' : 'Tag';
             
             // Update toggle switches
             if (status.motion_detection_enabled !== undefined) {
@@ -9570,7 +9586,7 @@ h1,h2,h3{ text-wrap:balance; }
                         <div class="modal-overlay" onclick="closeSunriseModal(event)">
                             <div class="modal-content" style="max-width: 600px;">
                                 <div class="modal-header">
-                                    <h2>🌅 Sonnenzeiten für ${data.location}</h2>
+                                    <h2><span class="sh-i" data-sh-icon="sunrise" aria-hidden="true"></span> Sonnenzeiten für ${data.location}</h2>
                                     <button class="modal-close" onclick="closeSunriseModal()">&times;</button>
                                 </div>
                                 <div class="modal-body">
@@ -9585,11 +9601,11 @@ h1,h2,h3{ text-wrap:balance; }
                                     <span>${day.date}</span>
                                 </div>
                                 <div class="sun-times">
-                                    <span>🌅 ${day.sunrise}</span>
-                                    <span>🌇 ${day.sunset}</span>
+                                    <span><span class="sh-i" data-sh-icon="sunrise" aria-hidden="true"></span> ${day.sunrise}</span>
+                                    <span><span class="sh-i" data-sh-icon="sunrise" aria-hidden="true"></span> ${day.sunset}</span>
                                 </div>
                                 <div class="daylight-duration">
-                                    ☀️ ${day.daylight_hours}
+                                     ${day.daylight_hours}
                                 </div>
                             </div>
                         `;
@@ -9634,48 +9650,48 @@ h1,h2,h3{ text-wrap:balance; }
     <!-- Globaler Schnellzugriff (unten auf allen Seiten) -->
     <div class="global-quick-access">
         <div class="quick-access-header">
-            <h3>⚡ Schnellzugriff</h3>
+            <h3><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Schnellzugriff</h3>
             <button class="toggle-quick-access" onclick="toggleGlobalQuickAccess()">
-                <span id="global-quick-access-toggle">▶</span>
+                <span id="global-quick-access-toggle">▶︎</span>
             </button>
         </div>
         <div class="quick-access-content collapsed" id="global-quick-access-content">
             <div class="quick-actions-grid">
                 <!-- Globale Aktionen -->
                 <div class="quick-action-card" onclick="executeQuickAction('all_on')">
-                    <div class="quick-action-icon">🌟</div>
+                    <div class="quick-action-icon"><span class="sh-i" data-sh-icon="sparkle" aria-hidden="true"></span></div>
                     <div class="quick-action-label">Alle An</div>
                 </div>
                 <div class="quick-action-card" onclick="executeQuickAction('all_off')">
-                    <div class="quick-action-icon">🌙</div>
+                    <div class="quick-action-icon"><span class="sh-i" data-sh-icon="moon" aria-hidden="true"></span></div>
                     <div class="quick-action-label">Alle Aus</div>
                 </div>
                 <div class="quick-action-card" onclick="executeQuickAction('emergency_off')">
-                    <div class="quick-action-icon">🚨</div>
+                    <div class="quick-action-icon"><span class="sh-i" data-sh-icon="siren" aria-hidden="true"></span></div>
                     <div class="quick-action-label">Notaus</div>
                 </div>
                 
                 <!-- Stimmungsszenen -->
                 <div class="quick-action-card" onclick="executeQuickAction('scene_relax')">
-                    <div class="quick-action-icon">😌</div>
+                    <div class="quick-action-icon"><span class="sh-i" data-sh-icon="mood" aria-hidden="true"></span></div>
                     <div class="quick-action-label">Entspannung</div>
                 </div>
                 <div class="quick-action-card" onclick="executeQuickAction('scene_work')">
-                    <div class="quick-action-icon">💼</div>
+                    <div class="quick-action-icon"></div>
                     <div class="quick-action-label">Arbeit</div>
                 </div>
                 <div class="quick-action-card" onclick="executeQuickAction('scene_party')">
-                    <div class="quick-action-icon">🎉</div>
+                    <div class="quick-action-icon"></div>
                     <div class="quick-action-label">Party</div>
                 </div>
                 
                 <!-- Effekte -->
                 <div class="quick-action-card" onclick="executeQuickAction('effect_colorloop')">
-                    <div class="quick-action-icon">🌈</div>
+                    <div class="quick-action-icon"><span class="sh-i" data-sh-icon="rainbow" aria-hidden="true"></span></div>
                     <div class="quick-action-label">Farbschleife</div>
                 </div>
                 <div class="quick-action-card" onclick="executeQuickAction('effect_stop_all')">
-                    <div class="quick-action-icon">⏹️</div>
+                    <div class="quick-action-icon" data-sh-icon="pause" aria-hidden="true"></div>
                     <div class="quick-action-label">Effekte Stop</div>
                 </div>
             </div>
@@ -9684,7 +9700,7 @@ h1,h2,h3{ text-wrap:balance; }
     
     <!-- Footer -->
     <footer style="text-align: center; padding: 20px; margin-top: 40px; color: rgba(255, 255, 255, 0.6); font-size: 14px; border-top: 1px solid var(--outline);">
-        Made with ❤️ by Martin Pfeffer
+        Made with  by Martin Pfeffer
     </footer>
 <script>/* cursor-sheen (gated, rAF-throttled, additiv) */
 (function(){try{
