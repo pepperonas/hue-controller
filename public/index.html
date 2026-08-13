@@ -5508,8 +5508,12 @@ h1,h2,h3{ text-wrap:balance; }
                     document.getElementById('monthly-estimate').textContent = data.estimated_monthly_kwh + ' kWh';
                     document.getElementById('monthly-cost').textContent = data.estimated_monthly_cost_eur + '€';
                     
-                    document.getElementById('current-power').textContent = 
-                        ` ${data.active_lights} Lichter •  ${data.total_watts}W •  ~${data.estimated_monthly_cost_eur}€/Monat`;
+                    // Abstände einheitlich: " • " als Trenner, kein führendes
+                    // Leerzeichen, schmale Lücke vor W/€ (Nutzerbefund 2026-08-13:
+                    // „die Abstände passen nicht" — vorher Doppel-Leerzeichen
+                    // NACH den Bullets, einfache davor)
+                    document.getElementById('current-power').textContent =
+                        `${data.active_lights} Lichter • ${data.total_watts} W • ~${data.estimated_monthly_cost_eur} €/Monat`;
 
                     // Light details
                     const detailsContainer = document.getElementById('light-power-details');
