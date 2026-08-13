@@ -4778,23 +4778,29 @@ h1,h2,h3{ text-wrap:balance; }
                     setTimeout(() => this.switchTab(savedTab), 100);
                 }
                 
-                try {
-                    await this.loadLights();
-                    await this.loadGroups();
-                    await this.loadScenes();
-                    await this.loadMoodScenes();
-                    await this.loadAudioDevices();
-                    await this.loadSensors();
-                    await this.updateActiveEffects();
-                    await this.updateActiveTimers();
-                    await this.updatePowerStats();
-                    
-                    
-                    // Live-Updates starten
-                    this.startLiveUpdates();
-                } catch (error) {
-                    this.showMessage('Fehler beim Laden: ' + error.message, 'error');
+                // Optimistisches Laden (2026-08-13): die Shell steht bereits —
+                // ALLE Erst-Ladungen laufen PARALLEL statt in Serie (9 awaits
+                // nacheinander = sekundenlange Spinner). Die Kern-Daten
+                // (Lampen + Gruppen) haben ein 2-s-Budget; nur wenn BEIDE
+                // scheitern, gilt die Bridge als nicht erreichbar und es gibt
+                // die Fehlermeldung. Live-Updates starten IMMER — sie heilen
+                // die Verbindung selbststaendig, sobald die Bridge antwortet.
+                const core = Promise.allSettled([
+                    this.loadLights(), this.loadGroups()]);
+                const rest = Promise.allSettled([
+                    this.loadScenes(), this.loadMoodScenes(),
+                    this.loadAudioDevices(), this.loadSensors(),
+                    this.updateActiveEffects(), this.updateActiveTimers(),
+                    this.updatePowerStats()]);
+                const [lightsRes, groupsRes] = await core;
+                if (lightsRes.status === 'rejected' && groupsRes.status === 'rejected') {
+                    const why = (lightsRes.reason && (lightsRes.reason.name === 'TimeoutError'
+                        || lightsRes.reason.name === 'AbortError'))
+                        ? 'keine Antwort in 2 s' : (lightsRes.reason?.message || 'Fehler');
+                    this.showMessage('Bridge nicht erreichbar (' + why + ') — verbinde automatisch neu …', 'error');
                 }
+                await rest;
+                this.startLiveUpdates();
             }
 
             switchTab(tabName) {
@@ -4836,13 +4842,17 @@ h1,h2,h3{ text-wrap:balance; }
             }
 
             async loadLights() {
-                const response = await fetch(`${this.baseUrl}/api/lights`);
+                // 2-s-Budget (optimistisches Laden): haengt die Bridge, faellt
+                // der Erst-Load kontrolliert — statt die Spinner ewig zu halten.
+                const response = await fetch(`${this.baseUrl}/api/lights`,
+                    { signal: AbortSignal.timeout(2000) });
                 const lights = await response.json();
                 this.renderLights(lights);
             }
 
             async loadGroups() {
-                const response = await fetch(`${this.baseUrl}/api/groups`);
+                const response = await fetch(`${this.baseUrl}/api/groups`,
+                    { signal: AbortSignal.timeout(2000) });
                 const groups = await response.json();
                 this.renderGroups(groups);
             }
