@@ -131,7 +131,8 @@
             background-color: transparent;
             /* Kein zweites Oberpolster: die 20 px zum Leistenrand kommen bereits
                vom body — so macht es der Massstab. Beides zusammen ergab 40. */
-            padding: 0 0 var(--sh-gap-lg);
+            padding: 0;
+            margin-bottom: var(--sh-gap-lg);   /* Haus-Norm: 16 px zum Inhalt */
             box-shadow: none;
             position: static;
             text-align: left;
@@ -156,7 +157,12 @@
             border: 1px solid var(--outline);
             border-radius: var(--radius);
             padding: var(--spacing-4);
-            margin-bottom: var(--spacing-4);
+            /* Kein eigener Unterrand: die Zeile ist das LETZTE Element des
+               Kopfbereichs, dessen Abstand nach unten der Kopf selbst setzt.
+               Zusammen mit dessen Polster und Rand stapelten sich hier drei
+               Abstaende zu 48 px — Haus-Norm sind 16 (Messung ueber alle Apps
+               2026-08-15: dashboard/yamaha/hifi/fog = 16). */
+            margin-bottom: 0;
             text-align: center;
         }
 
@@ -219,14 +225,20 @@
 
         /* Desktop tabs for larger screens */
         @media (min-width: 768px) {
+            /* Kein Container-Chrome: die Reiter sind selbst Pillen mit eigener
+               Kontur. Hintergrund + 2-px-Unterlinie + oben gerundete Ecken
+               liessen die Leiste wie einen KARTENKOPF aussehen, unter dem gar
+               keine Karte haengt — rechts neben den Pillen lief eine 437 px
+               lange leere Wanne samt Linie aus (Nutzerbefund 2026-08-15,
+               gemessen: Container 1200 px, Inhalt endet bei 763 px). */
             .tabs {
                 display: flex;
-                border-bottom: 2px solid var(--outline);
+                gap: .4rem;
                 margin-bottom: var(--spacing-6);
                 overflow-x: auto;
-                background: var(--card-background);
-                border-radius: var(--radius) var(--radius) 0 0;
+                scrollbar-width: none;
             }
+            .tabs::-webkit-scrollbar { display: none; }
 
             .tab {
                 padding: .32rem .8rem;
@@ -457,6 +469,36 @@
             margin-bottom: var(--spacing-3);
             color: var(--accent-blue);
         }
+
+        /* Zuklappbare Karten (2026-08-15). Der Titel wird zur Flex-Zeile:
+           Text links, Chevron rechts. Nur ZWEI Kinder (der Titeltext ist ein
+           anonymes Flex-Item) — bei dreien verteilte space-between den Raum
+           auf alle und schoebe das mittlere in die Mitte. */
+        .card-title--collapsible {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+        }
+        .card-collapse {
+            flex: 0 0 auto;
+            width: 30px; height: 30px;
+            display: grid; place-items: center;
+            padding: 0;
+            background: transparent;
+            border: 1px solid var(--outline);
+            border-radius: 999px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: transform .22s ease, color .18s ease, background-color .18s ease;
+        }
+        .card-collapse svg { width: 16px; height: 16px; }
+        .card-collapse:hover { color: var(--text-primary);
+            background: color-mix(in srgb, var(--text-primary) 8%, transparent); }
+        .card-collapse:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
+        .card.collapsed .card-collapse { transform: rotate(-90deg); }
+        .card.collapsed > *:not(.card-title) { display: none !important; }
+        .card.collapsed > .card-title { margin-bottom: 0; }
 
         /* Modal Styles */
         .modal-overlay {
@@ -2179,33 +2221,8 @@
             text-align: center;
         }
 
-        .floating-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 1000;
-        }
 
-        .floating-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%);
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        }
 
-        .floating-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-        }
 
         .pulse-animation {
             animation: pulse 2s infinite;
@@ -2340,17 +2357,7 @@
                 font-size: 2rem;
             }
 
-            .floating-controls {
-                bottom: var(--spacing-4);
-                right: var(--spacing-4);
-                gap: var(--spacing-2);
-            }
 
-            .floating-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
-            }
 
             .color-palette {
                 justify-content: center;
@@ -2404,11 +2411,6 @@
                 padding: var(--spacing-4);
             }
 
-            .floating-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1rem;
-            }
         }
 
         /* Touch gestures */
@@ -3295,16 +3297,7 @@
                 gap: var(--spacing-2);
             }
             
-            .floating-controls {
-                bottom: 15px;
-                right: 15px;
-            }
             
-            .floating-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.25rem;
-            }
             
             /* Power view tabs on tablet */
             #power-tab .tabs .tab {
@@ -3454,17 +3447,7 @@
                 max-height: 150px;
             }
             
-            .floating-controls {
-                bottom: 10px;
-                right: 10px;
-                gap: 8px;
-            }
             
-            .floating-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1.1rem;
-            }
             
             .message {
                 bottom: var(--spacing-3);
@@ -3538,11 +3521,6 @@
                 box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-blue) 30%, transparent);
             }
             
-            .floating-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
-            }
         }
     
 /* ===== MD3 Expressive Motion (konservativ — hue baut Karten dynamisch um) ===== */
@@ -4089,8 +4067,12 @@ h1,h2,h3{ text-wrap:balance; }
                 </div>
             </div>
             
-            <!-- Zeitraum-Auswahl -->
-            <div class="card" style="margin-top: var(--spacing-6);">
+            <!-- Zeitraum-Auswahl. KEINE Karte drumherum: eine Kartenflaeche mit
+                 einer einzelnen Pillenreihe darin ergab eine 1200 px breite
+                 Wanne, in der die Pillen nur das linke Drittel fuellten
+                 (Nutzerbefund 2026-08-15). Die Pillen tragen ihre Gestalt
+                 selbst — wie die Reiter oben. -->
+            <div style="margin-top: var(--spacing-6);">
                 <div class="tabs" style="margin-bottom: 0;">
                     <button class="tab active" data-view="today" onclick="switchPowerView('today')">Heute</button>
                     <button class="tab" data-view="week" onclick="switchPowerView('week')">Woche</button>
@@ -4641,10 +4623,6 @@ h1,h2,h3{ text-wrap:balance; }
         </div>
 
         <!-- Schwebende Steuerungselemente -->
-        <div class="floating-controls">
-            <button class="floating-btn" onclick="globalControl('all-off')" title="Alles Aus" style="background: linear-gradient(135deg, #f44336 0%, #da190b 100%);><span data-sh-icon="hue"></span></button>
-            <button class="floating-btn" onclick="globalControl('all-on')" title="Alles An" style="background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);"><span class="sh-i" data-sh-icon="sparkle" aria-hidden="true"></span></button>
-        </div>
     </div>
 
     <!-- Bottom Navigation (Mobile) -->
@@ -4684,6 +4662,26 @@ h1,h2,h3{ text-wrap:balance; }
     </nav>
 
     <script>
+        /* ⚠️ Chart.js malt auf ein CANVAS — dort gibt es weder CSS-Variablen
+           noch color-mix(). Ein ungueltiger Farbstring laesst den 2D-Kontext
+           auf seinem VORHERIGEN Wert stehen, praktisch also auf Schwarz: alle
+           Datenreihen und die Legenden-Kacheln waren auf dunklem Grund
+           unsichtbar (Nutzerbefund 2026-08-15). Das war nie funktionsfaehig,
+           es fiel im hellen Theme nur nicht auf.
+           Die Tokens muessen daher VOR der Uebergabe aufgeloest werden. Der
+           Umweg ueber ein echtes Element ist Absicht: er loest auch
+           verschachtelte var()-Ketten (--accent-blue -> --sh-primary) und
+           liefert immer ein normalisiertes rgb(). */
+        function themeColor(expr, alpha) {
+            const el = document.createElement('span');
+            el.style.cssText = 'display:none;color:' + expr;
+            document.body.appendChild(el);
+            const rgb = getComputedStyle(el).color || 'rgb(136,136,136)';
+            el.remove();
+            if (alpha === undefined || alpha >= 1) return rgb;
+            const m = rgb.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+            return m ? 'rgba(' + m[1] + ', ' + m[2] + ', ' + m[3] + ', ' + alpha + ')' : rgb;
+        }
 
         /* Fuer Beschriftungen, die zur Laufzeit geschrieben werden. Platzhalter
            im Markup nimmt der Beobachter in icons.js selbst mit. */
@@ -5752,8 +5750,8 @@ h1,h2,h3{ text-wrap:balance; }
                             {
                                 label: 'Durchschnitt',
                                 data: avgData,
-                                borderColor: 'color-mix(in srgb, var(--accent-blue) 100%, transparent)',
-                                backgroundColor: 'color-mix(in srgb, var(--accent-blue) 10%, transparent)',
+                                borderColor: themeColor('var(--accent-blue)', 1),
+                                backgroundColor: themeColor('var(--accent-blue)', 0.1),
                                 fill: true,
                                 tension: 0.3,
                                 borderWidth: 2,
@@ -5763,8 +5761,8 @@ h1,h2,h3{ text-wrap:balance; }
                             {
                                 label: 'Maximum',
                                 data: maxData,
-                                borderColor: 'color-mix(in srgb, var(--accent-red) 100%, transparent)',
-                                backgroundColor: 'color-mix(in srgb, var(--accent-red) 10%, transparent)',
+                                borderColor: themeColor('var(--accent-red)', 1),
+                                backgroundColor: themeColor('var(--accent-red)', 0.1),
                                 fill: false,
                                 tension: 0.3,
                                 borderWidth: 2,
@@ -5774,8 +5772,8 @@ h1,h2,h3{ text-wrap:balance; }
                             {
                                 label: 'Minimum',
                                 data: minData,
-                                borderColor: 'color-mix(in srgb, var(--accent-green) 100%, transparent)',
-                                backgroundColor: 'color-mix(in srgb, var(--accent-green) 10%, transparent)',
+                                borderColor: themeColor('var(--accent-green)', 1),
+                                backgroundColor: themeColor('var(--accent-green)', 0.1),
                                 fill: '-1',
                                 tension: 0.3,
                                 borderWidth: 2,
@@ -5790,20 +5788,20 @@ h1,h2,h3{ text-wrap:balance; }
                         animation: false,
                         elements: {
                             line: {
-                                borderColor: 'color-mix(in srgb, var(--accent-blue) 100%, transparent)' // Fallback line color
+                                borderColor: themeColor('var(--accent-blue)', 1) // Fallback line color
                             },
                             point: {
-                                borderColor: 'color-mix(in srgb, var(--accent-blue) 100%, transparent)',
-                                backgroundColor: 'color-mix(in srgb, var(--accent-blue) 100%, transparent)'
+                                borderColor: themeColor('var(--accent-blue)', 1),
+                                backgroundColor: themeColor('var(--accent-blue)', 1)
                             }
                         },
                         scales: {
                             y: {
                                 beginAtZero: true,
                                 // Dynamische Skalierung
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value) {
                                         return value + 'W';
                                     }
@@ -5811,20 +5809,20 @@ h1,h2,h3{ text-wrap:balance; }
                                 title: {
                                     display: true,
                                     text: 'Leistung (W)',
-                                    color: 'rgba(255, 255, 255, 0.8)'
+                                    color: themeColor('var(--sh-text)', 0.8)
                                 }
                             },
                             x: {
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     maxTicksLimit: timeframe === 'today' ? 24 : 20
                                 }
                             }
                         },
                         plugins: {
                             legend: {
-                                labels: { color: 'rgba(255, 255, 255, 0.8)' }
+                                labels: { color: themeColor('var(--sh-text)', 0.8) }
                             },
                             tooltip: {
                                 callbacks: {
@@ -5916,14 +5914,14 @@ h1,h2,h3{ text-wrap:balance; }
                                 position: 'left',
                                 beginAtZero: true,
                                 max: 100,
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value) {
                                         return value + 'W';
                                     }
                                 },
-                                title: { display: true, text: 'Leistung (W)', color: 'rgba(255, 255, 255, 0.8)' }
+                                title: { display: true, text: 'Leistung (W)', color: themeColor('var(--sh-text)', 0.8) }
                             },
                             y1: {
                                 type: 'linear',
@@ -5933,20 +5931,20 @@ h1,h2,h3{ text-wrap:balance; }
                                 max: 5,
                                 grid: { drawOnChartArea: false },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value) {
                                         return value + ' kWh';
                                     }
                                 },
-                                title: { display: true, text: 'Energie (kWh)', color: 'rgba(255, 255, 255, 0.8)' }
+                                title: { display: true, text: 'Energie (kWh)', color: themeColor('var(--sh-text)', 0.8) }
                             },
                             x: {
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                ticks: { color: 'rgba(255, 255, 255, 0.8)' }
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
+                                ticks: { color: themeColor('var(--sh-text)', 0.8) }
                             }
                         },
                         plugins: {
-                            legend: { labels: { color: 'rgba(255, 255, 255, 0.8)' } }
+                            legend: { labels: { color: themeColor('var(--sh-text)', 0.8) } }
                         }
                     }
                 });
@@ -6007,13 +6005,13 @@ h1,h2,h3{ text-wrap:balance; }
                                 max: 23,
                                 ticks: {
                                     stepSize: 1,
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value) {
                                         return value + ':00';
                                     }
                                 },
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                title: { display: true, text: 'Stunde', color: 'rgba(255, 255, 255, 0.8)' }
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
+                                title: { display: true, text: 'Stunde', color: themeColor('var(--sh-text)', 0.8) }
                             },
                             y: {
                                 type: 'linear',
@@ -6021,17 +6019,17 @@ h1,h2,h3{ text-wrap:balance; }
                                 max: 6.5,
                                 ticks: {
                                     stepSize: 1,
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value) {
                                         return weekdays[value] || '';
                                     }
                                 },
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                title: { display: true, text: 'Wochentag', color: 'rgba(255, 255, 255, 0.8)' }
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
+                                title: { display: true, text: 'Wochentag', color: themeColor('var(--sh-text)', 0.8) }
                             }
                         },
                         plugins: {
-                            legend: { labels: { color: 'rgba(255, 255, 255, 0.8)' } },
+                            legend: { labels: { color: themeColor('var(--sh-text)', 0.8) } },
                             tooltip: {
                                 callbacks: {
                                     title: function(context) {
@@ -6066,7 +6064,7 @@ h1,h2,h3{ text-wrap:balance; }
                         // Show a message to user that monthly data is not available
                         const ctx = document.getElementById('monthlyChart').getContext('2d');
                         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        ctx.fillStyle = themeColor('var(--sh-text)', 0.8);
                         ctx.font = '16px Arial';
                         ctx.textAlign = 'center';
                         ctx.fillText('Keine monatlichen Daten verfügbar', ctx.canvas.width/2, ctx.canvas.height/2);
@@ -6077,7 +6075,7 @@ h1,h2,h3{ text-wrap:balance; }
                     // Show error message to user
                     const ctx = document.getElementById('monthlyChart').getContext('2d');
                     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fillStyle = themeColor('var(--sh-text)', 0.8);
                     ctx.font = '16px Arial';
                     ctx.textAlign = 'center';
                     ctx.fillText('Fehler beim Laden der monatlichen Daten', ctx.canvas.width/2, ctx.canvas.height/2);
@@ -6139,14 +6137,14 @@ h1,h2,h3{ text-wrap:balance; }
                                 position: 'left',
                                 beginAtZero: true,
                                 max: 100,
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value) {
                                         return value + ' kWh';
                                     }
                                 },
-                                title: { display: true, text: 'Energie (kWh)', color: 'rgba(255, 255, 255, 0.8)' }
+                                title: { display: true, text: 'Energie (kWh)', color: themeColor('var(--sh-text)', 0.8) }
                             },
                             y1: {
                                 type: 'linear',
@@ -6156,17 +6154,17 @@ h1,h2,h3{ text-wrap:balance; }
                                 max: 50,
                                 grid: { drawOnChartArea: false },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value) {
                                         return value + ' €';
                                     }
                                 },
-                                title: { display: true, text: 'Kosten (€)', color: 'rgba(255, 255, 255, 0.8)' }
+                                title: { display: true, text: 'Kosten (€)', color: themeColor('var(--sh-text)', 0.8) }
                             },
                             x: {
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value, index) {
                                         // Convert YYYY-MM format to readable month name
                                         const month = labels[index];
@@ -6184,12 +6182,12 @@ h1,h2,h3{ text-wrap:balance; }
                                 title: { 
                                     display: true, 
                                     text: 'Monat', 
-                                    color: 'rgba(255, 255, 255, 0.8)' 
+                                    color: themeColor('var(--sh-text)', 0.8) 
                                 }
                             }
                         },
                         plugins: {
-                            legend: { labels: { color: 'rgba(255, 255, 255, 0.8)' } }
+                            legend: { labels: { color: themeColor('var(--sh-text)', 0.8) } }
                         }
                     }
                 });
@@ -6247,13 +6245,13 @@ h1,h2,h3{ text-wrap:balance; }
                         animation: false,
                         plugins: {
                             legend: { 
-                                labels: { color: 'rgba(255, 255, 255, 0.8)' },
+                                labels: { color: themeColor('var(--sh-text)', 0.8) },
                                 position: 'bottom'
                             },
                             title: {
                                 display: true,
                                 text: 'Energieverbrauch nach Jahreszeit',
-                                color: 'rgba(255, 255, 255, 0.8)'
+                                color: themeColor('var(--sh-text)', 0.8)
                             },
                             tooltip: {
                                 callbacks: {
@@ -6328,26 +6326,26 @@ h1,h2,h3{ text-wrap:balance; }
                             y: {
                                 beginAtZero: true,
                                 // Dynamische Skalierung
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value) {
                                         return value + 'W';
                                     }
                                 },
-                                title: { display: true, text: 'Leistung (W)', color: 'rgba(255, 255, 255, 0.8)' }
+                                title: { display: true, text: 'Leistung (W)', color: themeColor('var(--sh-text)', 0.8) }
                             },
                             x: {
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                ticks: { color: 'rgba(255, 255, 255, 0.8)' }
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
+                                ticks: { color: themeColor('var(--sh-text)', 0.8) }
                             }
                         },
                         plugins: {
-                            legend: { labels: { color: 'rgba(255, 255, 255, 0.8)' } },
+                            legend: { labels: { color: themeColor('var(--sh-text)', 0.8) } },
                             title: {
                                 display: true,
                                 text: 'Stundenvergleich Sommer vs. Winter',
-                                color: 'rgba(255, 255, 255, 0.8)'
+                                color: themeColor('var(--sh-text)', 0.8)
                             }
                         }
                     }
@@ -6577,11 +6575,11 @@ h1,h2,h3{ text-wrap:balance; }
 
             getChartColors() {
                 return {
-                    blue: 'color-mix(in srgb, var(--accent-blue) 100%, transparent)',
+                    blue: themeColor('var(--accent-blue)', 1),
                     blueAlpha: (alpha) => `rgba(104, 141, 177, ${alpha})`,
-                    red: 'color-mix(in srgb, var(--accent-red) 100%, transparent)',
+                    red: themeColor('var(--accent-red)', 1),
                     redAlpha: (alpha) => `rgba(225, 97, 98, ${alpha})`,
-                    green: 'color-mix(in srgb, var(--accent-green) 100%, transparent)',
+                    green: themeColor('var(--accent-green)', 1),
                     greenAlpha: (alpha) => `rgba(156, 182, 143, ${alpha})`,
                     yellow: 'rgba(255, 206, 84, 1)',
                     yellowAlpha: (alpha) => `rgba(255, 206, 84, ${alpha})`,
@@ -6598,7 +6596,7 @@ h1,h2,h3{ text-wrap:balance; }
                 
                 const ctx = canvas.getContext('2d');
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillStyle = themeColor('var(--sh-text)', 0.8);
                 ctx.font = '16px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText(message, canvas.width / 2, canvas.height / 2);
@@ -6744,9 +6742,9 @@ h1,h2,h3{ text-wrap:balance; }
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     callback: function(value) {
                                         return value + 'W';
                                     }
@@ -6754,20 +6752,20 @@ h1,h2,h3{ text-wrap:balance; }
                                 title: {
                                     display: true,
                                     text: 'Leistung (W)',
-                                    color: 'rgba(255, 255, 255, 0.8)'
+                                    color: themeColor('var(--sh-text)', 0.8)
                                 }
                             },
                             x: {
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: themeColor('var(--sh-text)', 0.1) },
                                 ticks: { 
-                                    color: 'rgba(255, 255, 255, 0.8)',
+                                    color: themeColor('var(--sh-text)', 0.8),
                                     maxTicksLimit: timeframe === 'today' ? 24 : 20
                                 }
                             }
                         },
                         plugins: {
                             legend: {
-                                labels: { color: 'rgba(255, 255, 255, 0.8)' }
+                                labels: { color: themeColor('var(--sh-text)', 0.8) }
                             },
                             tooltip: {
                                 callbacks: {
@@ -6930,7 +6928,55 @@ h1,h2,h3{ text-wrap:balance; }
 
         function switchTab(tabName) {
             hue.switchTab(tabName);
+            // Reiter rendern ihre Inhalte teils asynchron nach — die neuen
+            // Karten brauchen ihren Chevron ebenfalls (initHueCollapse ist
+            // idempotent, ein Doppelaufruf schadet also nicht).
+            setTimeout(initHueCollapse, 60);
+            setTimeout(initHueCollapse, 600);
         }
+
+        /* ---- Zuklappbare Karten (2026-08-15, wie im Dashboard) --------------
+           Chevron per JS in die Titelzeile, Zustand je Karte in localStorage.
+           Die Karten haben ueberwiegend KEINE id — als Schluessel dient darum
+           der Titeltext (stabil und sprechend); Karten ohne Titel bekommen
+           keinen Knopf. Die Reiter-Umschaltung baut Inhalte neu auf, deshalb
+           laeuft die Einrichtung idempotent bei jedem Tab-Wechsel erneut. */
+        const HUE_COLLAPSE_KEY = 'hue-collapsed';
+        function hueCollapsedSet() {
+            try { return new Set(JSON.parse(localStorage.getItem(HUE_COLLAPSE_KEY) || '[]')); }
+            catch { return new Set(); }
+        }
+        function initHueCollapse() {
+            const saved = hueCollapsedSet();
+            document.querySelectorAll('.card').forEach(card => {
+                const head = card.querySelector(':scope > .card-title');
+                if (!head || head.querySelector('.card-collapse')) return;   // idempotent
+                const key = (head.textContent || '').trim().slice(0, 60);
+                if (!key) return;
+                head.classList.add('card-title--collapsible');
+                const btn = document.createElement('button');
+                btn.className = 'card-collapse';
+                btn.type = 'button';
+                btn.title = 'Karte ein-/ausklappen';
+                btn.setAttribute('aria-expanded', 'true');
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+                btn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    const on = card.classList.toggle('collapsed');
+                    btn.setAttribute('aria-expanded', String(!on));
+                    const s = hueCollapsedSet();
+                    if (on) s.add(key); else s.delete(key);
+                    try { localStorage.setItem(HUE_COLLAPSE_KEY, JSON.stringify([...s])); } catch (_) {}
+                });
+                head.appendChild(btn);
+                if (saved.has(key)) {
+                    card.classList.add('collapsed');
+                    btn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', initHueCollapse);
+        initHueCollapse();
 
         // Neue erweiterte Funktionen
         function updateSliderValue(sliderId, value) {
@@ -8779,8 +8825,17 @@ h1,h2,h3{ text-wrap:balance; }
             
             // Power-Tab spezifische Aktionen
             if (tabName === 'power') {
-                // Lade Lampen-Auswahl beim ersten Mal
-                if (!hue.lampSelectionLoaded) {
+                // ⚠️ NICHT nur am Merker haengen: der bleibt gesetzt, auch wenn
+                // der Container zwischenzeitlich leer geraeumt wurde (Rerender,
+                // fehlgeschlagener erster Lauf). Dann fuellte ihn niemand mehr
+                // nach und die Lampenliste blieb bis zum Neuladen der Seite
+                // leer — genau das Bild aus dem Nutzerbefund 2026-08-15: eine
+                // leere Box und daneben "Bitte waehlen Sie mindestens eine
+                // Lampe aus". Also zusaetzlich pruefen, ob wirklich etwas
+                // drinsteht.
+                const lampBox = document.getElementById('lamp-selection');
+                const lampBoxLeer = !lampBox || !lampBox.querySelector('.lamp-checkbox');
+                if (!hue.lampSelectionLoaded || lampBoxLeer) {
                     hue.loadLampSelection();
                     hue.lampSelectionLoaded = true;
                 }
