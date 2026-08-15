@@ -4679,7 +4679,14 @@ h1,h2,h3{ text-wrap:balance; }
             const rgb = getComputedStyle(el).color || 'rgb(136,136,136)';
             el.remove();
             if (alpha === undefined || alpha >= 1) return rgb;
-            const m = rgb.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+            // ⚠️ Nur zerlegen, wenn es WIRKLICH rgb()/rgba() ist. Eine freie
+            // Ziffernsuche griff bei modernen Farbraeumen daneben: aus
+            // "color(display-p3 1 0 0)" wurde "rgba(3, 1, 0, …)" — die 3 kam
+            // aus dem Namen "p3". Browser liefern hier je nach Farbraum
+            // durchaus color(...)-Formen zurueck (in dieser App gemessen).
+            // Passt die Form nicht, lieber die Farbe deckend durchreichen als
+            // eine falsche zu erfinden.
+            const m = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(rgb);
             return m ? 'rgba(' + m[1] + ', ' + m[2] + ', ' + m[3] + ', ' + alpha + ')' : rgb;
         }
 
