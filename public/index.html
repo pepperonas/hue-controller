@@ -1245,10 +1245,15 @@
         }
 
         /* Color Quick Selection */
+        /* Die Felder sind FEST 32 px gross. In vier 1fr-Spuren wurden sie bei
+           voller Breite (1200 px) auf ~290 px auseinandergezogen und standen
+           als vier einsame Punkte im Raum (Sichtbefund 2026-08-15, nachdem die
+           Container wieder ihre volle Breite haben). Als umbrechende Reihe
+           packen sie dicht und fuellen die Zeile von links. */
         .color-quick-selection {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-top: 8px;
         }
 
@@ -2144,7 +2149,11 @@
 
         .control-group h4 {
             margin-bottom: 12px;
-            color: #E0E0E0;
+            /* War #E0E0E0 fest verdrahtet — im HELLEN Theme stand die
+               Ueberschrift damit nahezu unsichtbar auf hellem Grund
+               ("Beliebte Farben", Sichtbefund 2026-08-15). Der geteilte Token
+               dreht sich mit dem Theme mit. */
+            color: var(--sh-text, #E0E0E0);
             font-size: 1rem;
         }
 
@@ -3625,7 +3634,7 @@ h1,h2,h3{ text-wrap:balance; }
 </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="/shared/icons.js?v=7" defer></script>
-    <script src="/shared/nav.js?v=18" defer blocking="render"></script>
+    <script src="/shared/nav.js?v=20" defer blocking="render"></script>
     <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
     <link rel="apple-touch-icon" href="static/apple-touch-icon.png">
 </head>
