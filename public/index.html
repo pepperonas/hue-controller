@@ -76,7 +76,7 @@
             --text-secondary: var(--sh-text2);         /* on-surface-variant */
             --ease-spring: linear(0,0.009 1.2%,0.035 2.5%,0.158 6%,0.793 18.4%,0.984 23%,1.07 27%,1.104 31.5%,1.103 35%,1.07 41%,1.013 50%,0.991 57%,0.998 75%,1);
             --ease-emph: var(--sh-ease);
-            --accent-warn: #fbbf24;
+            --accent-warn: var(--sh-warn);   /* war #fbbf24 — auf weisser Karte 1,67:1 */
 
             /* Schatten */
             /* Stillgelegt: Höhe entsteht über Kontur und Flächenton. */
@@ -197,7 +197,7 @@
         }
 
         .nav-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: color-mix(in srgb, var(--text-primary) 10%, transparent);
         }
 
         .nav-item.active {
@@ -340,7 +340,7 @@
             }
 
             .quick-action-card:hover {
-                background: rgba(255, 255, 255, 0.1);
+                background: color-mix(in srgb, var(--text-primary) 10%, transparent);
                 border-color: var(--accent-blue);
                 transform: translateY(-2px);
             }
@@ -366,7 +366,7 @@
                 max-width: 400px;
                 background: var(--card-background);
                 backdrop-filter: blur(20px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                border: 1px solid color-mix(in srgb, var(--text-primary) 22%, transparent);
                 border-radius: var(--radius);
                 box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
                 transform: translateX(100%);
@@ -562,7 +562,7 @@
         }
 
         .modal-close:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: color-mix(in srgb, var(--text-primary) 10%, transparent);
             color: var(--text-primary);
         }
 
@@ -606,7 +606,7 @@
         }
 
         .info-header:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: color-mix(in srgb, var(--text-primary) 10%, transparent);
         }
 
         .info-content {
@@ -721,7 +721,7 @@
 
         .btn-primary {
             background-color: var(--accent-blue);
-            color: white;
+            color: var(--on-primary);
         }
 
         .btn-primary:hover {
@@ -732,7 +732,7 @@
 
         .btn-secondary {
             background-color: var(--accent-green);
-            color: white;
+            color: var(--sh-on-ok);
         }
 
         .btn-secondary:hover {
@@ -743,7 +743,7 @@
 
         .btn.danger {
             background-color: var(--accent-red);
-            color: white;
+            color: var(--sh-on-loud);
         }
 
         .btn.danger:hover {
@@ -915,7 +915,7 @@
             height: 40px;
             border-radius: var(--radius);
             margin: var(--spacing-2) 0;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid color-mix(in srgb, var(--text-primary) 32%, transparent);
             display: inline-block;
             cursor: pointer;
         }
@@ -1286,10 +1286,13 @@
 
         /* Light On Glow Effect - Will be dynamically styled with actual light color */
         .card.light-on {
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 
+            /* Der Schein nimmt die ECHTE Lampenfarbe (--lc) statt Weiss: auf
+               heller Karte war ein weisser Schein unsichtbar, der Zustand
+               "an" verlor damit im hellen Theme seinen Hinweis. */
+            box-shadow: 0 0 20px color-mix(in srgb, var(--lc, var(--accent-blue)) 45%, transparent),
                         0 4px 6px -1px rgba(0, 0, 0, 0.3),
                         0 2px 4px -1px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            border: 1px solid color-mix(in srgb, var(--lc, var(--accent-blue)) 60%, transparent);
             /* Animation removed - will be handled dynamically */
         }
 
@@ -1309,7 +1312,7 @@
         .color-btn {
             width: 32px;
             height: 32px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid color-mix(in srgb, var(--text-primary) 32%, transparent);
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -1318,7 +1321,7 @@
 
         .color-btn:hover {
             transform: scale(1.1);
-            border-color: rgba(255, 255, 255, 0.6);
+            border-color: color-mix(in srgb, var(--text-primary) 55%, transparent);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
@@ -1343,7 +1346,7 @@
         .color-category h4 {
             margin: 0 0 8px 0;
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--text-secondary);
         }
 
         .color-row {
@@ -1363,12 +1366,12 @@
             font-weight: bold;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
             color: rgba(0, 0, 0, 0.8);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid color-mix(in srgb, var(--text-primary) 32%, transparent);
         }
 
         .color-row .color-btn:hover {
             transform: scale(1.05);
-            border-color: rgba(255, 255, 255, 0.6);
+            border-color: color-mix(in srgb, var(--text-primary) 55%, transparent);
         }
 
         .strobe-speed-select {
@@ -1378,7 +1381,7 @@
             border-radius: 4px;
             background: rgba(52, 56, 69, 0.8);
             color: #d1d5db;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid color-mix(in srgb, var(--text-primary) 22%, transparent);
             font-size: 11px;
             font-family: inherit;
             cursor: pointer;
@@ -1386,7 +1389,7 @@
         }
 
         .strobe-speed-select:hover {
-            border-color: rgba(255, 255, 255, 0.4);
+            border-color: color-mix(in srgb, var(--text-primary) 45%, transparent);
             background: rgba(52, 56, 69, 0.9);
         }
 
@@ -1408,7 +1411,7 @@
 
         .strobe-speed-control label {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--text-secondary);
             display: block;
             margin-bottom: 4px;
         }
@@ -1502,7 +1505,7 @@
             height: 300px;
             overflow-y: auto;
             background: var(--background-darker);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid color-mix(in srgb, var(--text-primary) 22%, transparent);
             border-radius: var(--radius);
             padding: var(--spacing-3);
             font-family: 'Courier New', monospace;
@@ -1868,8 +1871,8 @@
         }
 
         .collapsible-header:hover {
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+            border-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
         }
 
         .collapsible-header h3 {
@@ -1938,7 +1941,7 @@
 
         .guide-nav-btn {
             padding: var(--spacing-2) var(--spacing-3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid color-mix(in srgb, var(--text-primary) 22%, transparent);
             border-radius: var(--radius);
             background: var(--card-background);
             color: var(--text-primary);
@@ -2201,19 +2204,19 @@
             height: 32px;
             border-radius: 50%;
             cursor: pointer;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            border: 2px solid color-mix(in srgb, var(--text-primary) 22%, transparent);
             transition: all 0.3s ease;
             position: relative;
         }
 
         .color-swatch:hover {
             transform: scale(1.2);
-            border-color: rgba(255, 255, 255, 0.6);
+            border-color: color-mix(in srgb, var(--text-primary) 55%, transparent);
         }
 
         .color-swatch.active {
-            border-color: #fff;
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--text-primary) 32%, transparent);
         }
 
         .control-group {
@@ -2247,7 +2250,7 @@
         }
 
         .slider-value {
-            background: rgba(255, 255, 255, 0.1);
+            background: color-mix(in srgb, var(--text-primary) 10%, transparent);
             padding: 4px 8px;
             border-radius: 8px;
             font-weight: 600;
@@ -2300,23 +2303,23 @@
         }
 
         .message.success {
-            background-color: #22c55e;
-            color: #ffffff;
+            background-color: var(--sh-ok);
+            color: var(--sh-on-ok);
         }
 
         .message.error {
-            background-color: #ef4444;
-            color: #ffffff;
+            background-color: var(--sh-loud);
+            color: var(--sh-on-loud);
         }
 
         .message.info {
-            background-color: #3b82f6;
-            color: #ffffff;
+            background-color: var(--sh-primary);
+            color: var(--sh-on-primary);
         }
 
         .message.warning {
-            background-color: #f59e0b;
-            color: #ffffff;
+            background-color: var(--sh-warn);
+            color: var(--sh-on-warn);
         }
 
         .error {
@@ -2486,7 +2489,7 @@
 
         .mood-scene-card {
             background: var(--card-background);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid color-mix(in srgb, var(--text-primary) 22%, transparent);
             border-radius: var(--radius-xl);
             padding: var(--spacing-4);
             text-align: center;
@@ -2636,7 +2639,7 @@
         .freq-bar {
             flex: 1;
             height: 16px;
-            background: rgba(255, 255, 255, 0.1);
+            background: color-mix(in srgb, var(--text-primary) 10%, transparent);
             border-radius: 8px;
             overflow: hidden;
             position: relative;
@@ -2773,7 +2776,7 @@
         .modal-header button {
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--text-secondary);
             font-size: 1.5rem;
             cursor: pointer;
             width: 32px;
@@ -2786,8 +2789,8 @@
         }
         
         .modal-header button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #FFFFFF;
+            background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+            color: var(--text-primary);
         }
         
         .modal-body {
@@ -2937,7 +2940,7 @@
             margin: 8px 0;
             font-family: 'Monaco', 'Menlo', monospace;
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--text-secondary);
         }
         
         /* Diagnosis Result */
@@ -3024,7 +3027,7 @@
         #power-tab .tabs .tab.active {
             background: var(--accent-blue);
             border-color: var(--accent-blue);
-            color: white;
+            color: var(--on-primary);
             box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-blue) 30%, transparent);
         }
 
@@ -3208,10 +3211,10 @@
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background-color: rgba(255, 255, 255, 0.2);
+                background-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
                 transition: 0.3s;
                 border-radius: 30px;
-                border: 1px solid rgba(255, 255, 255, 0.3);
+                border: 1px solid color-mix(in srgb, var(--text-primary) 32%, transparent);
             }
             
             .toggle-slider:before {
@@ -3343,7 +3346,7 @@
             #power-tab .tabs .tab.active {
                 background: var(--accent-blue);
                 border-color: var(--accent-blue);
-                color: white;
+                color: var(--on-primary);
                 box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-blue) 30%, transparent);
             }
         }
@@ -3434,7 +3437,7 @@
             #power-tab .tabs .tab.active {
                 background: var(--accent-blue);
                 border-color: var(--accent-blue);
-                color: white;
+                color: var(--on-primary);
                 box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-blue) 30%, transparent);
             }
             
@@ -3535,7 +3538,7 @@
             #power-tab .tabs .tab.active {
                 background: var(--accent-blue);
                 border-color: var(--accent-blue);
-                color: white;
+                color: var(--on-primary);
                 box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-blue) 30%, transparent);
             }
             
@@ -3629,8 +3632,8 @@ h1,h2,h3{ text-wrap:balance; }
         .btn .sh-i,button .sh-i{margin-right:.35rem;vertical-align:-.1em}
 </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/shared/icons.js?v=8" defer></script>
-    <script src="/shared/nav.js?v=20" defer blocking="render"></script>
+    <script src="/shared/icons.js?v=9" defer></script>
+    <script src="/shared/nav.js?v=21" defer blocking="render"></script>
     <link rel="icon" type="image/svg+xml" href="static/favicon.svg">
     <link rel="apple-touch-icon" href="static/apple-touch-icon.png">
 </head>
@@ -5131,7 +5134,7 @@ h1,h2,h3{ text-wrap:balance; }
                     <div class="control-group">
                         <h4>Schnellaktionen</h4>
                         <div class="strobe-speed-control" style="margin-bottom: 8px;">
-                            <label for="strobe-mode-${type}-${id}" style="font-size: 12px; color: rgba(255, 255, 255, 0.8);">Strobo-Modus:</label>
+                            <label for="strobe-mode-${type}-${id}" style="font-size: 12px; color: color-mix(in srgb, var(--text-primary) 80%, transparent);">Strobo-Modus:</label>
                             <div class="select-wrapper">
                                 <select id="strobe-mode-${type}-${id}" class="form-select" onchange="hue.saveStrobeMode('${type}', '${id}', this.value)">
                                     <option value="classic" ${this.selectedStrobeModes[`${type}_${id}`] === 'classic' || !this.selectedStrobeModes[`${type}_${id}`] ? 'selected' : ''}>Classic Strobe</option>
@@ -9378,7 +9381,7 @@ h1,h2,h3{ text-wrap:balance; }
                         <div class="modal-body">
                             <div class="form-field">
                                 <label>GPIO Pin:</label>
-                                <input type="number" id="edit-gpio-pin" value="${config.gpio_pin}" readonly style="background: rgba(255,255,255,0.1);">
+                                <input type="number" id="edit-gpio-pin" value="${config.gpio_pin}" readonly style="background: color-mix(in srgb, var(--text-primary) 10%, transparent);">
                             </div>
                             <div class="form-field">
                                 <label>Gruppe:</label>
