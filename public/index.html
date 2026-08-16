@@ -136,7 +136,6 @@
             box-shadow: none;
             position: static;
             text-align: left;
-            margin-bottom: var(--sh-gap-lg);
             border-radius: 0;
         }
 
@@ -148,7 +147,11 @@
             letter-spacing: -0.03em;
             line-height: 1.05;
             color: var(--text-primary);
-            margin-bottom: 0;
+            /* Der Titel steht DIREKT ueber der Verbrauchszeile. Beim Entstapeln
+               der drei Abstaende (2026-08-15) wurde hier auf 0 gesetzt — damit
+               klebte die Zeile ohne jeden Zwischenraum am Titel. Es braucht die
+               Haus-Norm, nicht die Null. */
+            margin-bottom: var(--sh-gap-lg);
         }
 
         /* Verbrauchsanzeige: neutrale Flaeche, der Wert traegt die Aussage. */
@@ -234,7 +237,10 @@
             .tabs {
                 display: flex;
                 gap: .4rem;
-                margin-bottom: var(--spacing-6);
+                /* Haus-Norm 16 px wie ueberall zwischen Kopfzeile und Inhalt;
+                   die 24 px hier waren der letzte Ausreisser (Messung
+                   2026-08-16: Reiter -> Inhalt 24, alles andere 16). */
+                margin-bottom: var(--sh-gap-lg);
                 overflow-x: auto;
                 scrollbar-width: none;
             }
@@ -825,7 +831,8 @@
         }
 
         .form-input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            /* War festes Weiss — im hellen Theme unlesbar. */
+            color: var(--sh-muted, var(--text-secondary));
         }
 
         .form-select {
@@ -1635,6 +1642,21 @@
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: var(--spacing-1);
         }
+
+        /* Die Lampenliste ist das Hauptelement dieser Karte, die Zeitraum-Wahl
+           nur Beiwerk. Das geerbte `auto-fill minmax(300px, 1fr)` legte bei
+           1160 px Breite DREI Spuren an — fuer zwei Kinder: die Liste wurde auf
+           371 px gequetscht und rechts blieb eine leere Spalte stehen
+           (gemessen 2026-08-16).
+           ⚠️ Bewusst eine Klasse und KEIN style-Attribut: die Mobil-Regel
+           `.controls-grid { grid-template-columns: 1fr }` weiter unten haette
+           gegen ein Inline-Attribut keine Chance, die Karte bliebe auf dem
+           Telefon zweispaltig. Gleiche Spezifitaet, spaetere Quelle gewinnt —
+           diese Regel muss deshalb VOR den Media-Bloecken stehen. */
+        .lamp-analysis-grid {
+            grid-template-columns: minmax(0, 1fr) minmax(190px, 250px);
+            align-items: start;
+        }
         
         .lamp-selection-grid label:hover {
             background: color-mix(in srgb, var(--text-primary) 5%, transparent);
@@ -1647,8 +1669,16 @@
             -webkit-appearance: none;
             width: 18px;
             height: 18px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: var(--radius);
+            /* ⚠️ War fest verdrahtetes Weiss — im hellen Theme stand ein weisser
+               Rahmen auf heller Flaeche: das Kaestchen war praktisch unsichtbar,
+               man sah nicht, was man anklicken soll (Nutzerbefund 2026-08-16,
+               "ich kann keine Lampen auswaehlen"). */
+            border: 2px solid color-mix(in srgb, var(--text-primary) 55%, transparent);
+            /* ⚠️ Nicht var(--radius): das sind 28 px und machen aus einem 18-px-
+               Kaestchen einen KREIS — der liest sich als Radio-Knopf, also als
+               Entweder-oder. Hier darf man aber mehrere Lampen waehlen; die
+               runde Form sagte das Gegenteil (Befund 2026-08-16). */
+            border-radius: 5px;
             background: color-mix(in srgb, var(--text-primary) 5%, transparent);
             cursor: pointer;
             position: relative;
@@ -1668,15 +1698,19 @@
             box-shadow: 0 0 10px color-mix(in srgb, var(--accent-blue) 30%, transparent);
         }
         
+        /* Ein echter Haken. Bisher war `content: ''` gesetzt — das Kaestchen
+           faerbte sich nur, das Zeichen fehlte ersatzlos. Als Glyph gezeichnet
+           (zwei Kanten, gedreht), damit keine Schriftart noetig ist. */
         .lamp-checkbox:checked::after, .form-checkbox:checked::after, input[type="checkbox"]:checked::after {
             content: '';
             position: absolute;
-            top: 50%;
+            top: 46%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
+            width: 5px;
+            height: 9px;
+            border: solid var(--on-primary, #fff);
+            border-width: 0 2px 2px 0;
+            transform: translate(-50%, -50%) rotate(45deg);
         }
         
         .lamp-checkbox:focus, .form-checkbox:focus, input[type="checkbox"]:focus {
@@ -2626,9 +2660,15 @@
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background: rgba(255, 255, 255, 0.1);
+            /* ⚠️ Als Einzel-Eigenschaft, nicht als Kurzform `background:` — die
+               wuerde das Pfeil-Bild unten mit zuruecksetzen. Genau daran
+               verschwand der Pfeil beim Ueberfahren (s. :hover/:focus). */
+            background-color: color-mix(in srgb, var(--text-primary) 8%, transparent);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* Bewusst kraeftiger als die Karten-Kontur (--outline, gemessen
+               1,6:1 auf Weiss): ein BEDIENELEMENT muss sich vom Untergrund
+               abheben, 3:1 ist die Untergrenze fuer Bedienelement-Grenzen. */
+            border: 1px solid color-mix(in srgb, var(--text-primary) 55%, transparent);
             border-radius: var(--radius);
             color: var(--text-primary);
             font-size: 0.9rem;
@@ -2637,9 +2677,11 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            background-image: 
-                linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.6) 50%),
-                linear-gradient(135deg, rgba(255, 255, 255, 0.6) 50%, transparent 50%);
+            /* currentColor statt festem Weiss: der Pfeil folgt damit der
+               Schriftfarbe und ist in BEIDEN Themes sichtbar. */
+            background-image:
+                linear-gradient(45deg, transparent 50%, currentColor 50%),
+                linear-gradient(135deg, currentColor 50%, transparent 50%);
             background-position: 
                 calc(100% - 20px) calc(1em + 2px),
                 calc(100% - 15px) calc(1em + 2px);
@@ -2648,14 +2690,14 @@
         }
         
         .form-select:hover, select:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background-color: color-mix(in srgb, var(--text-primary) 12%, transparent);
             border-color: var(--accent-blue);
             box-shadow: 0 4px 12px color-mix(in srgb, var(--accent-blue) 20%, transparent);
         }
-        
+
         .form-select:focus, select:focus {
             outline: none;
-            background: rgba(255, 255, 255, 0.2);
+            background-color: color-mix(in srgb, var(--text-primary) 16%, transparent);
             border-color: var(--accent-blue);
             box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 30%, transparent);
         }
@@ -2667,25 +2709,16 @@
             width: 100%;
         }
         
-        .select-wrapper::after {
-            content: '▼';
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-            pointer-events: none;
-            font-size: 0.8rem;
-            z-index: 1;
-        }
-        
-        .select-wrapper:hover::after {
-            color: var(--accent-blue);
-        }
+        /* Kein zweiter Pfeil: das <select> zeichnet seinen eigenen (oben, als
+           Verlaufspaar) — die Huelle setzte zusaetzlich ein ▼ daneben, es
+           standen also immer ZWEI Pfeile nebeneinander. Der eigene bleibt, weil
+           nicht jedes select von dieser Huelle umgeben ist. */
         
         /* Option styles (limited browser support but helps where available) */
+        /* War ein fest verdrahteter dunkler Ton — im hellen Theme stand die
+           Auswahlliste dunkel hinter dunkler Schrift. */
         .form-select option, select option {
-            background: rgba(45, 52, 64, 0.95);
+            background: var(--card-background);
             color: var(--text-primary);
             padding: 8px 16px;
             border: none;
@@ -2697,7 +2730,7 @@
         
         .form-select option:checked, select option:checked {
             background: var(--accent-blue);
-            color: white;
+            color: var(--on-primary);
         }
         
         /* Strobe speed select specific styling */
@@ -2708,21 +2741,13 @@
         }
         
         /* Dark theme enhancements for dropdowns */
-        @media (prefers-color-scheme: dark) {
-            .form-select, select {
-                background: rgba(255, 255, 255, 0.08);
-                border-color: rgba(255, 255, 255, 0.15);
-            }
-            
-            .form-select:hover, select:hover {
-                background: rgba(255, 255, 255, 0.12);
-            }
-            
-            .form-select:focus, select:focus {
-                background: rgba(255, 255, 255, 0.15);
-            }
-        }
-        
+        /* ⚠️ Hier stand ein `@media (prefers-color-scheme: dark)`-Block, der die
+           Auswahlfelder erneut mit festem Weiss uebermalte. Er hing an der
+           EINSTELLUNG DES BETRIEBSSYSTEMS und wusste nichts vom Theme-Schalter
+           der Seite (data-theme): wer sein System dunkel, die App aber hell
+           stellte, bekam weisse Flaechen auf hellem Grund. Die Grundregeln
+           oben sind jetzt selbst theme-treu — der Block ist ersatzlos weg. */
+
         /* Mobile optimizations for dropdowns */
         @media (max-width: 768px) {
             .form-select, select {
@@ -3012,15 +3037,12 @@
                 padding-bottom: 80px;
             }
             
-            .header {
-                padding: var(--spacing-4);
-                margin-bottom: var(--spacing-4);
-            }
-            
+            /* Kein eigenes Kopf-Polster und kein abweichender Abstand: der Kopf
+               ist auch auf dem Telefon Teil der Seite (Haus-Norm 16 px). */
             .header h1 {
                 font-size: 1.5rem;
             }
-            
+
             .tabs {
                 overflow-x: auto;
                 overflow-y: hidden;
@@ -3337,19 +3359,15 @@
                 padding-bottom: 70px;
             }
             
-            .header {
-                padding: var(--spacing-3);
-                margin-bottom: var(--spacing-3);
-            }
-            
+            /* Auch hier keine Sonderabstaende — nur die Schriftgroessen. Die
+               fruehere Staffelung (Kopf 12, Titel 4, Verbrauchszeile 8) ergab
+               eine dritte, wieder andere Rhythmik auf kleinen Schirmen. */
             .header h1 {
                 font-size: 1.25rem;
-                margin-bottom: var(--spacing-1);
             }
-            
+
             .power-display {
                 padding: var(--spacing-2);
-                margin-bottom: var(--spacing-2);
                 font-size: 0.875rem;
             }
             
@@ -4127,7 +4145,7 @@ h1,h2,h3{ text-wrap:balance; }
             <!-- Individuelle Lampen-Analyse -->
             <div class="card" style="margin-top: var(--spacing-6);">
                 <div class="card-title">Individuelle Lampen-Analyse</div>
-                <div class="controls-grid" style="margin-bottom: var(--spacing-4);">
+                <div class="controls-grid lamp-analysis-grid" style="margin-bottom: var(--spacing-4);">
                     <div>
                         <label class="form-label">Lampen auswählen:</label>
                         <div id="lamp-selection" class="lamp-selection-grid" style="max-height: 200px; overflow-y: auto; padding: var(--spacing-2); background: color-mix(in srgb, var(--text-primary) 5%, transparent); border-radius: var(--radius-lg); border: 1px solid var(--outline);">
@@ -4788,8 +4806,22 @@ h1,h2,h3{ text-wrap:balance; }
                 const savedTab = localStorage.getItem('hue-active-tab');
                 if (savedTab) {
                     this.activeTab = savedTab;
-                    // Tab-UI aktualisieren
-                    setTimeout(() => this.switchTab(savedTab), 100);
+                    /* ⚠️ Ueber window.switchTab wiederherstellen, NICHT ueber die
+                       Klassenmethode. Es gibt ZWEI Einstiege: die Methode hier
+                       schaltet nur die Sichtbarkeit um, waehrend die Reiter-
+                       Nebenwirkungen (Lampenliste des Verbrauchs-Reiters, Debug-
+                       und Tasten-Daten, die Chevrons der Karten) ausschliesslich
+                       am globalen Aufsatz haengen. Der Wiederaufbau aus dem
+                       Speicher umging sie — wer die App zuletzt im Verbrauchs-
+                       Reiter verlassen hatte, bekam beim naechsten Laden eine
+                       LEERE Lampenauswahl, die kein Klick mehr fuellte
+                       (Nutzerbefund 2026-08-16). Nicht am Merker kurieren:
+                       der Fehler ist der zweite Einstieg. */
+                    setTimeout(() => {
+                        const go = (typeof window.switchTab === 'function')
+                            ? window.switchTab : this.switchTab.bind(this);
+                        go(savedTab);
+                    }, 100);
                 }
                 
                 // Optimistisches Laden (2026-08-13): die Shell steht bereits —
