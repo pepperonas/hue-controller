@@ -157,6 +157,121 @@ test('hueCollapsedSet: kaputter Inhalt wirft nicht, sondern liefert leer', () =>
   }
 });
 
+/* --- Gemeinsame Zeitachse der Lampen-Analyse ------------------------------
+   Der Anzeigefehler vom 2026-08-16: die Achse kannte nur die Zeitpunkte der
+   ERSTEN Lampe, jede Reihe brachte aber ihre eigenen mit. Punkte, deren x in
+   der Beschriftungsliste fehlt, kann Chart.js nicht verorten — die zweite
+   Lampe lag als Gewirr aus Waagerechten und Diagonalen ueber dem Diagramm. */
+const { zeitSchluessel, vereinigeLampenreihen } = (() => {
+  const src = schneideFunktion(JS, 'zeitSchluessel') + '\n' +
+              schneideFunktion(JS, 'vereinigeLampenreihen') +
+              '\n; return { zeitSchluessel, vereinigeLampenreihen };';
+  return new Function(src)();
+})();
+
+test('zeitSchluessel ordnet die Stunde ohne fuehrende Null richtig ein', () => {
+  /* Genau hier versagt ein Textvergleich: das Backend baut
+     CONCAT(DATE, ' ', HOUR, ':00'), also "2026-08-10 8:00" — als Zeichenkette
+     laege das HINTER "2026-08-10 16:00". */
+  assert.ok(zeitSchluessel('2026-08-10 8:00') < zeitSchluessel('2026-08-10 16:00'));
+  assert.ok('2026-08-10 8:00' > '2026-08-10 16:00', 'Annahme: der Textvergleich irrt hier');
+  assert.ok(zeitSchluessel('9:05') < zeitSchluessel('10:00'), 'Tagesform ebenso');
+  assert.ok(zeitSchluessel('2026-08-09') < zeitSchluessel('2026-08-10'), 'Monatsform');
+  assert.ok(zeitSchluessel('2026-08-31 23:00') < zeitSchluessel('2026-09-01 0:00'), 'Monatswechsel');
+});
+
+test('zeitSchluessel meldet unbekannte Formen als NaN', () => {
+  for (const s of ['', 'gestern', '2026/08/10', null, undefined]) {
+    assert.ok(Number.isNaN(zeitSchluessel(s)), `${s} sollte NaN ergeben`);
+  }
+});
+
+test('zwei Lampen teilen sich EINE chronologische Achse', () => {
+  const { zeiten, reihen } = vereinigeLampenreihen([
+    { punkte: [{ time: '8:00', wert: 5 }, { time: '10:00', wert: 6 }] },
+    { punkte: [{ time: '9:00', wert: 3 }, { time: '10:00', wert: 4 }] },
+  ]);
+  assert.deepEqual(zeiten, ['8:00', '9:00', '10:00'], 'Zeitpunkte beider Lampen, chronologisch');
+  assert.deepEqual(reihen[0], [5, null, 6]);
+  assert.deepEqual(reihen[1], [null, 3, 4]);
+});
+
+test('jede Reihe ist so lang wie die Achse', () => {
+  // Sonst verrutschen die Werte gegen die Beschriftungen — der Fehler selbst.
+  const { zeiten, reihen } = vereinigeLampenreihen([
+    { punkte: [{ time: '2026-08-09 16:00', wert: 1 }] },
+    { punkte: [{ time: '2026-08-09 8:00', wert: 2 }, { time: '2026-08-10 9:00', wert: 3 }] },
+  ]);
+  assert.equal(zeiten.length, 3);
+  for (const r of reihen) assert.equal(r.length, zeiten.length);
+  assert.deepEqual(zeiten, ['2026-08-09 8:00', '2026-08-09 16:00', '2026-08-10 9:00']);
+  assert.deepEqual(reihen[0], [null, 1, null]);
+});
+
+test('ein Wert landet unter SEINEM Zeitpunkt, nicht unter dem Nachbarn', () => {
+  // Die eigentliche Zusicherung: Beschriftung und Wert gehoeren zusammen.
+  const lampen = [
+    { punkte: [{ time: '0:10', wert: 11 }, { time: '0:30', wert: 33 }] },
+    { punkte: [{ time: '0:20', wert: 22 }] },
+  ];
+  const { zeiten, reihen } = vereinigeLampenreihen(lampen);
+  for (const [i, l] of lampen.entries()) {
+    for (const p of l.punkte) {
+      assert.equal(reihen[i][zeiten.indexOf(p.time)], p.wert,
+        `${p.time} steht nicht an seiner Stelle`);
+    }
+  }
+});
+
+test('unbekannte Zeitform laesst die Reihenfolge des Servers stehen', () => {
+  // Lieber die (bereits chronologische) Server-Reihenfolge behalten als nach
+  // einem Schluessel sortieren, den es nicht gibt.
+  const { zeiten } = vereinigeLampenreihen([
+    { punkte: [{ time: 'spaet', wert: 1 }, { time: 'frueh', wert: 2 }] },
+  ]);
+  assert.deepEqual(zeiten, ['spaet', 'frueh']);
+});
+
+test('eine Lampe ohne Messwerte kippt die Achse nicht', () => {
+  const { zeiten, reihen } = vereinigeLampenreihen([
+    { punkte: [] },
+    { punkte: [{ time: '1:00', wert: 7 }] },
+  ]);
+  assert.deepEqual(zeiten, ['1:00']);
+  assert.deepEqual(reihen[0], [null]);
+  assert.deepEqual(reihen[1], [7]);
+});
+
+test('doppelte Zeitpunkte tauchen nur einmal auf der Achse auf', () => {
+  const { zeiten, reihen } = vereinigeLampenreihen([
+    { punkte: [{ time: '1:00', wert: 1 }, { time: '1:00', wert: 9 }] },
+  ]);
+  assert.deepEqual(zeiten, ['1:00']);
+  assert.deepEqual(reihen[0], [9], 'der letzte Wert gewinnt');
+});
+
+test('die Reihen haengen nicht mehr an den Zeitpunkten der ERSTEN Lampe', () => {
+  // Vertrags-Pin gegen den Rueckfall: kein {x: item.time} mehr, und die
+  // Beschriftungen kommen nicht aus validLamps[0].
+  const r = schneideBlock(JS_PUR, 'renderIndividualLampChart(lampData, timeframe)', 'Renderer');
+  assert.ok(!/x:\s*item\.time/.test(r),
+    'die Reihe traegt wieder eigene x-Werte gegen eine fremde Achse');
+  assert.ok(!/validLamps\[0\]\.data\.detailed_data\.map/.test(r),
+    'die Achse kommt wieder nur von der ersten Lampe');
+  assert.match(r, /vereinigeLampenreihen/, 'die gemeinsame Achse wird nicht gebildet');
+});
+
+test('Luecken werden nicht ueberbrueckt', () => {
+  /* Hausregel: bei Datenausfall bricht die Linie, statt Messwerte zu erfinden
+     (so halten es dB-Verlauf und Klima-Sparklines). Eine Lampe, die drei Tage
+     keinen Eintrag hatte, bekam sonst eine schnurgerade Linie darueber —
+     gemessen 19 fehlende Stunden am Stueck. Ein allein stehender Wert braucht
+     dafuer einen sichtbaren Punkt, sonst faellt er ganz weg. */
+  const r = schneideBlock(JS_PUR, 'renderIndividualLampChart(lampData, timeframe)', 'Renderer');
+  assert.match(r, /spanGaps:\s*false/, 'Luecken werden wieder ueberbrueckt');
+  assert.match(r, /pointRadius:\s*\(c\)/, 'einzelne Werte zwischen Luecken waeren unsichtbar');
+});
+
 /* ============================ 2. Vertrags-Pins =========================== */
 
 const chartJS = JS.slice(JS.indexOf('powerCharts'));
