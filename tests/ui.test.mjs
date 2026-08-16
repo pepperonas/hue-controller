@@ -416,8 +416,8 @@ test('⚠️ kein OS-Theme-Block ueberschreibt die Bedienelemente', () => {
 });
 
 test('geteilte Leiste und Icons stehen auf der Hausversion', () => {
-  assert.match(HTML, /nav\.js\?v=20/, 'nav.js-Version weicht ab');
-  assert.match(HTML, /icons\.js\?v=8/, 'icons.js-Version weicht ab');
+  assert.match(HTML, /nav\.js\?v=21/, 'nav.js-Version weicht ab');
+  assert.match(HTML, /icons\.js\?v=9/, 'icons.js-Version weicht ab');
 });
 
 test('CSS-Klammern sind ausgeglichen', () => {
