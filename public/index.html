@@ -4683,6 +4683,54 @@ h1,h2,h3{ text-wrap:balance; }
     </nav>
 
     <script>
+        /* Sortierschluessel fuer die Zeitangaben der Verbrauchs-API.
+           Das Backend baut sie in drei Formen, alle OHNE fuehrende Null in der
+           Stunde: "16:32" (heute), "2026-08-09 16:00" (Woche), "2026-08-09"
+           (Monat). Ein Textvergleich sortiert damit falsch — "2026-08-10 8:00"
+           laege hinter "2026-08-10 16:00". Deshalb ein rein numerischer
+           Schluessel; unbekannte Formen liefern NaN, dann wird gar nicht
+           sortiert und die Reihenfolge des Servers bleibt stehen. */
+        function zeitSchluessel(s) {
+            const d = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?$/.exec(s);
+            if (d) return ((((+d[1] * 100 + +d[2]) * 100 + +d[3]) * 100 + (+d[4] || 0)) * 100) + (+d[5] || 0);
+            const t = /^(\d{1,2}):(\d{2})$/.exec(s);
+            if (t) return +t[1] * 100 + +t[2];
+            return NaN;
+        }
+
+        /* Mehrere Lampenreihen auf EINE gemeinsame Zeitachse bringen.
+
+           ⚠️ Das ist der Kern des Anzeigefehlers vom 2026-08-16: die
+           Beschriftungen kamen nur von der ERSTEN Lampe, waehrend jede
+           Datenreihe ihre eigenen Zeitpunkte als {x,…} mitbrachte. Auf einer
+           Kategorie-Achse kann Chart.js einen Punkt, dessen x in der
+           Beschriftungsliste gar nicht vorkommt, nicht verorten — die zweite
+           Lampe wurde quer ueber das Diagramm verschmiert (waagerechte
+           Balken ueber die volle Breite plus Diagonalen). Zwei Lampen haben
+           unterschiedliche Zeitpunkte, sobald eine in einem Intervall keinen
+           Messwert hat.
+
+           Also: Vereinigung aller Zeitpunkte, chronologisch, und jede Reihe
+           daran ausgerichtet — fehlt ein Wert, steht dort null. */
+        function vereinigeLampenreihen(lampen) {
+            const zeiten = [];
+            const gesehen = new Set();
+            for (const l of lampen) {
+                for (const p of l.punkte) {
+                    if (!gesehen.has(p.time)) { gesehen.add(p.time); zeiten.push(p.time); }
+                }
+            }
+            if (zeiten.every(z => Number.isFinite(zeitSchluessel(z)))) {
+                zeiten.sort((a, b) => zeitSchluessel(a) - zeitSchluessel(b));
+            }
+            const reihen = lampen.map(l => {
+                const nach = new Map();
+                for (const p of l.punkte) nach.set(p.time, p.wert);
+                return zeiten.map(z => (nach.has(z) ? nach.get(z) : null));
+            });
+            return { zeiten, reihen };
+        }
+
         /* ⚠️ Chart.js malt auf ein CANVAS — dort gibt es weder CSS-Variablen
            noch color-mix(). Ein ungueltiger Farbstring laesst den 2D-Kontext
            auf seinem VORHERIGEN Wert stehen, praktisch also auf Schwarz: alle
@@ -6743,30 +6791,50 @@ h1,h2,h3{ text-wrap:balance; }
                 const colors = this.getChartColors();
                 const colorKeys = Object.keys(colors).filter(key => !key.includes('Alpha'));
                 
-                // Prepare datasets
+                /* Gemeinsame Zeitachse fuer ALLE gewaehlten Lampen. Vorher trug
+                   jede Reihe ihre eigenen Zeitpunkte, die Achse kannte aber nur
+                   die der ersten Lampe — s. vereinigeLampenreihen(). */
+                const { zeiten: labels, reihen } = vereinigeLampenreihen(
+                    validLamps.map(lamp => ({
+                        punkte: lamp.data.detailed_data.map(item => {
+                            const w = parseFloat(item.avg_watts);
+                            return { time: item.time, wert: Number.isFinite(w) ? w : null };
+                        })
+                    }))
+                );
+
                 const datasets = validLamps.map((lamp, index) => {
                     const color = colors[colorKeys[index % colorKeys.length]];
                     const colorAlpha = colors[colorKeys[index % colorKeys.length] + 'Alpha'];
-                    
+
                     return {
                         label: lamp.name,
-                        data: lamp.data.detailed_data.map(item => ({
-                            x: item.time,
-                            y: parseFloat(item.avg_watts)
-                        })),
+                        data: reihen[index],
                         borderColor: color,
                         backgroundColor: colorAlpha ? colorAlpha(0.1) : color,
                         fill: false,
                         tension: 0.3,
                         borderWidth: 2,
-                        pointRadius: 0,
-                        pointHoverRadius: 4
+                        pointHoverRadius: 4,
+                        /* Luecken werden NICHT ueberbrueckt — Hausregel: bei
+                           Datenausfall bricht die Linie, statt Messwerte zu
+                           erfinden (so halten es dB-Verlauf und die Klima-
+                           Sparklines). Eine Lampe ohne Eintraege hatte hier
+                           sonst eine schnurgerade Linie ueber drei Tage.
+                           Die Werte liegen in zusammenhaengenden Laeufen, die
+                           Linie zerfaellt also nicht in Staub. */
+                        spanGaps: false,
+                        /* ⚠️ Ein Messwert, der allein zwischen zwei Luecken
+                           steht, hat keine Strecke und waere bei pointRadius 0
+                           schlicht unsichtbar — der bekommt einen Punkt. */
+                        pointRadius: (c) => {
+                            const d = c.dataset.data, i = c.dataIndex;
+                            const leer = v => v === null || v === undefined;
+                            return (!leer(d[i]) && leer(d[i - 1]) && leer(d[i + 1])) ? 2.5 : 0;
+                        }
                     };
                 });
-                
-                // Get labels from first lamp's data
-                const labels = validLamps[0].data.detailed_data.map(item => item.time);
-                
+
                 this.powerCharts.individual = new Chart(ctx, {
                     type: 'line',
                     data: {
