@@ -3703,15 +3703,15 @@ h1,h2,h3{ text-wrap:balance; }
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('lights')">Lichter</button>
-            <button class="tab" onclick="switchTab('groups')">Gruppen</button>
-            <button class="tab" onclick="switchTab('scenes')">Szenen</button>
-            <button class="tab" onclick="switchTab('effects')">Effekte</button>
-            <button class="tab" onclick="switchTab('timers')">Timer</button>
-            <button class="tab" onclick="switchTab('sensors')">Sensoren</button>
-            <button class="tab" onclick="switchTab('buttons')">Custom Buttons</button>
-            <button class="tab" onclick="switchTab('debug')">Debug</button>
-            <button class="tab" onclick="switchTab('power')">Stromverbrauch</button>
+            <button class="tab active" data-tab="lights" onclick="switchTab('lights')">Lichter</button>
+            <button class="tab" data-tab="groups" onclick="switchTab('groups')">Gruppen</button>
+            <button class="tab" data-tab="scenes" onclick="switchTab('scenes')">Szenen</button>
+            <button class="tab" data-tab="effects" onclick="switchTab('effects')">Effekte</button>
+            <button class="tab" data-tab="timers" onclick="switchTab('timers')">Timer</button>
+            <button class="tab" data-tab="sensors" onclick="switchTab('sensors')">Sensoren</button>
+            <button class="tab" data-tab="buttons" onclick="switchTab('buttons')">Custom Buttons</button>
+            <button class="tab" data-tab="debug" onclick="switchTab('debug')">Debug</button>
+            <button class="tab" data-tab="power" onclick="switchTab('power')">Stromverbrauch</button>
         </div>
 
 
@@ -4901,11 +4901,22 @@ h1,h2,h3{ text-wrap:balance; }
             }
 
             switchTab(tabName) {
-                // Desktop tab buttons
-                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-                if (event && event.target.classList.contains('tab')) {
-                    event.target.classList.add('active');
-                }
+                /* ⚠️ Die Markierung haengt am NAMEN, nicht am Klick-Ereignis.
+                   Vorher stand hier `if (event && event.target...)` mit dem
+                   veralteten globalen `event`: beim Wiederherstellen des
+                   gespeicherten Reiters, beim Klick in der unteren Leiste und
+                   bei jedem Aufruf aus dem Code gab es kein Ereignis — dann
+                   war KEINE Pille markiert und die Leiste sah tot aus. Man
+                   sah nicht, wo man ist, und fand die Gruppen nicht wieder
+                   (Nutzerbefund 2026-08-17).
+                   ⚠️ Nur die Reiter der Hauptleiste anfassen: die
+                   Zeitraum-Pillen im Verbrauchs-Tab tragen dieselbe Klasse
+                   `.tab` und wuerden sonst ihre Markierung verlieren. */
+                document.querySelectorAll('.tabs > .tab[data-tab]').forEach(tab => {
+                    const an = tab.dataset.tab === tabName;
+                    tab.classList.toggle('active', an);
+                    tab.setAttribute('aria-current', an ? 'page' : 'false');
+                });
                 
                 // Bottom navigation items
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
@@ -7052,10 +7063,43 @@ h1,h2,h3{ text-wrap:balance; }
            keinen Knopf. Die Reiter-Umschaltung baut Inhalte neu auf, deshalb
            laeuft die Einrichtung idempotent bei jedem Tab-Wechsel erneut. */
         const HUE_COLLAPSE_KEY = 'hue-collapsed';
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', beobachteKarten);
+        } else { beobachteKarten(); }
         function hueCollapsedSet() {
             try { return new Set(JSON.parse(localStorage.getItem(HUE_COLLAPSE_KEY) || '[]')); }
             catch { return new Set(); }
         }
+        /* ⚠️ Die Karten der Lampen, Gruppen, Szenen und Sensoren werden vom
+           Live-Update staendig NEU GEBAUT — und mit dem alten Markup fielen
+           Chevron und Zuklapp-Zustand jedes Mal weg (gemessen 2026-08-17:
+           nach initHueCollapse 11 Chevrons, nach EINEM loadLights wieder 0).
+           Einzelne Render-Funktionen nachzuruesten hiesse, jede kuenftige
+           auch nicht zu vergessen; deshalb beobachtet ein MutationObserver
+           die Seite und richtet nach jeder Aenderung neu ein. Das ist
+           bezahlbar, weil initHueCollapse idempotent ist: Karten, die ihren
+           Knopf schon haben, werden uebersprungen. */
+        let hueCollapsePlan = false;
+        function planeHueCollapse() {
+            if (hueCollapsePlan) return;
+            hueCollapsePlan = true;
+            /* ⚠️ Bewusst ein Zeitgeber und NICHT requestAnimationFrame:
+               rAF ruht in einem Tab, der gerade nicht gezeichnet wird. Ein
+               Neuaufbau in dieser Zeit bliebe ohne Chevron liegen, bis
+               zufaellig die naechste Aenderung kommt — beim Messen ist mir
+               genau das passiert (0 statt 8 Chevrons). */
+            setTimeout(() => {
+                hueCollapsePlan = false;
+                try { initHueCollapse(); } catch (_) {}
+            }, 50);
+        }
+        function beobachteKarten() {
+            if (!document.body || window.__hueCollapseObserver) return;
+            window.__hueCollapseObserver = new MutationObserver(planeHueCollapse);
+            window.__hueCollapseObserver.observe(document.body, { childList: true, subtree: true });
+            planeHueCollapse();
+        }
+
         function initHueCollapse() {
             const saved = hueCollapsedSet();
             document.querySelectorAll('.card').forEach(card => {

@@ -530,6 +530,60 @@ test('⚠️ kein OS-Theme-Block ueberschreibt die Bedienelemente', () => {
     'wieder ein OS-Theme-Block — er kann den data-theme-Schalter nicht sehen');
 });
 
+test('⚠️ die Karten ueberleben einen Neuaufbau durch das Live-Update', () => {
+  /* Die Karten der Lampen, Gruppen, Szenen und Sensoren werden vom
+     Live-Update staendig NEU GEBAUT. Mit dem alten Stand fielen Chevron UND
+     Zuklapp-Zustand dabei jedes Mal weg (gemessen 2026-08-17: nach dem
+     Einrichten 11 Chevrons, nach EINEM loadLights wieder 0). Ein Beobachter
+     richtet nach jeder Aenderung neu ein — einzelne Render-Funktionen
+     nachzuruesten hiesse, jede kuenftige zu vergessen. */
+  assert.match(JS_PUR, /new MutationObserver\(planeHueCollapse\)/,
+    'kein Beobachter — die Karten verlieren ihren Chevron beim naechsten Neuaufbau');
+  assert.match(JS_PUR, /observe\(document\.body,\s*\{\s*childList:\s*true,\s*subtree:\s*true/,
+    'der Beobachter sieht die neu gebauten Karten nicht');
+});
+
+test('⚠️ der Beobachter haengt an einem Zeitgeber, nicht an requestAnimationFrame', () => {
+  /* rAF ruht in einem Tab, der gerade nicht gezeichnet wird: ein Neuaufbau in
+     dieser Zeit bliebe ohne Chevron liegen, bis zufaellig die naechste
+     Aenderung kommt. Beim Messen ist genau das passiert (0 statt 8). */
+  const plan = schneideFunktion(JS_PUR, 'planeHueCollapse');
+  assert.ok(!/requestAnimationFrame/.test(plan), 'wieder an rAF gehaengt');
+  assert.match(plan, /setTimeout/, 'ohne Zeitgeber wird gar nicht nachgeruestet');
+  assert.match(plan, /hueCollapsePlan/, 'ohne Sperre laeuft der Beobachter pro Mutation erneut');
+});
+
+test('⚠️ der aktive Reiter wird am NAMEN markiert, nicht am Klick-Ereignis', () => {
+  /* Vorher haftete die Markierung an `event.target`. Beim Wiederherstellen des
+     gespeicherten Reiters, beim Klick in der unteren Leiste und bei jedem
+     Aufruf aus dem Code gibt es kein Ereignis — dann war KEINE Pille markiert,
+     die Leiste sah tot aus und die Gruppen waren nicht wiederzufinden. */
+  const st = schneideBlock(JS_PUR, 'switchTab(tabName) {', 'Klassenmethode switchTab');
+  assert.ok(!/event\.target\.classList\.contains\('tab'\)/.test(st),
+    'die Markierung haengt wieder am Klick-Ereignis');
+  assert.match(st, /dataset\.tab === tabName/, 'der Reiter wird nicht am Namen erkannt');
+});
+
+test('jeder Reiter der Hauptleiste traegt seinen Namen als data-tab', () => {
+  const leiste = HTML.slice(HTML.indexOf('<div class="tabs">'));
+  const ende = leiste.indexOf('</div>');
+  const zeile = leiste.slice(0, ende);
+  const pillen = [...zeile.matchAll(/<button class="tab[^"]*"([^>]*)>([^<]+)</g)];
+  assert.equal(pillen.length, 9, 'die Hauptleiste hat nicht mehr neun Reiter');
+  for (const [, attrs, label] of pillen) {
+    assert.match(attrs, /data-tab="[a-z]+"/, `Reiter ohne data-tab: ${label.trim()}`);
+  }
+  assert.match(zeile, /data-tab="groups"[^>]*>Gruppen</, 'der Gruppen-Reiter fehlt');
+});
+
+test('⚠️ die Zeitraum-Pillen des Verbrauchs-Reiters bleiben unangetastet', () => {
+  // Sie tragen dieselbe Klasse `.tab`; ein pauschales Zuruecksetzen ueber
+  // `.tab` nahm ihnen ihre Markierung.
+  const st = schneideBlock(JS_PUR, 'switchTab(tabName) {', 'Klassenmethode switchTab');
+  assert.match(st, /\.tabs > \.tab\[data-tab\]/,
+    'die Auswahl trifft auch die Zeitraum-Pillen');
+});
+
 test('geteilte Leiste und Icons stehen auf der Hausversion', () => {
   assert.match(HTML, /nav\.js\?v=21/, 'nav.js-Version weicht ab');
   assert.match(HTML, /icons\.js\?v=9/, 'icons.js-Version weicht ab');
