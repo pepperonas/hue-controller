@@ -5004,8 +5004,29 @@ h1,h2,h3{ text-wrap:balance; }
                 }
             }
 
+            /* ⚠️ Die Render-Funktionen laufen am Live-Update im SEKUNDENTAKT.
+               Ein bedingungsloses innerHTML='' riss die Liste jedes Mal ab und
+               baute sie neu auf. Auf dem Handy war das als Flackern sichtbar
+               (gemessen 2026-08-20: eine zugeklappte Karte sprang jede Sekunde
+               auf und wieder zu, weil der Zuklapp-Zustand erst danach
+               zurueckkam), ein laufender Helligkeits-Zug starb unter dem
+               Finger, und die ganze Liste wurde im Sekundentakt neu gezeichnet.
+               Gleiche Eingabe ⇒ gleiche Ausgabe: bei unveraendertem
+               Fingerabdruck gar nichts tun. Ein VOLLER Vergleich ist hier
+               zulaessig, weil die Hue-Zustaende keinen Zeitstempel tragen —
+               sie aendern sich nur, wenn wirklich jemand etwas schaltet. */
+            unveraendert(schluessel, daten, container) {
+                if (!this._abdruecke) this._abdruecke = {};
+                const abdruck = JSON.stringify(daten);
+                // children.length: ein von aussen geleerter Container muss neu.
+                if (this._abdruecke[schluessel] === abdruck && container.children.length) return true;
+                this._abdruecke[schluessel] = abdruck;
+                return false;
+            }
+
             renderLights(lights) {
                 const container = document.getElementById('lights-container');
+                if (this.unveraendert('lampen', lights, container)) return;
                 container.innerHTML = '';
 
                 Object.entries(lights).forEach(([id, light]) => {
@@ -5017,6 +5038,7 @@ h1,h2,h3{ text-wrap:balance; }
 
             renderGroups(groups) {
                 const container = document.getElementById('groups-container');
+                if (this.unveraendert('gruppen', groups, container)) return;
                 container.innerHTML = '';
 
                 Object.entries(groups).forEach(([id, group]) => {
@@ -5030,6 +5052,7 @@ h1,h2,h3{ text-wrap:balance; }
 
             renderScenes(scenes) {
                 const container = document.getElementById('scenes-container');
+                if (this.unveraendert('szenen', scenes, container)) return;
                 container.innerHTML = '';
 
                 Object.entries(scenes).forEach(([id, scene]) => {
@@ -7079,19 +7102,24 @@ h1,h2,h3{ text-wrap:balance; }
            die Seite und richtet nach jeder Aenderung neu ein. Das ist
            bezahlbar, weil initHueCollapse idempotent ist: Karten, die ihren
            Knopf schon haben, werden uebersprungen. */
-        let hueCollapsePlan = false;
+        let hueCollapseLaeuft = false;
         function planeHueCollapse() {
-            if (hueCollapsePlan) return;
-            hueCollapsePlan = true;
-            /* ⚠️ Bewusst ein Zeitgeber und NICHT requestAnimationFrame:
-               rAF ruht in einem Tab, der gerade nicht gezeichnet wird. Ein
-               Neuaufbau in dieser Zeit bliebe ohne Chevron liegen, bis
-               zufaellig die naechste Aenderung kommt — beim Messen ist mir
-               genau das passiert (0 statt 8 Chevrons). */
-            setTimeout(() => {
-                hueCollapsePlan = false;
-                try { initHueCollapse(); } catch (_) {}
-            }, 50);
+            /* ⚠️ SYNCHRON — weder Zeitgeber noch requestAnimationFrame.
+               Der Rueckruf eines MutationObservers laeuft am Mikrotask-Punkt,
+               also noch VOR dem naechsten Zeichnen: die neu gebaute Karte
+               bekommt ihren Zustand zurueck, ohne dass der Browser sie je
+               offen malt. Hier stand bis 2026-08-20 ein setTimeout(50) — und
+               damit war eine zugeklappte Karte nach jedem Neuaufbau ~3 Bilder
+               lang offen zu sehen, bevor sie wieder zuklappte: genau das
+               Flackern im Sekundentakt auf dem Handy. rAF waere ebenso falsch,
+               es ruht in einem Tab, der gerade nicht gezeichnet wird (beim
+               Messen real passiert: 0 statt 8 Chevrons). */
+            if (hueCollapseLaeuft) return;          // die eigenen Chevrons ignorieren
+            // Billiger Vorabtest: gibt es ueberhaupt eine ungepruefte Kopfzeile?
+            if (!document.querySelector('.card > .card-title:not([data-hue-collapse])')) return;
+            hueCollapseLaeuft = true;
+            try { initHueCollapse(); } catch (_) {}
+            hueCollapseLaeuft = false;
         }
         function beobachteKarten() {
             if (!document.body || window.__hueCollapseObserver) return;
@@ -7102,9 +7130,16 @@ h1,h2,h3{ text-wrap:balance; }
 
         function initHueCollapse() {
             const saved = hueCollapsedSet();
-            document.querySelectorAll('.card').forEach(card => {
-                const head = card.querySelector(':scope > .card-title');
-                if (!head || head.querySelector('.card-collapse')) return;   // idempotent
+            /* Die Marke `data-hue-collapse` traegt die Idempotenz UND den
+               Vorabtest oben: sie sitzt auf JEDER geprueften Kopfzeile, auch
+               auf denen ohne Titeltext (die nie einen Knopf bekommen) — sonst
+               meldete der Vorabtest ewig Arbeit, die es nicht gibt. Der
+               Filter im Selektor macht den Durchlauf ausserdem so gross wie
+               die Zahl der NEUEN Karten, nicht wie die aller 67. */
+            document.querySelectorAll('.card > .card-title:not([data-hue-collapse])').forEach(head => {
+                head.dataset.hueCollapse = '1';
+                const card = head.parentElement;
+                if (!card || card.querySelector(':scope > .card-title > .card-collapse')) return;
                 const key = (head.textContent || '').trim().slice(0, 60);
                 if (!key) return;
                 head.classList.add('card-title--collapsible');

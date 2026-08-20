@@ -67,6 +67,18 @@ function schneideFunktion(src, name) {
   throw new Error(`Funktion ${name} nicht geschlossen`);
 }
 
+/** Wie schneideFunktion, aber fuer eine Methode der Klasse (`name(args) {`). */
+function schneideMethode(src, name) {
+  const start = src.search(new RegExp(`^\\s+${name}\\s*\\([^)]*\\)\\s*\\{`, 'm'));
+  assert.notEqual(start, -1, `Methode ${name} nicht gefunden`);
+  let i = src.indexOf('{', start), tiefe = 0;
+  for (let j = i; j < src.length; j++) {
+    if (src[j] === '{') tiefe++;
+    else if (src[j] === '}') { tiefe--; if (tiefe === 0) return src.slice(start, j + 1).trim(); }
+  }
+  throw new Error(`Methode ${name} nicht geschlossen`);
+}
+
 /* ============================ 1. Echte Unit-Tests ======================== */
 
 /** themeColor mit einem DOM-Stub laden; `farbe` ist, was getComputedStyle liefert. */
@@ -147,6 +159,64 @@ test('hueCollapsedSet: liest gespeicherte Titel', () => {
   const s = ladeCollapsedSet('["Stimmungsszenen","Top Verbraucher"]')();
   assert.equal(s.size, 2);
   assert.ok(s.has('Stimmungsszenen'));
+});
+
+/* ---- Neuaufbau-Sperre (das gemeldete Flackern, 2026-08-20) -------------- */
+
+/** `unveraendert` als aufrufbare Methode auf einem frischen Objekt. */
+function ladeUnveraendert() {
+  return new Function(`return { ${schneideMethode(JS_PUR, 'unveraendert')} };`)();
+}
+const voll = () => ({ children: { length: 3 } });
+
+test('unveraendert: der erste Aufruf baut immer', () => {
+  assert.equal(ladeUnveraendert().unveraendert('lampen', { a: 1 }, voll()), false);
+});
+
+test('unveraendert: gleiche Daten ⇒ kein Neuaufbau', () => {
+  /* Der Kern des Flacker-Fixes: das Live-Update ruft die Render-Funktionen im
+     Sekundentakt, obwohl sich fast nie etwas aendert. */
+  const o = ladeUnveraendert(), c = voll();
+  o.unveraendert('lampen', { a: 1, s: { on: true, bri: 200 } }, c);
+  assert.equal(o.unveraendert('lampen', { a: 1, s: { on: true, bri: 200 } }, c), true);
+});
+
+test('unveraendert: geaenderte Daten ⇒ Neuaufbau', () => {
+  const o = ladeUnveraendert(), c = voll();
+  o.unveraendert('lampen', { s: { on: true, bri: 200 } }, c);
+  assert.equal(o.unveraendert('lampen', { s: { on: true, bri: 201 } }, c), false,
+    'eine geaenderte Helligkeit muss sichtbar werden');
+  assert.equal(o.unveraendert('lampen', { s: { on: false, bri: 201 } }, c), false,
+    'ein geschaltetes Licht muss sichtbar werden');
+});
+
+test('unveraendert: ein LEERER Container wird immer neu gebaut', () => {
+  /* Sonst bliebe die Liste nach einem Reiterwechsel, der den Container
+     ausraeumt, fuer immer leer — der Fingerabdruck passte ja noch. */
+  const o = ladeUnveraendert(), leer = { children: { length: 0 } };
+  o.unveraendert('lampen', { a: 1 }, leer);
+  assert.equal(o.unveraendert('lampen', { a: 1 }, leer), false);
+});
+
+test('unveraendert: die Schluessel der Listen mischen sich nicht', () => {
+  const o = ladeUnveraendert(), c = voll();
+  o.unveraendert('lampen', { a: 1 }, c);
+  assert.equal(o.unveraendert('gruppen', { a: 1 }, c), false,
+    'Gruppen erbten den Fingerabdruck der Lampen');
+});
+
+test('⚠️ jede im Sekundentakt gerufene Render-Funktion nutzt die Sperre', () => {
+  /* refreshCurrentTab ruft loadLights/loadGroups/loadScenes jede Sekunde.
+     Wer die Sperre vergisst, bringt das Flackern zurueck. */
+  for (const [methode, schluessel] of [
+    ['renderLights', 'lampen'], ['renderGroups', 'gruppen'], ['renderScenes', 'szenen'],
+  ]) {
+    const fn = schneideMethode(JS_PUR, methode);
+    assert.match(fn, new RegExp(`if \\(this\\.unveraendert\\('${schluessel}'`),
+      `${methode} baut bedingungslos neu`);
+    assert.ok(fn.indexOf('unveraendert') < fn.indexOf('innerHTML'),
+      `${methode} raeumt den Container aus, bevor es die Sperre fragt`);
+  }
 });
 
 test('hueCollapsedSet: kaputter Inhalt wirft nicht, sondern liefert leer', () => {
@@ -360,9 +430,22 @@ test('Zuklappen: Zustand liegt unter einem eigenen Schluessel', () => {
 test('Zuklappen: die Einrichtung laeuft mehrfach ohne Schaden', () => {
   // switchTab ruft sie nach jedem Reiterwechsel erneut auf; ohne Wiedereintritts-
   // Schutz bekaeme jede Karte bei jedem Wechsel einen weiteren Chevron.
-  const fn = schneideFunktion(JS, 'initHueCollapse');
-  assert.match(fn, /querySelector\('\.card-collapse'\)\)\s*return/,
+  const fn = schneideFunktion(JS_PUR, 'initHueCollapse');
+  assert.match(fn, /card-collapse'\)\)\s*return/,
     'kein Schutz gegen doppelte Chevrons');
+});
+
+test('Zuklappen: jede gepruefte Kopfzeile wird markiert, auch die ohne Titel', () => {
+  /* Die Marke traegt zugleich den Vorabtest in planeHueCollapse. Bekaeme eine
+     titellose Kopfzeile sie NICHT, meldete der Vorabtest ewig Arbeit, die es
+     nicht gibt — der Beobachter liefe dann bei jeder Mutation voll durch. */
+  const fn = schneideFunktion(JS_PUR, 'initHueCollapse');
+  const markiert = fn.indexOf('dataset.hueCollapse');
+  const abbruch = fn.indexOf('if (!key) return');
+  assert.ok(markiert > -1, 'keine Marke gesetzt');
+  assert.ok(abbruch > -1, 'kein Abbruch bei titelloser Kopfzeile');
+  assert.ok(markiert < abbruch,
+    'die Marke wird erst NACH dem Abbruch gesetzt — titellose Koepfe bleiben ungemarkt');
 });
 
 test('Zuklappen: der Reiterwechsel richtet neue Karten mit ein', () => {
@@ -543,14 +626,24 @@ test('⚠️ die Karten ueberleben einen Neuaufbau durch das Live-Update', () =>
     'der Beobachter sieht die neu gebauten Karten nicht');
 });
 
-test('⚠️ der Beobachter haengt an einem Zeitgeber, nicht an requestAnimationFrame', () => {
-  /* rAF ruht in einem Tab, der gerade nicht gezeichnet wird: ein Neuaufbau in
-     dieser Zeit bliebe ohne Chevron liegen, bis zufaellig die naechste
-     Aenderung kommt. Beim Messen ist genau das passiert (0 statt 8). */
+test('⚠️ der Beobachter richtet SYNCHRON ein — weder Zeitgeber noch rAF', () => {
+  /* Der Rueckruf eines MutationObservers laeuft am Mikrotask-Punkt, also noch
+     vor dem naechsten Zeichnen. Nur so bekommt eine neu gebaute Karte ihren
+     Zuklapp-Zustand zurueck, ohne dass der Browser sie je offen malt.
+     Hier stand ein setTimeout(50) — damit sprang eine zugeklappte Karte nach
+     jedem Neuaufbau sichtbar auf und wieder zu: das gemeldete Flackern auf dem
+     Handy (gemessen 2026-08-20, im Sekundentakt reproduziert).
+     rAF waere ebenso falsch: es ruht in einem Tab, der nicht gezeichnet wird
+     (beim Messen real passiert: 0 statt 8 Chevrons). */
   const plan = schneideFunktion(JS_PUR, 'planeHueCollapse');
   assert.ok(!/requestAnimationFrame/.test(plan), 'wieder an rAF gehaengt');
-  assert.match(plan, /setTimeout/, 'ohne Zeitgeber wird gar nicht nachgeruestet');
-  assert.match(plan, /hueCollapsePlan/, 'ohne Sperre laeuft der Beobachter pro Mutation erneut');
+  assert.ok(!/setTimeout/.test(plan),
+    'wieder aufgeschoben — die Karte springt dann sichtbar auf, bevor sie zuklappt');
+  assert.match(plan, /initHueCollapse\(\)/, 'es wird gar nicht nachgeruestet');
+  assert.match(plan, /hueCollapseLaeuft/,
+    'ohne Wiedereintritts-Sperre loesen die eigenen Chevrons den Beobachter erneut aus');
+  assert.match(plan, /:not\(\[data-hue-collapse\]\)/,
+    'ohne Vorabtest laeuft bei JEDER Mutation ein voller Durchlauf');
 });
 
 test('⚠️ der aktive Reiter wird am NAMEN markiert, nicht am Klick-Ereignis', () => {
