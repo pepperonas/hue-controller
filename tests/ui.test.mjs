@@ -163,9 +163,12 @@ test('hueCollapsedSet: liest gespeicherte Titel', () => {
 
 /* ---- Neuaufbau-Sperre (das gemeldete Flackern, 2026-08-20) -------------- */
 
-/** `unveraendert` als aufrufbare Methode auf einem frischen Objekt. */
-function ladeUnveraendert() {
-  return new Function(`return { ${schneideMethode(JS_PUR, 'unveraendert')} };`)();
+/** `unveraendert` als aufrufbare Methode auf einem frischen Objekt.
+ *  Die Methode fragt window.hueZieht ab (Zug-Sperre) — im Browser immer da,
+ *  hier gestellt, damit der Zustand steuerbar bleibt. */
+function ladeUnveraendert(zieht = false) {
+  const f = new Function('window', `return { ${schneideMethode(JS_PUR, 'unveraendert')} };`);
+  return f({ hueZieht: zieht });
 }
 const voll = () => ({ children: { length: 3 } });
 
@@ -196,6 +199,14 @@ test('unveraendert: ein LEERER Container wird immer neu gebaut', () => {
   const o = ladeUnveraendert(), leer = { children: { length: 0 } };
   o.unveraendert('lampen', { a: 1 }, leer);
   assert.equal(o.unveraendert('lampen', { a: 1 }, leer), false);
+});
+
+test('⚠️ waehrend eines Zugs wird NIE neu gebaut', () => {
+  /* Der Sekundentakt wuerde die gezogene Karte sonst unter dem Finger
+     vernichten — die Sperre gilt selbst bei frischen Daten. */
+  const o = ladeUnveraendert(true), c = voll();
+  assert.equal(o.unveraendert('lampen', { a: 1 }, c), true, 'erster Aufruf trotzdem gebaut');
+  assert.equal(o.unveraendert('lampen', { a: 2 }, c), true, 'geaenderte Daten brachen den Zug ab');
 });
 
 test('unveraendert: die Schluessel der Listen mischen sich nicht', () => {
@@ -693,4 +704,117 @@ test('jeder Skriptblock ist syntaktisch gueltig', () => {
   for (const [i, b] of scriptBloecke.entries()) {
     assert.doesNotThrow(() => new Function(b), `Skriptblock ${i + 1} parst nicht`);
   }
+});
+
+/* ---- Sortierbare Listen (2026-08-21) ------------------------------------ */
+
+function ladeSortierLogik() {
+  const src = schneideFunktion(JS, 'ordneSchluessel')
+            + schneideFunktion(JS, 'naechsteKachel')
+            + '; return { ordneSchluessel, naechsteKachel };';
+  return new Function(src)();
+}
+const box = (left, top, width = 100, height = 40) => ({ left, top, width, height });
+
+test('ordneSchluessel: die gespeicherte Reihenfolge gewinnt', () => {
+  const { ordneSchluessel } = ladeSortierLogik();
+  assert.deepEqual(ordneSchluessel(['a', 'b', 'c'], ['c', 'a', 'b']), ['c', 'a', 'b']);
+});
+
+test('⚠️ ordneSchluessel: eine NEUE Lampe verschwindet nicht, sie haengt hinten an', () => {
+  /* Die Bridge lernt Lampen dazu. Wer nur die gespeicherte Liste rendert,
+     blendet alles Neue unsichtbar aus — der haeufigste Fehler bei so etwas. */
+  const { ordneSchluessel } = ladeSortierLogik();
+  assert.deepEqual(ordneSchluessel(['a', 'b', 'neu'], ['b', 'a']), ['b', 'a', 'neu']);
+});
+
+test('ordneSchluessel: mehrere Neue behalten ihre Ursprungsfolge', () => {
+  const { ordneSchluessel } = ladeSortierLogik();
+  assert.deepEqual(ordneSchluessel(['x', 'y', 'a'], ['a']), ['a', 'x', 'y']);
+});
+
+test('ordneSchluessel: entfernte Lampen fallen still raus', () => {
+  // Eine abgemeldete Lampe steht noch gespeichert — sie darf nichts kaputtmachen.
+  const { ordneSchluessel } = ladeSortierLogik();
+  assert.deepEqual(ordneSchluessel(['a', 'b'], ['weg', 'b', 'a']), ['b', 'a']);
+});
+
+test('ordneSchluessel: ohne gespeicherte Reihenfolge bleibt alles, wie es kam', () => {
+  const { ordneSchluessel } = ladeSortierLogik();
+  assert.deepEqual(ordneSchluessel(['a', 'b', 'c'], []), ['a', 'b', 'c']);
+});
+
+test('ordneSchluessel: jeder Schluessel kommt genau einmal vor', () => {
+  // Ein Duplikat wuerde beim Anwenden eine Kachel verschlucken (Map-Zugriff).
+  const { ordneSchluessel } = ladeSortierLogik();
+  const r = ordneSchluessel(['a', 'b', 'c'], ['b', 'b', 'a']);
+  assert.equal(new Set(r).size, r.length);
+  assert.equal(r.length, 3);
+});
+
+test('naechsteKachel: findet die Kachel unter dem Zeiger', () => {
+  const { naechsteKachel } = ladeSortierLogik();
+  const boxen = [box(0, 0), box(200, 0), box(0, 100)];
+  assert.equal(naechsteKachel(50, 20, boxen), 0);
+  assert.equal(naechsteKachel(250, 20, boxen), 1);
+  assert.equal(naechsteKachel(50, 120, boxen), 2);
+});
+
+test('⚠️ naechsteKachel misst zur MITTE, nicht nach Zeile oder Spalte', () => {
+  /* Die Liste ist ein Grid und bricht in zwei Richtungen um; eine Regel
+     "welche Zeile" waere dort blind fuer die Bewegung zur Seite. */
+  const { naechsteKachel } = ladeSortierLogik();
+  const boxen = [box(0, 0), box(200, 0)];
+  assert.equal(naechsteKachel(149, 20, boxen), 0, 'knapp links der Grenze');
+  assert.equal(naechsteKachel(151, 20, boxen), 1, 'knapp rechts der Grenze');
+});
+
+test('naechsteKachel: leere Liste liefert -1 statt zu werfen', () => {
+  const { naechsteKachel } = ladeSortierLogik();
+  assert.equal(naechsteKachel(10, 10, []), -1);
+});
+
+test('⚠️ die Reihenfolge wird nur angefasst, wenn sie falsch ist', () => {
+  /* Ein bedingungsloses appendChild erzeugt Mutationen — und der Beobachter
+     haengt an Mutationen. Ohne diesen Fruehausstieg dreht sich das endlos. */
+  const fn = schneideFunktion(JS_PUR, 'wendeReihenfolgeAn');
+  assert.match(fn, /if \(soll\.every\(\(k, i\) => k === keys\[i\]\)\) return;/,
+    'kein Fruehausstieg bei bereits richtiger Reihenfolge');
+});
+
+test('⚠️ gezogen wird per Zeigerereignis, nicht per HTML5-Drag-and-Drop', () => {
+  // HTML5-DnD kennt kein Touch — die App wird auf dem Handy bedient.
+  const fn = schneideFunktion(JS_PUR, 'beginneZug');
+  assert.match(fn, /setPointerCapture/, 'ohne Pointer-Capture reisst der Zug ab');
+  assert.ok(!/dragstart|dataTransfer|draggable/.test(JS_PUR),
+    'HTML5-Drag-and-Drop eingebaut — funktioniert auf dem Handy nicht');
+  assert.match(CSS_PUR, /\.hue-griff\s*\{[^}]*touch-action:\s*none/,
+    'ohne touch-action scrollt das Handy statt zu ziehen');
+});
+
+test('⚠️ der Zug haelt den Neuaufbau an', () => {
+  const fn = schneideMethode(JS_PUR, 'unveraendert');
+  assert.match(fn, /window\.hueZieht/, 'der Poll wuerde die gezogene Karte vernichten');
+  assert.match(schneideFunktion(JS_PUR, 'beginneZug'), /window\.hueZieht = true/);
+});
+
+test('⚠️ zugeklappte Karten strecken sich nicht auf die Zeilenhoehe', () => {
+  /* Grid-Kinder strecken per Default: die zugeklappte Karte blieb so hoch wie
+     die hoechste der Zeile und stand leer da (Nutzerbefund 2026-08-21). */
+  assert.match(schneideBlock(CSS_PUR, '.controls-grid {'), /align-items:\s*start/);
+});
+
+test('der Titeltext bekommt den freien Raum, sonst rutscht er in die Mitte', () => {
+  // Mit Griff UND Chevron hat die Titelzeile drei Kinder — genau die Falle,
+  // vor der der Kommentar an .card-title--collapsible warnt.
+  assert.match(CSS_PUR, /\.card-title-text\s*\{[^}]*flex:\s*1/);
+  assert.match(schneideFunktion(JS_PUR, 'initGriffe'), /huelleTitelText/);
+});
+
+test('der Griff hat auf Touch eine groessere Trefferflaeche als er aussieht', () => {
+  /* Sichtbar 30 px wie der Chevron daneben, Trefferflaeche 44 px. Live nicht
+     pruefbar: der Kopfbrowser meldet auch bei 390 px Breite einen FEINEN
+     Zeiger, `pointer: coarse` greift dort nie. */
+  assert.match(CSS_PUR, /@media \(pointer: coarse\)[\s\S]{0,200}\.hue-griff::before[\s\S]{0,160}width:\s*44px/);
+  assert.match(CSS_PUR, /\.hue-griff\s*\{[^}]*width:\s*30px/);
 });

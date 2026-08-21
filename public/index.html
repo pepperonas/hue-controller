@@ -443,6 +443,13 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: var(--spacing-6);
             margin-bottom: var(--spacing-8);
+            /* ⚠️ Grid-Kinder STRECKEN sich per Default auf die Zeilenhoehe.
+               Eine zugeklappte Karte versteckt zwar ihren Inhalt, blieb aber
+               so hoch wie die hoechste Karte der Zeile und stand leer da
+               (Nutzerbefund 2026-08-21: „die cards sollen nicht leer
+               aufgeklappt werden"). Dieselbe Falle wie im Dashboard und bei
+               lichtwerk — die Karte darf nur so hoch sein wie ihr Inhalt. */
+            align-items: start;
         }
 
         .card {
@@ -499,6 +506,58 @@
             transition: transform .22s ease, color .18s ease, background-color .18s ease;
         }
         .card-collapse svg { width: 16px; height: 16px; }
+
+        /* ---- Sortieren per Griff (2026-08-21) --------------------------
+           Der Griff ist die EINZIGE Zugflaeche. Die Karten tragen Schalter,
+           Regler und Farbfelder — waere die ganze Karte ziehbar, liesse sich
+           nichts davon mehr bedienen. */
+        .hue-griff {
+            flex: 0 0 auto;
+            width: 30px; height: 30px;
+            display: grid; place-items: center;
+            padding: 0; border: 0; background: transparent;
+            color: var(--text-secondary);
+            border-radius: 999px;
+            cursor: grab;
+            /* ⚠️ Ohne touch-action scrollt das Handy, statt zu ziehen. */
+            touch-action: none;
+            transition: color .18s ease, background-color .18s ease;
+        }
+        .hue-griff:hover { color: var(--text-primary);
+            background: color-mix(in srgb, var(--text-primary) 8%, transparent); }
+        .hue-griff:active { cursor: grabbing; }
+        .hue-griff:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
+        .hue-griff svg { width: 16px; height: 16px; pointer-events: none; }
+        /* Sichtbar bleibt der Griff 30 px (gleiche Groesse wie der Chevron
+           daneben), die TREFFERFLAECHE waechst auf Touch unsichtbar auf 44 px —
+           ein Ziehgriff, den man nicht trifft, ist keiner. Muster wie bei den
+           Schaltern in xword: unsichtbares ::before statt groesserem Knopf. */
+        @media (pointer: coarse) {
+            .hue-griff::before {
+                content: ''; position: absolute;
+                width: 44px; height: 44px;
+                left: 50%; top: 50%; transform: translate(-50%, -50%);
+            }
+            .hue-griff { position: relative; }
+        }
+
+        /* ⚠️ Mit dem Griff hat die Titelzeile DREI Kinder. Genau davor warnt
+           der Kommentar bei .card-title--collapsible: space-between verteilt
+           den Raum sonst auf alle drei und schiebt den Titel in die Mitte.
+           Deshalb nimmt der Text den freien Raum. */
+        .card-title-text { flex: 1 1 auto; min-width: 0; }
+        .card-title--sortierbar { display: flex; align-items: center; gap: 8px; }
+
+        .hue-zieht {
+            position: relative;
+            z-index: 20;
+            cursor: grabbing;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, .45);
+            opacity: .96;
+        }
+        /* Szenen sind Kacheln ohne Titelzeile — dort sitzt der Griff in der Ecke. */
+        .scene-btn { position: relative; }
+        .scene-btn > .hue-griff { position: absolute; top: 2px; right: 2px; width: 24px; height: 24px; }
         .card-collapse:hover { color: var(--text-primary);
             background: color-mix(in srgb, var(--text-primary) 8%, transparent); }
         .card-collapse:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
@@ -5016,6 +5075,11 @@ h1,h2,h3{ text-wrap:balance; }
                zulaessig, weil die Hue-Zustaende keinen Zeitstempel tragen —
                sie aendern sich nur, wenn wirklich jemand etwas schaltet. */
             unveraendert(schluessel, daten, container) {
+                // ⚠️ Waehrend eines Zugs nie neu bauen: der Sekundentakt
+                // wuerde die gezogene Karte unter dem Finger vernichten.
+                // window.* statt let: `unveraendert` kann laufen, bevor die
+                // Deklaration weiter unten ausgewertet ist (TDZ).
+                if (window.hueZieht) return true;
                 if (!this._abdruecke) this._abdruecke = {};
                 const abdruck = JSON.stringify(daten);
                 // children.length: ein von aussen geleerter Container muss neu.
@@ -5058,6 +5122,7 @@ h1,h2,h3{ text-wrap:balance; }
                 Object.entries(scenes).forEach(([id, scene]) => {
                     const btn = document.createElement('div');
                     btn.className = 'scene-btn';
+                    btn.dataset.itemId = id;
                     btn.innerHTML = scene.name;
                     btn.onclick = () => this.activateScene(id, scene);
                     container.appendChild(btn);
@@ -5071,6 +5136,7 @@ h1,h2,h3{ text-wrap:balance; }
                 Object.entries(sensors).forEach(([id, sensor]) => {
                     const card = document.createElement('div');
                     card.className = 'card';
+                    card.dataset.itemId = id;
                     card.innerHTML = `
                         <div class="card-title">${sensor.name}</div>
                         <div>Typ: ${sensor.type}</div>
@@ -5152,6 +5218,8 @@ h1,h2,h3{ text-wrap:balance; }
                     cardClasses += ' light-on';
                 }
                 card.className = cardClasses;
+                // Stabiler Schluessel fuer die gespeicherte Reihenfolge (s. HUE_LISTEN).
+                card.dataset.itemId = type + '-' + id;
 
                 // Apply actual light color as glow effect for active lights
                 if (isReachable && isOn && supportsColor) {
@@ -7119,6 +7187,7 @@ h1,h2,h3{ text-wrap:balance; }
             if (!document.querySelector('.card > .card-title:not([data-hue-collapse])')) return;
             hueCollapseLaeuft = true;
             try { initHueCollapse(); } catch (_) {}
+            try { richteSortierungEin(); } catch (_) {}
             hueCollapseLaeuft = false;
         }
         function beobachteKarten() {
@@ -7126,6 +7195,185 @@ h1,h2,h3{ text-wrap:balance; }
             window.__hueCollapseObserver = new MutationObserver(planeHueCollapse);
             window.__hueCollapseObserver.observe(document.body, { childList: true, subtree: true });
             planeHueCollapse();
+        }
+
+        /* ---- Sortierbare Listen per Griff (2026-08-21) ---------------------
+           Lichter, Gruppen, Sensoren und Szenen lassen sich am 2x3-Punkte-Griff
+           umsortieren; die Reihenfolge liegt je Liste im localStorage und wird
+           nach JEDEM Neuaufbau wieder angewandt — die Listen werden vom
+           Live-Update neu gebaut, sobald sich irgendein Zustand aendert.
+
+           ⚠️ Zeigerereignisse, NICHT HTML5-Drag-and-Drop: letzteres kennt kein
+           Touch, und diese App wird auf dem Handy bedient. */
+        window.hueZieht = false;                 // s. unveraendert()
+        const HUE_ORDER_PREFIX = 'hue-order-';
+        const HUE_LISTEN = [
+            { id: 'lights-container',  auswahl: '.card' },
+            { id: 'groups-container',  auswahl: '.card' },
+            { id: 'sensors-container', auswahl: '.card' },
+            { id: 'scenes-container',  auswahl: '.scene-btn' },
+        ];
+
+        /* Gespeicherte Reihenfolge zuerst, Unbekanntes hinten in Ursprungsfolge:
+           eine neu angelernte Lampe verschwindet so nicht und wirft nichts um. */
+        function ordneSchluessel(vorhanden, gespeichert) {
+            const bekannt = new Set(vorhanden);
+            const drin = new Set();
+            const zuerst = [];
+            // ⚠️ Doppelte muessen HIER raus. Ein doppelter Schluessel im
+            // Speicher (von Hand editiert, kaputter Eintrag) machte die Liste
+            // laenger als die Kacheln — der Fruehausstieg in
+            // wendeReihenfolgeAn vergleicht dann ungleich lange Listen, findet
+            // nie Gleichheit und sortiert bei JEDER Mutation neu. Das ist die
+            // Endlosschleife, die der Ausstieg gerade verhindern soll.
+            gespeichert.forEach(k => {
+                if (bekannt.has(k) && !drin.has(k)) { drin.add(k); zuerst.push(k); }
+            });
+            return zuerst.concat(vorhanden.filter(k => !drin.has(k)));
+        }
+
+        /* Index der Kachel, deren MITTE dem Zeiger am naechsten liegt. Ueber die
+           Mitte statt ueber Zeilen/Spalten, weil die Liste ein Grid ist und in
+           zwei Richtungen umbricht. */
+        function naechsteKachel(x, y, boxen) {
+            let best = -1, kleinste = Infinity;
+            boxen.forEach((b, i) => {
+                const dx = x - (b.left + b.width / 2);
+                const dy = y - (b.top + b.height / 2);
+                const d = dx * dx + dy * dy;
+                if (d < kleinste) { kleinste = d; best = i; }
+            });
+            return best;
+        }
+
+        function ladeReihenfolge(id) {
+            try {
+                const v = JSON.parse(localStorage.getItem(HUE_ORDER_PREFIX + id) || '[]');
+                return Array.isArray(v) ? v : [];
+            } catch { return []; }
+        }
+        function speichereReihenfolge(id, schluessel) {
+            try { localStorage.setItem(HUE_ORDER_PREFIX + id, JSON.stringify(schluessel)); }
+            catch (_) {}
+        }
+
+        function hueKinder(container, auswahl) {
+            return [...container.querySelectorAll(':scope > ' + auswahl)];
+        }
+
+        function wendeReihenfolgeAn(liste) {
+            const c = document.getElementById(liste.id);
+            if (!c) return;
+            const items = hueKinder(c, liste.auswahl);
+            if (items.length < 2) return;
+            const keys = items.map(el => el.dataset.itemId);
+            if (keys.some(k => !k)) return;              // ohne Schluessel nichts anfassen
+            const soll = ordneSchluessel(keys, ladeReihenfolge(liste.id));
+            // ⚠️ Schon richtig? Dann NICHTS anfassen. Ein bedingungsloses
+            // appendChild erzeugt Mutationen, die den Beobachter erneut ausloesen
+            // — das waere eine Endlosschleife.
+            if (soll.every((k, i) => k === keys[i])) return;
+            const nach = new Map(items.map(el => [el.dataset.itemId, el]));
+            soll.forEach(k => c.appendChild(nach.get(k)));
+        }
+
+        const HUE_GRIFF_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+            + [7, 12, 17].map(y => [9, 15].map(x =>
+                '<circle cx="' + x + '" cy="' + y + '" r="1.6" fill="currentColor"/>').join('')).join('')
+            + '</svg>';
+
+        /* Der Titeltext ist ein anonymer Textknoten und laesst sich nicht per CSS
+           ansprechen — fuer die Drei-Kinder-Regel (s. .card-title-text) bekommt er
+           eine eigene Huelle. textContent bleibt dabei gleich, der Zuklapp-
+           Schluessel haengt daran. */
+        function huelleTitelText(kopf) {
+            if (kopf.querySelector(':scope > .card-title-text')) return;
+            const span = document.createElement('span');
+            span.className = 'card-title-text';
+            [...kopf.childNodes].forEach(n => { if (n.nodeType === 3) span.appendChild(n); });
+            kopf.insertBefore(span, kopf.firstChild);
+        }
+
+        function initGriffe() {
+            HUE_LISTEN.forEach(liste => {
+                const c = document.getElementById(liste.id);
+                if (!c) return;
+                hueKinder(c, liste.auswahl).forEach(item => {
+                    if (!item.dataset.itemId) return;
+                    if (item.querySelector('.hue-griff')) return;      // idempotent
+                    const griff = document.createElement('button');
+                    griff.type = 'button';
+                    griff.className = 'hue-griff';
+                    griff.title = 'Zum Umsortieren ziehen';
+                    griff.setAttribute('aria-label', 'Zum Umsortieren ziehen');
+                    griff.innerHTML = HUE_GRIFF_SVG;
+                    griff.addEventListener('pointerdown', ev => beginneZug(ev, item, c, liste));
+                    const kopf = item.querySelector(':scope > .card-title');
+                    if (kopf) {
+                        huelleTitelText(kopf);
+                        kopf.classList.add('card-title--sortierbar');
+                        kopf.insertBefore(griff, kopf.firstChild);
+                    } else {
+                        item.appendChild(griff);       // Szenen-Kachel: Ecke
+                    }
+                });
+            });
+        }
+
+        function beginneZug(ev, item, container, liste) {
+            if (ev.button !== undefined && ev.button !== 0) return;
+            ev.preventDefault();
+            ev.stopPropagation();          // nicht den Zuklapp-Klick ausloesen
+            const griff = ev.currentTarget;
+            window.hueZieht = true;
+            item.classList.add('hue-zieht');
+            try { griff.setPointerCapture(ev.pointerId); } catch (_) {}
+
+            const start = { x: ev.clientX, y: ev.clientY };
+
+            const bewege = (e) => {
+                item.style.transform = 'translate(' + (e.clientX - start.x) + 'px, '
+                                                    + (e.clientY - start.y) + 'px)';
+                const andere = hueKinder(container, liste.auswahl).filter(el => el !== item);
+                if (!andere.length) return;
+                const ziel = andere[naechsteKachel(e.clientX, e.clientY, andere.map(el => el.getBoundingClientRect()))];
+                if (!ziel) return;
+                const itemIstVorZiel = !!(ziel.compareDocumentPosition(item)
+                                          & Node.DOCUMENT_POSITION_PRECEDING);
+                const bezug = itemIstVorZiel ? ziel.nextSibling : ziel;
+                if (bezug === item || item.nextSibling === bezug) return;   // steht schon da
+
+                // ⚠️ Nach dem Umhaengen liegt das Element woanders — der Ursprung
+                // muss mitwandern, sonst springt es unter dem Finger weg.
+                // offsetLeft/-Top sind Layoutwerte und vom transform unberuehrt.
+                const vorherL = item.offsetLeft, vorherT = item.offsetTop;
+                container.insertBefore(item, bezug);
+                start.x += item.offsetLeft - vorherL;
+                start.y += item.offsetTop - vorherT;
+                item.style.transform = 'translate(' + (e.clientX - start.x) + 'px, '
+                                                    + (e.clientY - start.y) + 'px)';
+            };
+
+            const ende = () => {
+                griff.removeEventListener('pointermove', bewege);
+                griff.removeEventListener('pointerup', ende);
+                griff.removeEventListener('pointercancel', ende);
+                item.classList.remove('hue-zieht');
+                item.style.transform = '';
+                window.hueZieht = false;
+                speichereReihenfolge(liste.id,
+                    hueKinder(container, liste.auswahl).map(el => el.dataset.itemId));
+            };
+
+            griff.addEventListener('pointermove', bewege);
+            griff.addEventListener('pointerup', ende);
+            griff.addEventListener('pointercancel', ende);
+        }
+
+        function richteSortierungEin() {
+            if (window.hueZieht) return;        // waehrend eines Zugs nichts umbauen
+            initGriffe();
+            HUE_LISTEN.forEach(wendeReihenfolgeAn);
         }
 
         function initHueCollapse() {
