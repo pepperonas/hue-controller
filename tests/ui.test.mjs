@@ -689,7 +689,7 @@ test('⚠️ die Zeitraum-Pillen des Verbrauchs-Reiters bleiben unangetastet', (
 });
 
 test('geteilte Leiste und Icons stehen auf der Hausversion', () => {
-  assert.match(HTML, /nav\.js\?v=21/, 'nav.js-Version weicht ab');
+  assert.match(HTML, /nav\.js\?v=23/, 'nav.js-Version weicht ab');
   assert.match(HTML, /icons\.js\?v=9/, 'icons.js-Version weicht ab');
 });
 
