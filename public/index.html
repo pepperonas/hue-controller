@@ -507,6 +507,28 @@
         }
         .card-collapse svg { width: 16px; height: 16px; }
 
+        /* Farben & Effekte je Lampe aufklappbar (2026-08-24): Toggle und
+           Helligkeit sind der Alltag und bleiben sofort sichtbar; die zwoelf
+           Farbknoepfe + Strobo machten jede Karte ~560 px hoch. */
+        .card-details { display: none; }
+        .card-details.open { display: block; }
+        .details-toggle {
+            width: 100%;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 12px; padding: 8px 12px;
+            background: none;
+            border: 1px solid color-mix(in srgb, var(--text-primary) 14%, transparent);
+            border-radius: var(--radius);
+            color: var(--text-secondary);
+            font-size: 0.85rem; font-weight: 600;
+            cursor: pointer;
+            transition: color .15s ease, border-color .15s ease;
+        }
+        .details-toggle:hover { color: var(--text-primary);
+            border-color: color-mix(in srgb, var(--text-primary) 30%, transparent); }
+        .details-toggle .dt-chev { transition: transform .2s ease; font-size: .75rem; }
+        .details-toggle[aria-expanded="true"] .dt-chev { transform: rotate(180deg); }
+
         /* ---- Sortieren per Griff (2026-08-21) --------------------------
            Der Griff ist die EINZIGE Zugflaeche. Die Karten tragen Schalter,
            Regler und Farbfelder — waere die ganze Karte ziehbar, liesse sich
@@ -4873,6 +4895,7 @@ h1,h2,h3{ text-wrap:balance; }
                 this.activeStrobes = {}; // Verfolge aktive Strobe-Effekte
                 this.lastSelectedColors = {}; // Verfolge letzte Farbauswahl pro Licht
                 this.selectedStrobeSpeeds = {}; // Verfolge gewählte Strobo-Geschwindigkeiten
+                this._openDetails = new Set();
                 this.selectedStrobeModes = {}; // Verfolge gewählte Strobo-Modi
                 this.init();
             }
@@ -5200,6 +5223,27 @@ h1,h2,h3{ text-wrap:balance; }
                 });
             }
 
+            /* Offene Farben-&-Effekte-Aufklapper je Karte. ⚠️ BEWUSST ein
+               Session-Set und kein localStorage: der Zustand muss vor allem
+               den Fingerprint-REBUILD ueberleben — Farbe setzen aendert die
+               Lampendaten, die Liste wird neu gebaut, und ohne dieses Set
+               klappte der Aufklapper MITTEN im Faerben zu. Ueber Sitzungen
+               hinweg frisch zuzustarten ist dagegen gewollt (kompakt ist
+               der Ruhezustand). */
+            toggleDetails(type, id, btn) {
+                const key = `${type}_${id}`;
+                const box = btn.nextElementSibling;
+                if (this._openDetails.has(key)) {
+                    this._openDetails.delete(key);
+                    if (box) box.classList.remove('open');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    this._openDetails.add(key);
+                    if (box) box.classList.add('open');
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+            }
+
             createLightCard(id, item, type) {
                 const card = document.createElement('div');
                 
@@ -5261,6 +5305,12 @@ h1,h2,h3{ text-wrap:balance; }
                         </div>
                     </div>
                     
+                    <button type="button" class="details-toggle"
+                            aria-expanded="${this._openDetails.has(`${type}_${id}`)}"
+                            onclick="hue.toggleDetails('${type}', '${id}', this)">
+                        <span>Farben &amp; Effekte</span><span class="dt-chev">▾</span>
+                    </button>
+                    <div class="card-details${this._openDetails.has(`${type}_${id}`) ? ' open' : ''}">
                     ${supportsColor && isReachable ? `
                     <div class="control-group">
                         <h4>Beliebte Farben</h4>
@@ -5299,6 +5349,7 @@ h1,h2,h3{ text-wrap:balance; }
                         <div class="effect-controls">
                             <button class="btn warning" onclick="hue.toggleStrobe('${id}', '${type}')" ${!isReachable ? 'disabled' : ''} id="strobe-btn-${type}-${id}"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Strobo</button>
                         </div>
+                    </div>
                     </div>
                 `;
 

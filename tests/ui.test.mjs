@@ -818,3 +818,62 @@ test('der Griff hat auf Touch eine groessere Trefferflaeche als er aussieht', ()
   assert.match(CSS_PUR, /@media \(pointer: coarse\)[\s\S]{0,200}\.hue-griff::before[\s\S]{0,160}width:\s*44px/);
   assert.match(CSS_PUR, /\.hue-griff\s*\{[^}]*width:\s*30px/);
 });
+
+/* ---- Farben & Effekte aufklappbar (2026-08-24) -------------------------- */
+
+test('Toggle und Helligkeit stehen VOR dem Aufklapper, der Rest dahinter', () => {
+  /* Der Alltag (schalten, dimmen) bleibt sofort sichtbar; die zwoelf
+     Farbknoepfe + Strobo machten jede Karte ~560 px hoch. */
+  const fn = schneideMethode(JS_PUR, 'createLightCard');
+  const toggle = fn.indexOf('hue.toggle(');
+  const slider = fn.indexOf('debouncedSetBrightness');
+  const klappe = fn.indexOf('class="card-details');
+  const farben = fn.indexOf('Beliebte Farben');
+  const strobo = fn.indexOf('toggleStrobe');
+  assert.ok(toggle > -1 && slider > -1 && klappe > -1);
+  assert.ok(toggle < klappe && slider < klappe, 'Alltag hinter der Klappe versteckt');
+  assert.ok(farben > klappe && strobo > klappe, 'Farben/Strobo nicht in der Klappe');
+});
+
+test('der Aufklapper startet ZU', () => {
+  assert.match(CSS_PUR, /\.card-details\s*\{\s*display:\s*none/);
+  assert.match(CSS_PUR, /\.card-details\.open\s*\{\s*display:\s*block/);
+});
+
+test('⚠️ der Offen-Zustand ueberlebt den Fingerprint-Rebuild', () => {
+  /* Farbe setzen aendert die Lampendaten -> die Liste wird neu gebaut.
+     Ohne das Set klappte der Aufklapper MITTEN im Faerben zu. Die Karte
+     muss den Zustand beim Neuaufbau aus dem Set LESEN. */
+  const fn = schneideMethode(JS_PUR, 'createLightCard');
+  /* ⚠️ Der Pin muss an der KLASSE haengen, nicht irgendwo: die erste Fassung
+     matchte jedes _openDetails.has() — auch das aria-Attribut — und blieb
+     gruen, als die Klasse (die das Zeigen/Verstecken traegt) den Zustand
+     nicht mehr las (eigene Mutationsprobe). */
+  assert.match(fn, /class="card-details\$\{this\._openDetails\.has\(`\$\{type\}_\$\{id\}`\) \? ' open' : ''\}"/,
+    'die card-details-KLASSE liest den Offen-Zustand nicht');
+  assert.match(fn, /aria-expanded="\$\{this\._openDetails\.has\(`\$\{type\}_\$\{id\}`\)\}"/,
+    'aria-expanded liest den Offen-Zustand nicht');
+  const tg = schneideMethode(JS_PUR, 'toggleDetails');
+  assert.match(tg, /_openDetails\.add\(key\)/);
+  assert.match(tg, /_openDetails\.delete\(key\)/);
+});
+
+test('toggleDetails schaltet Klasse, Set und aria gemeinsam', () => {
+  // Echter Verhaltens-Test mit Stubs statt Text-Pin.
+  const mk = () => {
+    const box = { classList: { c: new Set(), add(x){this.c.add(x);}, remove(x){this.c.delete(x);} } };
+    const btn = { nextElementSibling: box, attrs: {}, setAttribute(k,v){this.attrs[k]=v;} };
+    return { box, btn };
+  };
+  const obj = { _openDetails: new Set() };
+  const fn = new Function('return function ' + schneideMethode(JS_PUR, 'toggleDetails'))();
+  const { box, btn } = mk();
+  fn.call(obj, 'light', '7', btn);
+  assert.ok(obj._openDetails.has('light_7'));
+  assert.ok(box.classList.c.has('open'));
+  assert.equal(btn.attrs['aria-expanded'], 'true');
+  fn.call(obj, 'light', '7', btn);
+  assert.ok(!obj._openDetails.has('light_7'));
+  assert.ok(!box.classList.c.has('open'));
+  assert.equal(btn.attrs['aria-expanded'], 'false');
+});
