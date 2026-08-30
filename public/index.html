@@ -59,7 +59,7 @@
     <meta name="msapplication-TileImage" content="/android-chrome-192x192.png">
     
     <link rel="stylesheet" href="/shared/theme.css">
-<link rel="stylesheet" href="/shared/ui.css?v=1">
+<link rel="stylesheet" href="/shared/ui.css?v=2">
 <style>
         :root {
             /* Material Design 3 Expressive — dark, tonal, vibrant */
@@ -247,31 +247,8 @@
             }
             .tabs::-webkit-scrollbar { display: none; }
 
-            .tab {
-                padding: .32rem .8rem;
-                background: transparent;
-                color: var(--text-primary);
-                cursor: pointer;
-                font-size: .8rem;
-                font-weight: 650;
-                white-space: nowrap;
-                transition: all 0.3s ease;
-                border: 1px solid var(--outline);
-                border-radius: 999px;
-                flex: 0 0 auto;
-                min-width: 0;
-            }
-
-            .tab:hover {
-                color: var(--text-primary);
-                background-color: color-mix(in srgb, var(--text-primary) 5%, transparent);
-            }
-
-            .tab.active {
-                color: var(--on-primary);
-                border-color: transparent;
-                background-color: var(--accent-blue);
-            }
+            /* Pillen-Skin = Suite-Dialekt (sh-pill); nowrap bleibt App-Layout. */
+            .tab { white-space: nowrap; flex: 0 0 auto; }
 
             /* Schnellzugriff Sektion */
             .quick-access-section {
@@ -778,20 +755,10 @@
         }
 
         /* Buttons */
+        /* Skin kommt seit 2026-08-30 aus dem Suite-Dialekt (sh-btn,
+           shared/theme.css + ui.css) — hier bleibt das Layout-Skelett. */
         .btn {
-            /* Grundzustand als umrandete Pille wie in der Referenz. Vorher setzte
-               .btn GAR KEINEN Hintergrund — jede Variante ohne Modifier fiel
-               damit auf `buttonface` des Browsers zurück, im Dark-Mode ein
-               kräftiges Grau. Das sah aus wie Absicht und war keine. */
-            background: color-mix(in srgb, var(--text-primary) 4%, transparent);
-            color: var(--text-secondary);
             padding: var(--spacing-3) var(--spacing-6);
-            border: 1px solid var(--outline);
-            border-radius: var(--radius);
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -801,87 +768,6 @@
             margin: var(--spacing-1) 0;
         }
 
-        .btn-primary {
-            background-color: var(--accent-blue);
-            color: var(--on-primary);
-        }
-
-        .btn-primary:hover {
-            background-color: #5a7a9a;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .btn-secondary {
-            background-color: var(--accent-green);
-            color: var(--sh-on-ok);
-        }
-
-        .btn-secondary:hover {
-            background-color: #8aa47d;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .btn.danger {
-            background-color: var(--accent-red);
-            color: var(--sh-on-loud);
-        }
-
-        .btn.danger:hover {
-            background-color: #d04f50;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .btn.warning {
-            background-color: var(--accent-warn);
-            color: #1a1a2e;
-        }
-
-        .btn.warning:hover {
-            background-color: #f59e0b;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .btn.accent {
-            background-color: #9C27B0;
-            color: white;
-        }
-
-        .btn.accent:hover {
-            background-color: #7B1FA2;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .btn.premium {
-            background-color: #FFD700;
-            color: #1a1a2e;
-        }
-
-        .btn.premium:hover {
-            background-color: #FFA000;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-sm {
-            padding: var(--spacing-2) var(--spacing-4);
-            font-size: 0.875rem;
-        }
-
-        .btn-lg {
-            padding: var(--spacing-4) var(--spacing-8);
-            font-size: 1.125rem;
-        }
 
         /* Formulare */
         .input-group {
@@ -945,43 +831,6 @@
             margin-bottom: var(--spacing-2);
         }
 
-        .slider {
-            width: 100%;
-            height: 6px;
-            border-radius: var(--radius);
-            background: var(--background-darker);
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--accent-blue);
-            cursor: pointer;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-        }
-
-        .slider::-webkit-slider-thumb:hover {
-            background: #5a7a9a;
-            transform: scale(1.1);
-            box-shadow: var(--shadow);
-        }
-
-        .slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--accent-blue);
-            cursor: pointer;
-            border: none;
-            box-shadow: var(--shadow-sm);
-        }
 
         .color-picker {
             width: 100%;
@@ -1088,35 +937,9 @@
         }
 
         /* Elegante intuitive Button-Styles */
-        .btn-on {
-            background: var(--accent-blue);
-            color: var(--on-primary);
-            border: 1px solid transparent;
+        /* Lampen-AN-Glut: App-Identitaet AUF dem Dialekt (Basis = sh-btn). */
+        .sh-btn.on {
             box-shadow: 0 0 14px color-mix(in srgb, var(--accent-blue) 45%, transparent);
-        }
-
-        .btn-on:hover { background: var(--accent-blue); filter: brightness(1.06); }
-
-        .btn-off {
-            background: color-mix(in srgb, var(--text-primary) 4%, transparent);
-            color: var(--text-secondary);
-            border: 1px solid var(--outline);
-            box-shadow: none;
-        }
-
-        .btn-off:hover { background: color-mix(in srgb, var(--accent-blue) 10%, transparent); color: var(--text-primary); }
-
-        .btn-disabled {
-            background: var(--surface-high);
-            color: var(--text-secondary);
-            border: 1px solid var(--surface-high);
-            cursor: not-allowed;
-        }
-
-        .btn-disabled:hover {
-            background: var(--surface-high);
-            transform: none;
-            box-shadow: none;
         }
 
         /* Unreachable Card Styles */
@@ -1498,18 +1321,20 @@
             margin-bottom: 4px;
         }
 
-        .btn-active {
-            background: linear-gradient(45deg, #FF6B6B, #FF8E8E) !important;
-            color: white !important;
-            border-color: #FF6B6B !important;
-            box-shadow: 0 0 15px rgba(255, 107, 107, 0.5) !important;
-            animation: pulse 2s infinite !important;
+        /* Aktiver Strobo: Haus-Loud statt Hardcode-Rot; .sh-btn.btn-active
+           (0-2-0) schlaegt die tonal-Variante ohne !important. */
+        .sh-btn.btn-active {
+            background: var(--sh-loud);
+            color: var(--sh-on-loud);
+            border-color: transparent;
+            box-shadow: 0 0 15px color-mix(in srgb, var(--sh-loud) 50%, transparent);
+            animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 0 15px rgba(255, 107, 107, 0.5); }
-            50% { box-shadow: 0 0 25px rgba(255, 107, 107, 0.8); }
-            100% { box-shadow: 0 0 15px rgba(255, 107, 107, 0.5); }
+            0% { box-shadow: 0 0 15px color-mix(in srgb, var(--sh-loud) 50%, transparent); }
+            50% { box-shadow: 0 0 25px color-mix(in srgb, var(--sh-loud) 80%, transparent); }
+            100% { box-shadow: 0 0 15px color-mix(in srgb, var(--sh-loud) 50%, transparent); }
         }
 
         .strobe-active {
@@ -2440,11 +2265,6 @@
                 margin-bottom: var(--spacing-4);
             }
 
-            .tab {
-                padding: var(--spacing-3) var(--spacing-4);
-                font-size: 0.875rem;
-                min-width: 100px;
-            }
             
             .effect-controls {
                 flex-direction: column;
@@ -2494,14 +2314,6 @@
                 margin: var(--spacing-2) 0;
             }
 
-            .slider {
-                height: 8px;
-            }
-
-            .slider::-webkit-slider-thumb {
-                width: 28px;
-                height: 28px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -2521,10 +2333,6 @@
                 font-size: 0.8rem;
             }
 
-            .tab {
-                min-width: 80px;
-                padding: var(--spacing-2) var(--spacing-3);
-            }
 
             .card {
                 padding: var(--spacing-4);
@@ -2962,7 +2770,7 @@
         }
         
         .smart-error h4 {
-            color: #FF6B6B;
+            color: var(--accent-red);
             margin-bottom: 12px;
             font-size: 1.2rem;
         }
@@ -3091,27 +2899,7 @@
         /* === POWER TAB STYLES === */
         
         /* Power view tab styling for all screen sizes */
-        #power-tab .tabs .tab {
-            background: var(--card-background);
-            border: 1px solid var(--outline);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-            border-radius: var(--radius);
-            cursor: pointer;
-        }
-        
-        #power-tab .tabs .tab:hover {
-            background: color-mix(in srgb, var(--accent-blue) 10%, transparent);
-            border-color: var(--accent-blue);
-            transform: translateY(-1px);
-        }
-        
-        #power-tab .tabs .tab.active {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-            color: var(--on-primary);
-            box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-blue) 30%, transparent);
-        }
+        /* Pillen-Skin = Suite-Dialekt (sh-pill). */
 
         /* === MOBILE OPTIMIZATIONS === */
         
@@ -3273,58 +3061,6 @@
             }
             
             /* Toggle Switch Styles */
-            .toggle-switch {
-                position: relative;
-                display: inline-block;
-                width: 60px;
-                height: 30px;
-            }
-            
-            .toggle-switch input {
-                opacity: 0;
-                width: 0;
-                height: 0;
-            }
-            
-            .toggle-slider {
-                position: absolute;
-                cursor: pointer;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: color-mix(in srgb, var(--text-primary) 22%, transparent);
-                transition: 0.3s;
-                border-radius: 30px;
-                border: 1px solid color-mix(in srgb, var(--text-primary) 32%, transparent);
-            }
-            
-            .toggle-slider:before {
-                position: absolute;
-                content: "";
-                height: 22px;
-                width: 22px;
-                left: 3px;
-                bottom: 3px;
-                background-color: white;
-                transition: 0.3s;
-                border-radius: 50%;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            }
-            
-            input:checked + .toggle-slider {
-                background-color: var(--accent-green);
-                border-color: var(--accent-green);
-            }
-            
-            input:checked + .toggle-slider:before {
-                transform: translateX(30px);
-            }
-            
-            input:disabled + .toggle-slider {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
             
             /* Sunrise Modal Styles */
             .sunrise-grid {
@@ -3407,30 +3143,7 @@
             
             
             /* Power view tabs on tablet */
-            #power-tab .tabs .tab {
-                min-width: auto;
-                flex: 1;
-                font-size: 0.8rem;
-                padding: var(--spacing-2);
-                text-align: center;
-                background: var(--card-background);
-                border: 1px solid var(--outline);
-                color: var(--text-primary);
-                transition: all 0.3s ease;
-            }
-            
-            #power-tab .tabs .tab:hover {
-                background: color-mix(in srgb, var(--accent-blue) 10%, transparent);
-                border-color: var(--accent-blue);
-                transform: translateY(-1px);
-            }
-            
-            #power-tab .tabs .tab.active {
-                background: var(--accent-blue);
-                border-color: var(--accent-blue);
-                color: var(--on-primary);
-                box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-blue) 30%, transparent);
-            }
+            /* Pillen-Skin = Suite-Dialekt (sh-pill). */
         }
         
         /* Mobile phones (480px and below) */
@@ -3497,31 +3210,7 @@
             }
             
             /* Power view tabs need special treatment on mobile */
-            #power-tab .tabs .tab {
-                min-width: auto;
-                flex: 1;
-                font-size: 0.75rem;
-                padding: var(--spacing-2) var(--spacing-1);
-                text-align: center;
-                background: var(--card-background);
-                border: 1px solid var(--outline);
-                color: var(--text-primary);
-                transition: all 0.3s ease;
-                border-radius: var(--radius);
-            }
-            
-            #power-tab .tabs .tab:hover {
-                background: color-mix(in srgb, var(--accent-blue) 10%, transparent);
-                border-color: var(--accent-blue);
-                transform: translateY(-1px);
-            }
-            
-            #power-tab .tabs .tab.active {
-                background: var(--accent-blue);
-                border-color: var(--accent-blue);
-                color: var(--on-primary);
-                box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-blue) 30%, transparent);
-            }
+            /* Pillen-Skin = Suite-Dialekt (sh-pill). */
             
             .card {
                 padding: var(--spacing-3);
@@ -3600,29 +3289,7 @@
             }
             
             /* Power view tabs for very small screens */
-            #power-tab .tabs .tab {
-                font-size: 0.7rem;
-                padding: var(--spacing-1);
-                min-width: auto;
-                flex: 1;
-                background: var(--card-background);
-                border: 1px solid var(--outline);
-                color: var(--text-primary);
-                transition: all 0.3s ease;
-                border-radius: var(--radius);
-            }
-            
-            #power-tab .tabs .tab:hover {
-                background: color-mix(in srgb, var(--accent-blue) 10%, transparent);
-                border-color: var(--accent-blue);
-            }
-            
-            #power-tab .tabs .tab.active {
-                background: var(--accent-blue);
-                border-color: var(--accent-blue);
-                color: var(--on-primary);
-                box-shadow: 0 2px 8px color-mix(in srgb, var(--accent-blue) 30%, transparent);
-            }
+            /* Pillen-Skin = Suite-Dialekt (sh-pill). */
             
         }
     
@@ -3644,21 +3311,20 @@ h1,.header,header{animation:md-drop .55s var(--ease-emph,cubic-bezier(.2,0,0,1))
 @keyframes md-breathe2 { 0%,100%{box-shadow:0 0 0 0 rgba(170,199,255,0)} 50%{box-shadow:0 0 26px 2px rgba(170,199,255,.35)} }
 @keyframes md-pulse2 { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(.7)} }
 /* Buttons: hover-lift + active-squash */
-.btn, .btn-on, .btn-off {
+.btn {
   transition: transform .4s var(--md-ease-spatial), box-shadow .2s var(--md-ease-effects), filter .2s var(--md-ease-effects);
 }
-.btn:active, .btn-on:active, .btn-off:active { transform: scale(.95); }
-.btn:hover, .btn-on:hover, .btn-off:hover { background: color-mix(in srgb, var(--accent-blue) 10%, transparent); color: var(--text-primary); }
-/* An-/aktive Zustände: breathe */
-.btn.active, .btn-on, .card.light-on { animation: md-breathe2 2.6s ease-in-out infinite; }
+.btn:active { transform: scale(.95); }
+/* Hover-Feedback kommt aus dem sh-State-Layer (ui.css) — der alte Hover-Wash
+   uebermalte gefuellte Varianten mit background. */
+/* An-/aktive Zustände: breathe (Lampen-AN = Dialekt-Zustand .sh-btn.on) */
+.btn.active, .sh-btn.on, .card.light-on { animation: md-breathe2 2.6s ease-in-out infinite; }
 /* Status-/Online-Dots: pulse */
 .status-dot.online { animation: md-pulse2 2s ease-in-out infinite; }
 /* Slider-Thumb (Switch-Äquivalent): spring */
-.slider::-webkit-slider-thumb { transition: transform .5s var(--md-ease-spatial); }
-.slider::-moz-range-thumb { transition: transform .5s var(--md-ease-spatial); }
 @media (prefers-reduced-motion: reduce) {
-  .btn, .btn-on, .btn-off, .btn.active, .card.light-on, .status-dot.online,
-  .slider::-webkit-slider-thumb, .slider::-moz-range-thumb { animation: none !important; transition: none !important; }
+  .btn, .btn.active, .sh-btn.on, .card.light-on, .status-dot.online,
+  .sh-switch-thumb { animation: none !important; transition: none !important; }
 }
 
 /* ===== Obsessive-Detail Politur (2026-06-16) — additiv, kein Umbau =====
@@ -3739,9 +3405,9 @@ h1,h2,h3{ text-wrap:balance; }
             </div>
             <div class="collapsible-content" id="globalcontrols-content">
                 <div class="effect-controls">
-                    <button class="btn" onclick="globalControl('all-on')">Alles An</button>
-                    <button class="btn danger" onclick="globalControl('all-off')">Alles Aus</button>
-                    <button class="btn" id="disco-mode-btn" onclick="toggleDiscoMode()">
+                    <button class="btn sh-btn tonal" onclick="globalControl('all-on')">Alles An</button>
+                    <button class="btn danger sh-btn danger" onclick="globalControl('all-off')">Alles Aus</button>
+                    <button class="btn sh-btn tonal" id="disco-mode-btn" onclick="toggleDiscoMode()">
                         <span id="disco-icon"><span class="sh-i" data-sh-icon="party" aria-hidden="true"></span></span> Disko-Modus
                     </button>
                 </div>
@@ -3759,7 +3425,7 @@ h1,h2,h3{ text-wrap:balance; }
                             <span>Helligkeit alle Lampen</span>
                             <span class="slider-value" id="global-brightness-value">100%</span>
                         </div>
-                        <input type="range" class="slider" id="global-brightness-slider" min="1" max="254" value="254" 
+                        <input type="range" class="slider sh-slider" id="global-brightness-slider" min="1" max="254" value="254" 
                                oninput="document.getElementById('global-brightness-value').textContent = Math.round(this.value / 254 * 100) + '%'; debouncedGlobalBrightnessChange(this.value)">
                     </div>
                 </div>
@@ -3786,15 +3452,15 @@ h1,h2,h3{ text-wrap:balance; }
         </div>
 
         <div class="tabs">
-            <button class="tab active" data-tab="lights" onclick="switchTab('lights')">Lichter</button>
-            <button class="tab" data-tab="groups" onclick="switchTab('groups')">Gruppen</button>
-            <button class="tab" data-tab="scenes" onclick="switchTab('scenes')">Szenen</button>
-            <button class="tab" data-tab="effects" onclick="switchTab('effects')">Effekte</button>
-            <button class="tab" data-tab="timers" onclick="switchTab('timers')">Timer</button>
-            <button class="tab" data-tab="sensors" onclick="switchTab('sensors')">Sensoren</button>
-            <button class="tab" data-tab="buttons" onclick="switchTab('buttons')">Custom Buttons</button>
-            <button class="tab" data-tab="debug" onclick="switchTab('debug')">Debug</button>
-            <button class="tab" data-tab="power" onclick="switchTab('power')">Stromverbrauch</button>
+            <button class="tab sh-pill active" data-tab="lights" onclick="switchTab('lights')">Lichter</button>
+            <button class="tab sh-pill" data-tab="groups" onclick="switchTab('groups')">Gruppen</button>
+            <button class="tab sh-pill" data-tab="scenes" onclick="switchTab('scenes')">Szenen</button>
+            <button class="tab sh-pill" data-tab="effects" onclick="switchTab('effects')">Effekte</button>
+            <button class="tab sh-pill" data-tab="timers" onclick="switchTab('timers')">Timer</button>
+            <button class="tab sh-pill" data-tab="sensors" onclick="switchTab('sensors')">Sensoren</button>
+            <button class="tab sh-pill" data-tab="buttons" onclick="switchTab('buttons')">Custom Buttons</button>
+            <button class="tab sh-pill" data-tab="debug" onclick="switchTab('debug')">Debug</button>
+            <button class="tab sh-pill" data-tab="power" onclick="switchTab('power')">Stromverbrauch</button>
         </div>
 
 
@@ -3850,13 +3516,13 @@ h1,h2,h3{ text-wrap:balance; }
                                 <span>Reaktion</span>
                                 <span class="slider-value" id="audio-sensitivity-value">50%</span>
                             </div>
-                            <input type="range" class="slider" id="audio-sensitivity" min="0.1" max="1.0" step="0.1" value="0.5" oninput="updateSliderValue('audio-sensitivity', Math.round(this.value * 100) + '%')">
+                            <input type="range" class="slider sh-slider" id="audio-sensitivity" min="0.1" max="1.0" step="0.1" value="0.5" oninput="updateSliderValue('audio-sensitivity', Math.round(this.value * 100) + '%')">
                         </div>
                     </div>
                     
                     <div class="effect-controls">
-                        <button class="btn" id="start-audio-sync" onclick="startAudioSync()">Musik-Sync starten</button>
-                        <button class="btn danger" id="stop-audio-sync" onclick="stopAudioSync()" style="display: none;">Sync stoppen</button>
+                        <button class="btn sh-btn tonal" id="start-audio-sync" onclick="startAudioSync()">Musik-Sync starten</button>
+                        <button class="btn danger sh-btn danger" id="stop-audio-sync" onclick="stopAudioSync()" style="display: none;">Sync stoppen</button>
                     </div>
                     
                     <div id="audio-status" class="message" style="display: none;"></div>
@@ -3959,7 +3625,7 @@ h1,h2,h3{ text-wrap:balance; }
                                 <span>Dauer</span>
                                 <span class="slider-value" id="strobe-duration-value">∞ Unbegrenzt</span>
                             </div>
-                            <input type="range" class="slider" id="strobe-duration" min="0" max="300" value="0" oninput="updateNormalStrobeDurationValue(this.value)">
+                            <input type="range" class="slider sh-slider" id="strobe-duration" min="0" max="300" value="0" oninput="updateNormalStrobeDurationValue(this.value)">
                             <div class="duration-info">
                                 <small>0 = ∞ Unbegrenzt | 1-300 = Sekunden</small>
                             </div>
@@ -3969,14 +3635,14 @@ h1,h2,h3{ text-wrap:balance; }
                                 <span>Frequenz</span>
                                 <span class="slider-value" id="strobe-frequency-value">2Hz</span>
                             </div>
-                            <input type="range" class="slider" id="strobe-frequency" min="1" max="10" step="0.5" value="2" oninput="updateSliderValue('strobe-frequency', this.value + 'Hz')">
+                            <input type="range" class="slider sh-slider" id="strobe-frequency" min="1" max="10" step="0.5" value="2" oninput="updateSliderValue('strobe-frequency', this.value + 'Hz')">
                         </div>
                         <div class="slider-container">
                             <div class="slider-label">
                                 <span>Helligkeit</span>
                                 <span class="slider-value" id="strobe-brightness-value">254</span>
                             </div>
-                            <input type="range" class="slider" id="strobe-brightness" min="50" max="254" value="254" oninput="updateSliderValue('strobe-brightness', this.value)">
+                            <input type="range" class="slider sh-slider" id="strobe-brightness" min="50" max="254" value="254" oninput="updateSliderValue('strobe-brightness', this.value)">
                         </div>
                         <div class="color-selection-section">
                             <h5><span class="sh-i" data-sh-icon="palette" aria-hidden="true"></span> Strobo-Farbe</h5>
@@ -4012,7 +3678,7 @@ h1,h2,h3{ text-wrap:balance; }
                                 </select>
                             </div>
                         </div>
-                        <button class="btn warning" onclick="startAdvancedStrobe()">Strobo Starten</button>
+                        <button class="btn warning sh-btn warn" onclick="startAdvancedStrobe()">Strobo Starten</button>
                     </div>
 
 
@@ -4023,7 +3689,7 @@ h1,h2,h3{ text-wrap:balance; }
                     <div id="effects-list" class="effect-list">
                         <div>Keine aktiven Effekte</div>
                     </div>
-                    <button class="btn danger" onclick="stopAllEffects()" style="margin-top: 12px;">Alle Effekte Stoppen</button>
+                    <button class="btn danger sh-btn danger" onclick="stopAllEffects()" style="margin-top: 12px;">Alle Effekte Stoppen</button>
                 </div>
             </div>
         </div>
@@ -4058,7 +3724,7 @@ h1,h2,h3{ text-wrap:balance; }
                             </select>
                         </div>
                     </div>
-                    <button class="btn" onclick="createTimer()">Timer Erstellen</button>
+                    <button class="btn sh-btn tonal" onclick="createTimer()">Timer Erstellen</button>
                 </div>
 
                 <div class="card">
@@ -4081,8 +3747,8 @@ h1,h2,h3{ text-wrap:balance; }
                 <div class="control-group">
                     <h4>System Informationen</h4>
                     <div class="debug-controls">
-                        <button class="btn" onclick="showSystemInfo()" style="background: var(--accent-green);"><span class="sh-i" data-sh-icon="search" aria-hidden="true"></span> System-Info anzeigen</button>
-                        <button class="btn" onclick="refreshSystemInfo()"><span class="sh-i" data-sh-icon="refresh" aria-hidden="true"></span> Aktualisieren</button>
+                        <button class="btn sh-btn tonal" onclick="showSystemInfo()" style="background: var(--accent-green);"><span class="sh-i" data-sh-icon="search" aria-hidden="true"></span> System-Info anzeigen</button>
+                        <button class="btn sh-btn tonal" onclick="refreshSystemInfo()"><span class="sh-i" data-sh-icon="refresh" aria-hidden="true"></span> Aktualisieren</button>
                     </div>
                     <div id="system-info-container" style="display: none; margin-top: var(--spacing-4);"></div>
                 </div>
@@ -4090,8 +3756,8 @@ h1,h2,h3{ text-wrap:balance; }
                 <div class="control-group">
                     <h4>Hue Bridge Kommunikation</h4>
                     <div class="debug-controls">
-                        <button class="btn" onclick="clearDebugLog()">Log Löschen</button>
-                        <button class="btn" onclick="toggleDebugAutoScroll()">Auto-Scroll: <span id="autoscroll-status">AN</span></button>
+                        <button class="btn sh-btn tonal" onclick="clearDebugLog()">Log Löschen</button>
+                        <button class="btn sh-btn tonal" onclick="toggleDebugAutoScroll()">Auto-Scroll: <span id="autoscroll-status">AN</span></button>
                         <label class="form-label">
                             Max Entries: 
                             <div class="select-wrapper">
@@ -4141,11 +3807,11 @@ h1,h2,h3{ text-wrap:balance; }
                 <div class="control-group">
                     <h4>Test-Befehle</h4>
                     <div class="debug-test-grid">
-                        <button class="btn" onclick="testHueConnection()">Bridge Testen</button>
-                        <button class="btn" onclick="testLightCommand()">Licht Testen</button>
-                        <button class="btn" onclick="testGroupCommand()">Gruppe Testen</button>
-                        <button class="btn warning" onclick="sendTestStrobe()">Test-Strobo</button>
-                        <button class="btn" onclick="checkSystemHealth()">System-Gesundheit</button>
+                        <button class="btn sh-btn tonal" onclick="testHueConnection()">Bridge Testen</button>
+                        <button class="btn sh-btn tonal" onclick="testLightCommand()">Licht Testen</button>
+                        <button class="btn sh-btn tonal" onclick="testGroupCommand()">Gruppe Testen</button>
+                        <button class="btn warning sh-btn warn" onclick="sendTestStrobe()">Test-Strobo</button>
+                        <button class="btn sh-btn tonal" onclick="checkSystemHealth()">System-Gesundheit</button>
                     </div>
                 </div>
             </div>
@@ -4178,12 +3844,12 @@ h1,h2,h3{ text-wrap:balance; }
                  selbst — wie die Reiter oben. -->
             <div style="margin-top: var(--spacing-6);">
                 <div class="tabs" style="margin-bottom: 0;">
-                    <button class="tab active" data-view="today" onclick="switchPowerView('today')">Heute</button>
-                    <button class="tab" data-view="week" onclick="switchPowerView('week')">Woche</button>
-                    <button class="tab" data-view="month" onclick="switchPowerView('month')">Monat</button>
-                    <button class="tab" data-view="year" onclick="switchPowerView('year')">Jahr</button>
-                    <button class="tab" data-view="weekday" onclick="switchPowerView('weekday')">Wochentage</button>
-                    <button class="tab" data-view="seasonal" onclick="switchPowerView('seasonal')">Sommer/Winter</button>
+                    <button class="tab sh-pill active" data-view="today" onclick="switchPowerView('today')">Heute</button>
+                    <button class="tab sh-pill" data-view="week" onclick="switchPowerView('week')">Woche</button>
+                    <button class="tab sh-pill" data-view="month" onclick="switchPowerView('month')">Monat</button>
+                    <button class="tab sh-pill" data-view="year" onclick="switchPowerView('year')">Jahr</button>
+                    <button class="tab sh-pill" data-view="weekday" onclick="switchPowerView('weekday')">Wochentage</button>
+                    <button class="tab sh-pill" data-view="seasonal" onclick="switchPowerView('seasonal')">Sommer/Winter</button>
                 </div>
             </div>
             
@@ -4247,7 +3913,7 @@ h1,h2,h3{ text-wrap:balance; }
                                 <option value="month">Dieser Monat</option>
                             </select>
                         </div>
-                        <button class="btn" style="margin-top: var(--spacing-2); width: 100%;" onclick="updateIndividualLampChart()">Chart aktualisieren</button>
+                        <button class="btn sh-btn tonal" style="margin-top: var(--spacing-2); width: 100%;" onclick="updateIndividualLampChart()">Chart aktualisieren</button>
                     </div>
                 </div>
                 <div class="power-chart">
@@ -4683,19 +4349,19 @@ h1,h2,h3{ text-wrap:balance; }
                             <label for="motion-detection-toggle">
                                 <strong> Bewegungserkennung aktiviert:</strong>
                             </label>
-                            <div class="toggle-switch">
+                            <label class="toggle-switch sh-switch">
                                 <input type="checkbox" id="motion-detection-toggle" onchange="updatePIRConfig('motion_detection_enabled', this.checked)">
-                                <span class="toggle-slider"></span>
-                            </div>
+                                <span class="sh-switch-track"><span class="sh-switch-thumb"></span></span>
+                            </label>
                         </div>
                         <div class="setting-row">
                             <label for="daylight-detection-toggle">
                                 <strong> Nur nachts aktiv (Tageslichteerkennung):</strong>
                             </label>
-                            <div class="toggle-switch">
+                            <label class="toggle-switch sh-switch">
                                 <input type="checkbox" id="daylight-detection-toggle" onchange="updatePIRConfig('daylight_detection_enabled', this.checked)">
-                                <span class="toggle-slider"></span>
-                            </div>
+                                <span class="sh-switch-track"><span class="sh-switch-thumb"></span></span>
+                            </label>
                         </div>
                     </div>
                     
@@ -5288,7 +4954,7 @@ h1,h2,h3{ text-wrap:balance; }
                         ${isReachable ? (isOn ? '' : '') : ''}
                     </div>
                     
-                    <button class="btn ${this.getButtonClass(isOn, isReachable)}" 
+                    <button class="btn sh-btn ${this.getButtonClass(isOn, isReachable)}" 
                             onclick="hue.toggle('${id}', ${!isOn}, '${type}')"
                             ${!isReachable ? 'disabled' : ''}>
                         ${this.getButtonText(isOn, isReachable)}
@@ -5300,7 +4966,7 @@ h1,h2,h3{ text-wrap:balance; }
                                 <span>Helligkeit</span>
                                 <span class="slider-value">${brightness}%</span>
                             </div>
-                            <input type="range" class="slider" min="1" max="254" value="${state.bri || 254}" 
+                            <input type="range" class="slider sh-slider" min="1" max="254" value="${state.bri || 254}" style="--sh-slider-fill:${(((state.bri || 254) - 1) / 253 * 100)}%" 
                                    oninput="this.nextElementSibling.textContent = Math.round(this.value / 254 * 100) + '%'; hue.updateLightPreview('${id}', this.value, '${type}'); hue.debouncedSetBrightness('${id}', this.value, '${type}')"
                                    ${!isReachable ? 'disabled' : ''}>
                             <div style="display: none;"></div>
@@ -5349,7 +5015,7 @@ h1,h2,h3{ text-wrap:balance; }
                             </div>
                         </div>
                         <div class="effect-controls">
-                            <button class="btn warning" onclick="hue.toggleStrobe('${id}', '${type}')" ${!isReachable ? 'disabled' : ''} id="strobe-btn-${type}-${id}"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Strobo</button>
+                            <button class="btn warning sh-btn warn" onclick="hue.toggleStrobe('${id}', '${type}')" ${!isReachable ? 'disabled' : ''} id="strobe-btn-${type}-${id}"><span class="sh-i" data-sh-icon="bolt" aria-hidden="true"></span> Strobo</button>
                         </div>
                     </div>
                     </div>
@@ -5359,8 +5025,10 @@ h1,h2,h3{ text-wrap:balance; }
             }
             
             getButtonClass(isOn, isReachable) {
-                if (!isReachable) return 'btn-disabled';
-                return isOn ? 'btn-on' : 'btn-off';
+                // Dialekt-Zustaende: AN = gefuellte sh-btn-Basis + Glut (.on),
+                // AUS = tonal; unreachable regelt das disabled-Attribut.
+                if (!isReachable) return '';
+                return isOn ? 'on' : 'tonal';
             }
             
             getButtonText(isOn, isReachable) {
@@ -5718,7 +5386,7 @@ h1,h2,h3{ text-wrap:balance; }
                         container.innerHTML = data.active_effects.map(effectId => `
                             <div class="effect-item">
                                 <span>${effectId}</span>
-                                <button class="btn danger" onclick="hue.stopEffect('${effectId}')">Stoppen</button>
+                                <button class="btn danger sh-btn danger" onclick="hue.stopEffect('${effectId}')">Stoppen</button>
                             </div>
                         `).join('');
                     }
@@ -5741,7 +5409,7 @@ h1,h2,h3{ text-wrap:balance; }
                         container.innerHTML = timers.map(([timerId, timer]) => `
                             <div class="timer-item">
                                 <span>${timer.target_type} ${timer.target_id}</span>
-                                <button class="btn danger" onclick="hue.cancelTimer('${timerId}')">Abbrechen</button>
+                                <button class="btn danger sh-btn danger" onclick="hue.cancelTimer('${timerId}')">Abbrechen</button>
                             </div>
                         `).join('');
                     }
@@ -7191,6 +6859,21 @@ h1,h2,h3{ text-wrap:balance; }
         // Global functions
         const hue = new HueControllerPro();
 
+        /* Fuellstand der geteilten .sh-slider (ui.css): delegiert fuer Draege,
+           Faenger fuer programmatisch gesetzte Werte (Poll-Reconcile baut die
+           Lampen-Slider ohnehin mit GEBACKENER Fuellung im Template neu). */
+        window.fuelleShSlider = function(sl) {
+            const min = parseFloat(sl.min) || 0, max = parseFloat(sl.max) || 100;
+            if (max <= min) return;
+            sl.style.setProperty('--sh-slider-fill', ((sl.value - min) / (max - min) * 100) + '%');
+        };
+        document.addEventListener('input', (e) => {
+            if (e.target && e.target.classList && e.target.classList.contains('sh-slider')) fuelleShSlider(e.target);
+        }, { passive: true });
+        const fuelleAlleShSlider = () => document.querySelectorAll('input.sh-slider').forEach(fuelleShSlider);
+        fuelleAlleShSlider();
+        setInterval(fuelleAlleShSlider, 1000);
+
         function switchTab(tabName) {
             hue.switchTab(tabName);
             // Reiter rendern ihre Inhalte teils asynchron nach — die neuen
@@ -8384,7 +8067,7 @@ h1,h2,h3{ text-wrap:balance; }
                         </ul>
                     </div>
                     <div class="error-actions">
-                        <button onclick="diagnoseIssue('${errorInfo.category}')" class="btn secondary">
+                        <button onclick="diagnoseIssue('${errorInfo.category}')" class="btn secondary sh-btn tonal">
                              Diagnose starten
                         </button>
                         ${getRecoveryButton(errorInfo.category)}
@@ -8409,7 +8092,7 @@ h1,h2,h3{ text-wrap:balance; }
             
             const action = recoveryActions[category];
             if (action) {
-                return `<button onclick="performRecovery('${action}')" class="btn danger">
+                return `<button onclick="performRecovery('${action}')" class="btn danger sh-btn danger">
                      Auto-Recovery
                 </button>`;
             }
@@ -9877,8 +9560,8 @@ h1,h2,h3{ text-wrap:balance; }
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button class="btn" onclick="closeEditModal()">Abbrechen</button>
-                            <button class="btn" style="background: var(--accent-green);" onclick="saveButtonConfiguration(${config.id})"><span class="sh-i" data-sh-icon="save" aria-hidden="true"></span> Speichern</button>
+                            <button class="btn sh-btn tonal" onclick="closeEditModal()">Abbrechen</button>
+                            <button class="btn sh-btn tonal" style="background: var(--accent-green);" onclick="saveButtonConfiguration(${config.id})"><span class="sh-i" data-sh-icon="save" aria-hidden="true"></span> Speichern</button>
                         </div>
                     </div>
                 </div>

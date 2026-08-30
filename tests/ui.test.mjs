@@ -877,3 +877,64 @@ test('toggleDetails schaltet Klasse, Set und aria gemeinsam', () => {
   assert.ok(!box.classList.c.has('open'));
   assert.equal(btn.attrs['aria-expanded'], 'false');
 });
+
+/* ---- Phase-3-Adoption: Suite-Dialekt (2026-08-30) ------------------------- */
+
+const CSSP = CSS.replace(/\/\*[\s\S]*?\*\//g, '');
+
+test('alle Buttons tragen sh-btn (Alt-Klassen bleiben als JS-Vertraege)', () => {
+  const btns = [...HTML.matchAll(/<button[^>]*class="btn[ "$][^>]*/g)];
+  assert.equal(btns.length, 26, 'Buttons gefunden: ' + btns.length);
+  for (const b of btns) assert.match(b[0], /sh-btn/, b[0].slice(0, 90));
+  // .btn.warning wird per querySelectorAll selektiert — die Klasse MUSS bleiben:
+  assert.match(HTML, /querySelectorAll\('\.btn\.warning'\)/);
+  assert.ok([...HTML.matchAll(/class="btn warning sh-btn warn"/g)].length === 3);
+});
+
+test('Lampen-Knopf: Zustaende kommen aus dem Dialekt (on/tonal)', () => {
+  assert.match(HTML, /class="btn sh-btn \$\{this\.getButtonClass\(isOn, isReachable\)\}"/);
+  const fn = HTML.match(/getButtonClass\(isOn, isReachable\) \{[\s\S]{0,400}?\}/)[0];
+  assert.match(fn, /'on'/); assert.match(fn, /'tonal'/);
+  assert.ok(!/btn-on/.test(fn), 'alte Zustandsklasse lebt noch in getButtonClass');
+  // Die Lampen-AN-Glut ist App-Identitaet auf dem Dialekt:
+  assert.match(CSSP, /\.sh-btn\.on\s*\{[^}]*box-shadow/);
+});
+
+test('die 2 Toggles sind sh-switch (Vertrag A), das alte Skinning ist tot', () => {
+  const sw = [...HTML.matchAll(/<label class="toggle-switch sh-switch">/g)];
+  assert.equal(sw.length, 2);
+  assert.ok([...HTML.matchAll(/sh-switch-track/g)].length >= 2);
+  assert.ok(!/\.toggle-slider\s*\{/.test(CSSP), 'toggle-slider-Skin lebt noch');
+});
+
+test('die 6 Slider sind sh-slider mit Fuellungs-Verdrahtung', () => {
+  const sliders = [...HTML.matchAll(/<input type="range"[^>]*>/g)];
+  assert.equal(sliders.length, 6);
+  for (const m of sliders) assert.match(m[0], /sh-slider/, m[0].slice(0, 90));
+  // Lampen-Slider wird bei jedem Rebuild NEU gebaut — die Fuellung muss im
+  // Template GEBACKEN sein, sonst blitzt sie nach jedem Fingerprint-Rebuild weg:
+  assert.match(HTML, /--sh-slider-fill:\$\{/);
+  // Statische Slider: delegierter input-Listener + programmatischer Faenger:
+  assert.match(HTML, /fuelleShSlider/);
+  assert.ok(!/\.slider::-webkit-slider-thumb/.test(CSSP), 'eigener Thumb-Skin lebt noch');
+});
+
+test('Reiter-Pillen sprechen sh-pill, der Skin ist tot', () => {
+  const tabs = [...HTML.matchAll(/<button class="tab[ "][^>]*/g)];
+  assert.equal(tabs.length, 15);
+  for (const t of tabs) assert.match(t[0], /sh-pill/, t[0].slice(0, 90));
+  assert.ok(!/\.tab\.active\s*\{[^}]*background/.test(CSSP), 'eigener Aktiv-Skin lebt noch');
+});
+
+test('btn-active (Strobo) ist tokenisiert und sitzt AUF dem Dialekt', () => {
+  assert.ok(!CSSP.includes('#FF6B6B'), 'Hardcode-Rot lebt noch');
+  assert.match(CSSP, /\.sh-btn\.btn-active\s*\{[^}]*var\(--sh-loud\)/);
+  assert.ok(!/\.sh-btn\.btn-active\s*\{[^}]*!important/.test(CSSP),
+    'important war nur gegen den eigenen Alt-Skin noetig');
+});
+
+test('die toten Skins sind wirklich tot', () => {
+  for (const tot of ['.btn-primary', '.btn-secondary', '.btn.accent', '.btn.premium', '.btn-on', '.btn-off', '.btn-disabled']) {
+    assert.ok(!new RegExp(tot.replace(/\./g, '\\.') + '\\s*\\{').test(CSSP), tot + ' lebt noch');
+  }
+});
