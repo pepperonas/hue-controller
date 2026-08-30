@@ -938,3 +938,14 @@ test('die toten Skins sind wirklich tot', () => {
     assert.ok(!new RegExp(tot.replace(/\./g, '\\.') + '\\s*\\{').test(CSSP), tot + ' lebt noch');
   }
 });
+
+/* ---- Chart-Motion (2026-08-30) -------------------------------------------- */
+
+test('Chart.js zeichnet bei jedem expliziten Aufbau ein (reduced-motion-bewusst)', () => {
+  // Die Charts entstehen NUR bei expliziten Wechseln (destroy+new; kein Poll
+  // fasst sie an) — animation:false hatte das Einzeichnen ueberall abgeschaltet.
+  const JSP = HTML.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/[^\n]*$/gm, '');
+  assert.ok(!/animation: false,/.test(JSP), 'ein Chart ist noch stumm');
+  assert.equal([...JSP.matchAll(/animation: this\.chartAnim\(\),/g)].length, 7);
+  assert.match(JSP, /prefers-reduced-motion[\s\S]{0,80}\? false/);
+});
