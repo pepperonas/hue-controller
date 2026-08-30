@@ -1,4 +1,4 @@
-// Hue-Controller SW — app-v18 (2026-08-13, optimistisches Laden).
+// Hue-Controller SW — app-v19 (2026-08-13, optimistisches Laden).
 // Vorher: cache-first fuer die Shell OHNE Activate-Cleanup — Updates
 // erreichten installierte PWAs nie (caches.match durchsucht ALLE Caches,
 // die alte app-v1-Shell gewann fuer immer). Jetzt das Haus-Muster
@@ -6,7 +6,7 @@
 // Cache-Fallback (offline), cache-first fuer statische Assets,
 // /api/ IMMER am Cache vorbei, und alte Caches werden beim Activate
 // geloescht. Bei Shell-Aenderungen: CACHE_NAME bumpen.
-const CACHE_NAME = 'app-v18';
+const CACHE_NAME = 'app-v19';
 const urlsToCache = [
   '/',
   '/index.html'
