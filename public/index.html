@@ -5621,6 +5621,16 @@ h1,h2,h3{ text-wrap:balance; }
                 }
             }
 
+            // Chart-Motion (2026-08-30): Charts werden hier IMMER per destroy+new
+            // gebaut — ausschliesslich bei EXPLIZITEN Wechseln (Tab/View/
+            // Timeframe), nie im Poll. Jeder Aufbau ist damit ein Erstaufbau
+            // und bekommt das Einzeichnen; animation:false hatte es ueberall
+            // abgeschaltet.
+            chartAnim() {
+                return window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches
+                    ? false : { duration: 600, easing: 'easeOutQuart' };
+            }
+
             renderDetailedChart(data, timeframe) {
                 console.log('renderDetailedChart called with:', { timeframe, dataLength: data?.length, data: data?.slice(0, 3) });
                 
@@ -5698,7 +5708,7 @@ h1,h2,h3{ text-wrap:balance; }
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false,
+                        animation: this.chartAnim(),
                         elements: {
                             line: {
                                 borderColor: themeColor('var(--accent-blue)', 1) // Fallback line color
@@ -5819,7 +5829,7 @@ h1,h2,h3{ text-wrap:balance; }
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false,
+                        animation: this.chartAnim(),
                         scales: {
                             y: {
                                 type: 'linear',
@@ -5909,7 +5919,7 @@ h1,h2,h3{ text-wrap:balance; }
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false,
+                        animation: this.chartAnim(),
                         scales: {
                             x: {
                                 type: 'linear',
@@ -6042,7 +6052,7 @@ h1,h2,h3{ text-wrap:balance; }
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false,
+                        animation: this.chartAnim(),
                         scales: {
                             y: {
                                 type: 'linear',
@@ -6155,7 +6165,7 @@ h1,h2,h3{ text-wrap:balance; }
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false,
+                        animation: this.chartAnim(),
                         plugins: {
                             legend: { 
                                 labels: { color: themeColor('var(--sh-text)', 0.8) },
@@ -6234,7 +6244,7 @@ h1,h2,h3{ text-wrap:balance; }
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false,
+                        animation: this.chartAnim(),
                         scales: {
                             y: {
                                 beginAtZero: true,
@@ -6667,7 +6677,7 @@ h1,h2,h3{ text-wrap:balance; }
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: false,
+                        animation: this.chartAnim(),
                         interaction: {
                             mode: 'index',
                             intersect: false
