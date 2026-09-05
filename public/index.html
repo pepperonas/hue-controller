@@ -7071,13 +7071,21 @@ h1,h2,h3{ text-wrap:balance; }
             ev.preventDefault();
             ev.stopPropagation();          // nicht den Zuklapp-Klick ausloesen
             const griff = ev.currentTarget;
+            const zeiger = ev.pointerId;
             window.hueZieht = true;
             item.classList.add('hue-zieht');
-            try { griff.setPointerCapture(ev.pointerId); } catch (_) {}
+            /* Die Erfassung hilft nur noch dabei, ein Loslassen AUSSERHALB des
+               Fensters mitzubekommen. Tragend sind die Fenster-Zuhoerer unten:
+               beim Umsortieren wandert der Griff im DOM mit, und ein
+               Verschieben ist ein Entfernen+Einfuegen — das gibt die Erfassung
+               frei (lostpointercapture). Zuhoerer AM GRIFF ueberlebten deshalb
+               den ersten Tausch nicht. */
+            try { griff.setPointerCapture(zeiger); } catch (_) {}
 
             const start = { x: ev.clientX, y: ev.clientY };
 
             const bewege = (e) => {
+                if (e.pointerId !== undefined && e.pointerId !== zeiger) return;
                 item.style.transform = 'translate(' + (e.clientX - start.x) + 'px, '
                                                     + (e.clientY - start.y) + 'px)';
                 const andere = hueKinder(container, liste.auswahl).filter(el => el !== item);
@@ -7100,10 +7108,12 @@ h1,h2,h3{ text-wrap:balance; }
                                                     + (e.clientY - start.y) + 'px)';
             };
 
-            const ende = () => {
-                griff.removeEventListener('pointermove', bewege);
-                griff.removeEventListener('pointerup', ende);
-                griff.removeEventListener('pointercancel', ende);
+            const ende = (e) => {
+                // Ein zweiter Finger darf den laufenden Zug nicht beenden.
+                if (e && e.pointerId !== undefined && e.pointerId !== zeiger) return;
+                window.removeEventListener('pointermove', bewege);
+                window.removeEventListener('pointerup', ende);
+                window.removeEventListener('pointercancel', ende);
                 item.classList.remove('hue-zieht');
                 item.style.transform = '';
                 window.hueZieht = false;
@@ -7111,9 +7121,9 @@ h1,h2,h3{ text-wrap:balance; }
                     hueKinder(container, liste.auswahl).map(el => el.dataset.itemId));
             };
 
-            griff.addEventListener('pointermove', bewege);
-            griff.addEventListener('pointerup', ende);
-            griff.addEventListener('pointercancel', ende);
+            window.addEventListener('pointermove', bewege);
+            window.addEventListener('pointerup', ende);
+            window.addEventListener('pointercancel', ende);
         }
 
         function richteSortierungEin() {
