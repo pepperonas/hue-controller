@@ -785,7 +785,10 @@ test('⚠️ die Reihenfolge wird nur angefasst, wenn sie falsch ist', () => {
 test('⚠️ gezogen wird per Zeigerereignis, nicht per HTML5-Drag-and-Drop', () => {
   // HTML5-DnD kennt kein Touch — die App wird auf dem Handy bedient.
   const fn = schneideFunktion(JS_PUR, 'beginneZug');
-  assert.match(fn, /setPointerCapture/, 'ohne Pointer-Capture reisst der Zug ab');
+  /* ⚠️ Die Erfassung war hier frueher als das Tragende beschrieben — falsch:
+     sie ist genau das, was beim Umsortieren ABREISST (s. den Zug-Test oben).
+     Sie bleibt nur, um ein Loslassen ausserhalb des Fensters mitzubekommen. */
+  assert.match(fn, /setPointerCapture/, 'Loslassen ausserhalb des Fensters ginge verloren');
   assert.ok(!/dragstart|dataTransfer|draggable/.test(JS_PUR),
     'HTML5-Drag-and-Drop eingebaut — funktioniert auf dem Handy nicht');
   assert.match(CSS_PUR, /\.hue-griff\s*\{[^}]*touch-action:\s*none/,
@@ -796,6 +799,165 @@ test('⚠️ der Zug haelt den Neuaufbau an', () => {
   const fn = schneideMethode(JS_PUR, 'unveraendert');
   assert.match(fn, /window\.hueZieht/, 'der Poll wuerde die gezogene Karte vernichten');
   assert.match(schneideFunktion(JS_PUR, 'beginneZug'), /window\.hueZieht = true/);
+});
+
+/* ---- Der Zug muss ENDEN (Fehler gefunden 2026-09-05) --------------------
+   Bis hierher pruefte die Suite nur die reinen Funktionen (ordneSchluessel,
+   naechsteKachel) — die Zug-Maschinerie selbst war NIE geprueft, und genau
+   dort sass der Fehler: `container.insertBefore(item, …)` verschiebt den
+   Griff samt eigenem Teilbaum, und das ENTZIEHT dem Element die
+   Zeiger-Erfassung (Pointer Events: Capture wird beim Entfernen aus dem
+   Dokument freigegeben, ein Verschieben ist ein Entfernen+Einfuegen).
+   Danach erreichten pointermove/pointerup den Griff nie wieder — dort hingen
+   aber die Zuhoerer. Live gemessen: pointerdown → gotpointercapture → EIN
+   pointermove → lostpointercapture → Stille. Folge war nicht nur "nicht
+   gespeichert", sondern `window.hueZieht` blieb FUER IMMER true, womit
+   `unveraendert()` jeden Neuaufbau blockierte: die Liste fror ein und die
+   Karte blieb verschoben stehen, bis zum Reload.
+
+   Der Stub bildet genau das nach: solange die Erfassung haelt, bekommt der
+   Griff die Ereignisse; nach dem ersten Umsortieren nur noch das Fenster. */
+function ladeBeginneZug() {
+  const gespeichert = [];
+  let erfassungHaelt = true;
+
+  const stubZiel = (name) => {
+    const h = {};
+    return {
+      _name: name, _h: h,
+      addEventListener(t, fn) { (h[t] = h[t] || []).push(fn); },
+      removeEventListener(t, fn) { if (h[t]) h[t] = h[t].filter(f => f !== fn); },
+      feuere(t, ev) { (h[t] || []).slice().forEach(f => f(ev)); },
+      zahl(t) { return (h[t] || []).length; },
+    };
+  };
+  const klassen = () => ({
+    c: new Set(), add(x) { this.c.add(x); }, remove(x) { this.c.delete(x); },
+    contains(x) { return this.c.has(x); },
+  });
+  const griff = stubZiel('griff');
+  griff.setPointerCapture = () => {};
+  griff.releasePointerCapture = () => {};
+  const fenster = stubZiel('window');
+  fenster.hueZieht = false;
+
+  const container = {
+    _kinder: [],
+    insertBefore(el, bezug) {
+      const i = this._kinder.indexOf(el);
+      if (i >= 0) this._kinder.splice(i, 1);
+      const j = bezug ? this._kinder.indexOf(bezug) : -1;
+      this._kinder.splice(j < 0 ? this._kinder.length : j, 0, el);
+      erfassungHaelt = false;      // ⚠️ genau hier stirbt die Erfassung
+    },
+  };
+
+  /* ⚠️ nextSibling und compareDocumentPosition muessen aus der ECHTEN
+     Reihenfolge kommen. Als feste Werte (null bzw. 0) haelt `bewege` die
+     Kachel fuer bereits richtig platziert und steigt aus — der Test lief
+     dann durch, ohne je umzusortieren. Genau das hat die Gegenprobe
+     "die Probe sortiert nicht um" hier gemeldet. */
+  const kachel = (id, left) => ({
+    dataset: { itemId: id }, classList: klassen(), style: {},
+    offsetLeft: left, offsetTop: 0,
+    get nextSibling() {
+      const i = container._kinder.indexOf(this);
+      return (i >= 0 ? container._kinder[i + 1] : null) || null;
+    },
+    compareDocumentPosition(anderer) {
+      const a = container._kinder.indexOf(this), b = container._kinder.indexOf(anderer);
+      return b < a ? 2 : 4;        // 2 = DOCUMENT_POSITION_PRECEDING
+    },
+    getBoundingClientRect: () => ({ left, top: 0, width: 10, height: 10 }),
+  });
+
+  const item = kachel('a', 0), zweite = kachel('b', 100);
+  container._kinder.push(item, zweite);
+
+  const liste = { id: 'lights-container', auswahl: '.card' };
+  const fn = new Function(
+    'window', 'Node', 'hueKinder', 'naechsteKachel', 'speichereReihenfolge',
+    schneideFunktion(JS, 'beginneZug') + '; return beginneZug;'
+  )(
+    fenster,
+    { DOCUMENT_POSITION_PRECEDING: 2 },
+    (c) => c._kinder.slice(),
+    (x) => (x >= 50 ? 0 : 0),
+    (id, keys) => gespeichert.push({ id, keys }),
+  );
+
+  const ereignis = (extra = {}) => ({
+    button: 0, pointerId: 1, clientX: 0, clientY: 0, currentTarget: griff,
+    preventDefault() {}, stopPropagation() {}, ...extra,
+  });
+
+  return {
+    fenster, griff, item, container, liste, gespeichert,
+    verschoben: () => container._kinder[0] !== item,
+    erfassung: () => erfassungHaelt,
+    starte: () => fn(ereignis(), item, container, liste),
+    /* Zustellung wie im Browser: an den Griff nur, solange die Erfassung
+       haelt — ans Fenster immer (Blasenphase bzw. Fenster-Zuhoerer). */
+    liefere: (typ, extra = {}) => {
+      const ev = ereignis(extra);
+      if (erfassungHaelt) griff.feuere(typ, ev);
+      fenster.feuere(typ, ev);
+    },
+  };
+}
+
+test('⚠️ der Zug endet auch, wenn die Karte dabei im DOM verschoben wurde', () => {
+  const t = ladeBeginneZug();
+  t.starte();
+  assert.equal(t.fenster.hueZieht, true, 'der Zug hat gar nicht begonnen');
+
+  t.liefere('pointermove', { clientX: 100, clientY: 0 });
+  // Gegenprobe: wenn die Probe gar nicht umsortiert, prueft der Test nichts.
+  assert.equal(t.verschoben(), true, 'die Probe sortiert nicht um — Test taugt nichts');
+  assert.equal(t.erfassung(), false, 'die Erfassung muesste jetzt weg sein');
+
+  t.liefere('pointerup');
+  assert.equal(t.fenster.hueZieht, false,
+    'hueZieht haengt auf true — die Liste friert ein und die Karte bleibt verschoben stehen');
+  assert.equal(t.gespeichert.length, 1, 'die Reihenfolge wurde nicht gespeichert');
+  assert.deepEqual(t.gespeichert[0], { id: 'lights-container', keys: ['b', 'a'] });
+});
+
+test('⚠️ nach dem Zug bleibt keine Verschiebung und keine Zug-Klasse stehen', () => {
+  const t = ladeBeginneZug();
+  t.starte();
+  t.liefere('pointermove', { clientX: 100, clientY: 0 });
+  t.liefere('pointerup');
+  assert.equal(t.item.style.transform, '', 'die Karte steht verschoben da');
+  assert.equal(t.item.classList.contains('hue-zieht'), false);
+});
+
+test('⚠️ auch ein Abbruch (pointercancel) raeumt auf', () => {
+  // Auf dem Handy bricht das System einen Zug ab, sobald es scrollen will.
+  const t = ladeBeginneZug();
+  t.starte();
+  t.liefere('pointermove', { clientX: 100, clientY: 0 });
+  t.liefere('pointercancel');
+  assert.equal(t.fenster.hueZieht, false, 'nach dem Abbruch friert die Liste ein');
+});
+
+test('⚠️ der Zug haengt seine Zuhoerer ans Fenster, nicht an den Griff', () => {
+  /* Das ist die Lehre des Fehlers: der Griff wandert beim Umsortieren mit,
+     das Fenster nicht. Zuhoerer am Griff ueberleben den ersten Tausch nicht. */
+  const fn = schneideFunktion(JS_PUR, 'beginneZug');
+  assert.match(fn, /window\.addEventListener\(\s*'pointermove'/, 'pointermove haengt nicht am Fenster');
+  assert.match(fn, /window\.addEventListener\(\s*'pointerup'/, 'pointerup haengt nicht am Fenster');
+  assert.ok(!/griff\.addEventListener/.test(fn),
+    'Zuhoerer am Griff — die reissen beim ersten Umsortieren ab');
+});
+
+test('⚠️ ein zweiter Finger stoert den laufenden Zug nicht', () => {
+  const t = ladeBeginneZug();
+  t.starte();
+  t.liefere('pointerup', { pointerId: 99 });     // anderer Finger
+  assert.equal(t.fenster.hueZieht, true, 'ein fremder Finger hat den Zug beendet');
+  t.liefere('pointerup', { pointerId: 1 });
+  assert.equal(t.fenster.hueZieht, false);
 });
 
 test('⚠️ zugeklappte Karten strecken sich nicht auf die Zeilenhoehe', () => {
