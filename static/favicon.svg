@@ -1,18 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Hue">
   <defs>
     <linearGradient id="fg-hue" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#ffd98a"/>
-      <stop offset="1" stop-color="#d97e18"/>
+      <stop offset="0" stop-color="#e6d7a8"/>
+      <stop offset="1" stop-color="#d1a51a"/>
     </linearGradient>
     <linearGradient id="fs-hue" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fff" stop-opacity=".30"/>
+      <stop offset="0" stop-color="#fff" stop-opacity=".26"/>
       <stop offset=".55" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
+    <radialGradient id="fk-hue" cx=".42" cy=".38" r=".72">
+      <stop offset="0" stop-color="#ffe0ad"/>
+      <stop offset="1" stop-color="#ff9b22"/>
+    </radialGradient>
   </defs>
   <rect width="64" height="64" rx="15" fill="url(#fg-hue)"/>
   <rect width="64" height="64" rx="15" fill="url(#fs-hue)"/>
-  <g transform="translate(8 8) scale(2)" fill="#fff">
-    <path d="M12 2.5a6.25 6.25 0 0 0-3.6 11.35c.42.3.7.72.8 1.2l.15.7h5.3l.15-.7c.1-.48.38-.9.8-1.2A6.25 6.25 0 0 0 12 2.5zm-2.1 14.55a.85.85 0 0 0-.85.85v.2c0 .9.55 1.7 1.4 2.05v.6c0 .55.45 1 1 1h1.1c.55 0 1-.45 1-1v-.6c.85-.35 1.4-1.15 1.4-2.05v-.2a.85.85 0 0 0-.85-.85H9.9z"/>
-    <circle cx="12" cy="9.2" r="2.2" opacity=".35"/>
+  <g transform="translate(32 32) scale(1) translate(-32 -32)">
+    <circle cx="32" cy="32" r="22" fill="#3c3214"/>
+    <path d="M32.00 21.00L41.53 26.50L41.53 37.50L32.00 43.00L22.47 37.50L22.47 26.50Z" fill="url(#fk-hue)"/>
+    <g stroke="#fff" stroke-opacity=".17" stroke-width="1.6" stroke-linecap="round">
+      <path d="M41.53 26.50L49.48 31.09"/>
+      <path d="M41.53 37.50L41.53 46.68"/>
+      <path d="M32.00 43.00L24.05 47.59"/>
+      <path d="M22.47 37.50L14.52 32.91"/>
+      <path d="M22.47 26.50L22.47 17.32"/>
+      <path d="M32.00 21.00L39.95 16.41"/>
+    </g>
   </g>
 </svg>
