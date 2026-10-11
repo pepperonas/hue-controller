@@ -5,10 +5,14 @@ Aenderung selbst (auch aus der Philips-App, von Schaltern, von Automationen)
 und wir muessen nicht mehr pollen. Der v1-Benutzername gilt in v2 als
 ``hue-application-key``.
 
-TLS: die Bridge spricht nur HTTPS mit einem selbstsignierten Zertifikat, dessen
-Name die Bridge-ID ist, nicht die IP — eine normale Pruefung scheitert also
-immer. Wir sprechen sie im Heimnetz per fester IP an; ``HUE_TLS_VERIFY`` kann
-auf einen CA-Pfad zeigen, wenn jemand die Hue-Root-CA hinterlegen will.
+TLS: das Bridge-Zertifikat lautet auf die Bridge-ID, nicht auf die IP — eine
+normale Pruefung scheitert immer. Statt sie abzuschalten (dann koennte sich
+jemand im Heimnetz als Bridge ausgeben und den Schluessel aus dem Header
+abgreifen; Security-Review 2026-10-11) wird der SHA-256-Fingerabdruck des
+Zertifikats angeheftet: ``HUE_TLS_FINGERPRINT`` in der .env. Alternativ
+``HUE_TLS_VERIFY`` = Pfad zur Hue-Root-CA. Ohne beides: kein Start (fail closed).
+Fingerabdruck auslesen:
+  echo | openssl s_client -connect <bridge>:443 | openssl x509 -noout -fingerprint -sha256
 """
 import json
 import os
@@ -16,6 +20,7 @@ import time
 
 import requests
 import urllib3
+from requests.adapters import HTTPAdapter
 
 TIMEOUT = (3, 5)            # (Verbindung, Lesen) fuer normale Aufrufe
 STREAM_TIMEOUT = (5, 90)    # Event-Stream: die Bridge schickt regelmaessig ": hi"
@@ -25,17 +30,51 @@ class BridgeError(Exception):
     pass
 
 
+class PinnedAdapter(HTTPAdapter):
+    """Prueft statt Name+CA den SHA-256-Fingerabdruck des Zertifikats."""
+
+    def __init__(self, fingerprint, **kw):
+        self.fingerprint = normalize_fingerprint(fingerprint)
+        super().__init__(**kw)
+
+    def init_poolmanager(self, *args, **kw):
+        kw["assert_fingerprint"] = self.fingerprint
+        kw["cert_reqs"] = "CERT_NONE"   # die Kette ist egal — der Abdruck entscheidet
+        return super().init_poolmanager(*args, **kw)
+
+
+def normalize_fingerprint(fp):
+    fp = (fp or "").replace(":", "").replace(" ", "").lower()
+    if len(fp) != 64 or any(c not in "0123456789abcdef" for c in fp):
+        raise BridgeError("HUE_TLS_FINGERPRINT muss ein SHA-256-Abdruck sein (64 Hex-Zeichen)")
+    return fp
+
+
+def tls_config(env=os.environ):
+    """('pin', abdruck) | ('ca', pfad). Ohne beides: Fehler — nie ungeprueft."""
+    fp, ca = env.get("HUE_TLS_FINGERPRINT"), env.get("HUE_TLS_VERIFY")
+    if fp:
+        return "pin", normalize_fingerprint(fp)
+    if ca and os.path.isfile(ca):
+        return "ca", ca
+    raise BridgeError("keine TLS-Pruefung konfiguriert: HUE_TLS_FINGERPRINT oder "
+                      "HUE_TLS_VERIFY (CA-Pfad) in der .env setzen")
+
+
 class Bridge:
-    def __init__(self, ip, key, verify=None, session=None):
+    def __init__(self, ip, key, session=None, env=os.environ):
         self.ip = ip
         self.key = key
         self.base = "https://%s" % ip
-        if verify is None:
-            verify = os.environ.get("HUE_TLS_VERIFY") or False
-        self.verify = verify
-        if verify is False:
-            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.s = session or requests.Session()
+        mode, val = tls_config(env)
+        if mode == "pin":
+            self.s.mount(self.base + "/", PinnedAdapter(val))
+            # die Warnung meldet nur "keine CA-Pruefung" — der Abdruck ist strenger
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            self.verify = False
+        else:
+            self.verify = val
         self.s.headers.update({"hue-application-key": key})
 
     # ------------------------------------------------------------ Ressourcen

@@ -511,3 +511,27 @@ def test_views_carry_v1_ids_for_existing_dashboard_order():
     v = build_view(fixture())
     assert v["rooms"]["R1"]["v1"] == "81" and v["rooms"]["R2"]["v1"] is None
     assert v["lights"]["L2"]["v1"] == "2"
+
+
+# ---------------------------------------------------------------- TLS
+
+def test_bridge_refuses_to_start_without_tls_pinning():
+    import hue_v2
+    with pytest.raises(hue_v2.BridgeError):
+        hue_v2.Bridge("192.0.2.1", "k", env={})
+
+
+def test_bridge_pins_the_certificate_fingerprint():
+    import hue_v2
+    fp = "4A:80:8A:97:42:BF:BC:C4:EF:41:8C:71:64:D1:A5:9C:6A:35:28:5D:6E:15:9D:AF:6B:DE:72:E5:1D:2D:C9:3F"
+    b = hue_v2.Bridge("192.0.2.1", "k", env={"HUE_TLS_FINGERPRINT": fp})
+    ad = b.s.get_adapter("https://192.0.2.1/clip/v2/resource")
+    assert isinstance(ad, hue_v2.PinnedAdapter)
+    assert ad.poolmanager.connection_pool_kw["assert_fingerprint"] == fp.replace(":", "").lower()
+    with pytest.raises(hue_v2.BridgeError):
+        hue_v2.normalize_fingerprint("abc")
+
+
+def test_no_blanket_tls_off_in_source():
+    src = open(os.path.join(os.path.dirname(__file__), "..", "hue_v2.py")).read()
+    assert 'os.environ.get("HUE_TLS_VERIFY") or False' not in src

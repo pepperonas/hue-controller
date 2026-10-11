@@ -81,7 +81,9 @@ ssh raspi5 'sudo systemctl restart hue-controller'   # Jinja-Cache: Neustart nö
 ```
 
 - **Konfiguration:** `.env` mit `HUE_BRIDGE_IP`, `HUE_USERNAME` (Pflicht, kein
-  Standardwert im Code), `DB_*`.
+  Standardwert im Code), `HUE_TLS_FINGERPRINT` (Pflicht: SHA-256 des Bridge-Zertifikats,
+  angeheftet statt abgeschalteter TLS-Prüfung; auslesen mit
+  `echo | openssl s_client -connect <bridge>:443 | openssl x509 -noout -fingerprint -sha256`), `DB_*`.
 - **Automationen:** Regeln liegen in `automations.db` (SQLite, nicht im Repo, in der
   nächtlichen Sicherung von `/home/pi/apps`).
 - **Verpasste Termine:** Fällige Termine während einer Ausfallzeit werden nicht
