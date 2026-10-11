@@ -2,7 +2,7 @@
 
 * ``GET  /api/v2/state``            — komplette Ansicht (Raeume, Lampen, Szenen)
 * ``GET  /api/v2/events``           — Server-Sent Events: ``snapshot``, dann ``delta``,
-                                      ``status``, ``error``; Herzschlag alle 25 s
+                                      ``status``, ``fail``; Herzschlag alle 25 s
 * ``PUT  /api/v2/light/<id>``       — {on, brightness, xy, mirek, transition_ms}
 * ``PUT  /api/v2/room/<id>``        — dasselbe fuer den ganzen Raum (grouped_light)
 * ``POST /api/v2/room/<id>/mood``   — eingebaute Stimmung {mood}
@@ -357,7 +357,9 @@ def init(app, ip, key):
 
     def on_error(rtype, rid, body, err):
         state.note_error(rtype, err)
-        state.publish({"type": "error", "data": {"rtype": rtype, "rid": rid,
+        # "fail", nicht "error": in EventSource kollidiert ein Event namens
+        # "error" mit dem Verbindungsfehler gleichen Namens.
+        state.publish({"type": "fail", "data": {"rtype": rtype, "rid": rid,
                                                  "msg": str(err)[:200], "at": time.time()}})
 
     cq = CommandQueue(lambda t, i, b: bridge.put(t, i, b), on_error=on_error)

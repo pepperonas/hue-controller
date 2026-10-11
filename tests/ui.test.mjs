@@ -22,7 +22,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const HTML = readFileSync(join(HERE, '..', 'public', 'index.html'), 'utf8');
+const HTML = readFileSync(join(HERE, '..', 'public', 'legacy.html'), 'utf8');
 
 const styleBloecke = [...HTML.matchAll(/<style>([\s\S]*?)<\/style>/g)].map(m => m[1]);
 const scriptBloecke = [...HTML.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);

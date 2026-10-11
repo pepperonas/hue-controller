@@ -1,40 +1,17 @@
 {
-  "name": "Hue Smart Lighting Controller",
-  "short_name": "Hue Control",
-  "description": "Philips Hue Steuerung mit Effekten und Monitoring",
-  "start_url": "/",
+  "name": "Hue – Lichtsteuerung",
+  "short_name": "Hue",
+  "description": "Philips Hue: Räume, Szenen, Farbe, Effekte und Automation",
+  "id": "../",
+  "start_url": "../",
+  "scope": "../",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#1a1b21",
-  "theme_color": "#2c2e3b",
-  "icons": [
-    {
-      "src": "/favicon.ico",
-      "sizes": "16x16 32x32 48x48",
-      "type": "image/x-icon",
-      "purpose": "any"
-    },
-    {
-      "src": "/apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/android-chrome-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "categories": ["utilities", "productivity"],
+  "background_color": "#121318",
+  "theme_color": "#121318",
   "lang": "de-DE",
-  "dir": "ltr",
-  "prefer_related_applications": false
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
 }

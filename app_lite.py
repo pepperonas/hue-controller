@@ -571,6 +571,22 @@ def index():
         return render_template('onboarding.html')
     return render_template('index.html')
 
+@app.route('/alt/')
+def legacy_ui():
+    # Bisherige Oberflaeche — bleibt bis zur Abnahme der neuen erreichbar (Rollback).
+    return render_template('legacy.html')
+
+
+@app.route('/sw.js')
+def service_worker():
+    # Der Worker muss NEBEN der Seite liegen, damit sein Scope die App ist;
+    # die alte Registrierung unter static/ hatte den Scope /static/ und
+    # steuerte die Seite nie.
+    resp = send_from_directory('static', 'sw.js', mimetype='application/javascript')
+    resp.headers['Cache-Control'] = 'no-cache'
+    return resp
+
+
 @app.route('/onboarding')
 def onboarding():
     return render_template('onboarding.html')

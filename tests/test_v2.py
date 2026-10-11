@@ -498,3 +498,10 @@ def test_light_view_lists_effects_without_no_effect():
     v = build_view(fixture())["lights"]
     assert v["L1"]["effects"] == ["candle", "fire", "prism"]
     assert v["L4"]["effects"] == ["candle"] and v["L1"]["effect"] == "no_effect"
+
+
+def test_queue_failure_is_published_as_fail_event_not_error():
+    # "error" ist in EventSource der Verbindungsfehler — ein gleichnamiges
+    # Server-Event waere davon nicht zu unterscheiden.
+    src = open(os.path.join(os.path.dirname(__file__), "..", "hue_api_v2.py")).read()
+    assert '"type": "fail"' in src and '"type": "error"' not in src
