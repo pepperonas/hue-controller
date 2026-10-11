@@ -3176,8 +3176,10 @@ def start_music_sync():
                         })
                         
                         # Kurze Pause dann zurück zu normalem Zustand
-                        threading.Timer(0.1, lambda: hue_request(
-                            f'lights/{light_id}/state', 'PUT', {
+                        # lid=light_id bindet JETZT — ohne den Default traf jede
+                        # verzoegerte Rueckstellung die LETZTE Lampe der Schleife.
+                        threading.Timer(0.1, lambda lid=light_id: hue_request(
+                            f'lights/{lid}/state', 'PUT', {
                                 'bri': int(150 * sensitivity),
                                 'transitiontime': 5
                             }

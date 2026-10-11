@@ -35,3 +35,8 @@ def test_v1_list_routes_escape_bridge_names_for_the_legacy_ui():
         assert "jsonify(_escape_names(%s))" % var in CODE, route
     fn = re.search(r"def _escape_names\(items\):.*?return items", SRC, re.S).group(0)
     assert "_html.escape(obj['name'], quote=True)" in fn
+
+
+def test_beat_sync_timer_binds_the_light_id_now():
+    i = CODE.index("threading.Timer(0.1, lambda")
+    assert CODE[i:i + 80].startswith("threading.Timer(0.1, lambda lid=light_id:")
