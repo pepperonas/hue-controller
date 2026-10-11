@@ -17,7 +17,7 @@ from hue_v2 import parse_sse  # noqa: E402
 
 
 def light(lid, dev, name, on, bri, xy=None, mirek=None, color=True, ct=True):
-    l = {"id": lid, "type": "light", "owner": {"rid": dev, "rtype": "device"},
+    l = {"id": lid, "type": "light", "id_v1": "/lights/" + lid[1:], "owner": {"rid": dev, "rtype": "device"},
          "metadata": {"name": name, "archetype": "classic_bulb"},
          "on": {"on": on}, "dimming": {"brightness": bri},
          "effects": {"status": "no_effect",
@@ -43,7 +43,7 @@ def fixture():
             "L5": light("L5", "D5", "Flur Decke", True, 100.0, mirek=250),
         },
         "room": {
-            "R1": {"id": "R1", "type": "room", "metadata": {"name": ".Wohnzimmer", "archetype": "living_room"},
+            "R1": {"id": "R1", "type": "room", "id_v1": "/groups/81", "metadata": {"name": ".Wohnzimmer", "archetype": "living_room"},
                    "children": [{"rid": d, "rtype": "device"} for d in ("D1", "D2", "D3")],
                    "services": [{"rid": "G1", "rtype": "grouped_light"}]},
             "R2": {"id": "R2", "type": "room", "metadata": {"name": "Schlafzimmer", "archetype": "bedroom"},
@@ -505,3 +505,9 @@ def test_queue_failure_is_published_as_fail_event_not_error():
     # Server-Event waere davon nicht zu unterscheiden.
     src = open(os.path.join(os.path.dirname(__file__), "..", "hue_api_v2.py")).read()
     assert '"type": "fail"' in src and '"type": "error"' not in src
+
+
+def test_views_carry_v1_ids_for_existing_dashboard_order():
+    v = build_view(fixture())
+    assert v["rooms"]["R1"]["v1"] == "81" and v["rooms"]["R2"]["v1"] is None
+    assert v["lights"]["L2"]["v1"] == "2"

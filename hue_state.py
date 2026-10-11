@@ -79,6 +79,9 @@ def light_view(l, room_of, reachable):
     owner = (l.get("owner") or {}).get("rid")
     return {
         "id": l["id"],
+        # v1-Kennung ("/lights/18" -> "18"): das Dashboard speichert seine
+        # Sortierung je Geraet unter diesen IDs — so bleibt sie beim Umstieg erhalten.
+        "v1": (l.get("id_v1") or "").rsplit("/", 1)[-1] or None,
         "name": (l.get("metadata") or {}).get("name", "?"),
         "archetype": (l.get("metadata") or {}).get("archetype"),
         "on": on,
@@ -143,6 +146,7 @@ def build_view(res):
                 bri = round(sum(vals) / len(vals), 1) if vals else None
             rooms[rid] = {
                 "id": rid,
+                "v1": (r.get("id_v1") or "").rsplit("/", 1)[-1] or None,
                 "kind": kind,
                 "name": (r.get("metadata") or {}).get("name", "?").lstrip("."),
                 "archetype": (r.get("metadata") or {}).get("archetype"),
