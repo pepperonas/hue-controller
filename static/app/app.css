@@ -170,6 +170,24 @@ dialog.sheet::backdrop { background: rgb(0 0 0 / .5); }
 .errs { margin: 0; padding-left: 1.1rem; font-size: .85rem; display: grid; gap: .3rem; }
 .prose p { line-height: 1.55; margin: 0 0 .7rem; }
 
+/* ---- Automation */
+.rule { display: flex; align-items: center; gap: .75rem; padding: .6rem 0; border-top: 1px solid color-mix(in srgb, var(--sh-outline) 40%, transparent); }
+.rule:first-child { border-top: 0; }
+.rule.off .rule-text { opacity: .65; }
+.rule-ic { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: color-mix(in srgb, var(--sh-primary) 16%, transparent); color: var(--sh-primary); }
+.rule-text { flex: 1; min-width: 0; display: grid; gap: .1rem; }
+.rule-name { font-weight: 700; }
+.rule-sub, .rule-next { font-size: .82rem; color: var(--sh-text2); }
+.rule .sh-icon-btn { min-width: 44px; min-height: 44px; }
+.fld { display: grid; gap: .3rem; }
+.fld-l { font-size: .82rem; font-weight: 650; color: var(--sh-text2); }
+select.field { appearance: auto; }
+.check { display: flex; gap: .55rem; align-items: center; font-size: .9rem; margin: .6rem 0; }
+.check input { width: 20px; height: 20px; accent-color: var(--sh-primary); }
+.grow { flex: 1; }
+.danger-text { color: var(--sh-loud); }
+
 /* ---- Navigation: unten am Handy (4 x 25 %), links ab 900 px */
 .nav {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;

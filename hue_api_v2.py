@@ -132,7 +132,7 @@ def scene_actions(view, room_id):
     return acts
 
 
-def create_blueprint(state, cq, bridge):
+def create_blueprint(state, cq, bridge, automation=None):
     bp = Blueprint("hue_v2", __name__, url_prefix="/api/v2")
 
     def bad(msg, code=400):
@@ -341,7 +341,81 @@ def create_blueprint(state, cq, bridge):
         cq.submit("grouped_light", home, {"on": {"on": on}})
         return jsonify({"ok": True}), 202
 
+    if automation is not None:
+        add_automation_routes(bp, automation, state, bad, body_json)
     return bp
+
+
+RULE_NAME = re.compile(r"^[\w ÄÖÜäöüß.,!?:+()/-]{1,40}$")
+
+
+def add_automation_routes(bp, auto, state, bad, body_json):
+    from hue_automation import Invalid as AInvalid, validate
+
+    def known():
+        return state.view["rooms"], state.view["scenes"]
+
+    @bp.get("/automations")
+    def automations():
+        return jsonify(auto.overview())
+
+    @bp.post("/automations")
+    def add_rule():
+        try:
+            b = body_json()
+            kind, name = b.get("kind"), (b.get("name") or "").strip()
+            if not RULE_NAME.match(name):
+                raise AInvalid("Name: 1–40 Zeichen, nur Buchstaben, Ziffern und .,!?:+()/-")
+            if kind == "motion" and any(r["kind"] == "motion" for r in auto.db.rules()):
+                return bad("es gibt nur einen Bewegungsmelder — bestehende Regel bearbeiten", 409)
+            cfg = validate(kind, b.get("config"), *known())
+        except (Invalid, AInvalid) as e:
+            return bad(str(e))
+        rid = auto.db.add(kind, name, cfg, enabled=b.get("enabled", True) is not False)
+        auto.db.log("Regel angelegt: " + name, rid)
+        return jsonify({"ok": True, "id": rid}), 201
+
+    @bp.put("/automations/<int:rid>")
+    def edit_rule(rid):
+        rule = next((r for r in auto.db.rules() if r["id"] == rid), None)
+        if not rule:
+            return bad("unbekannte Regel", 404)
+        try:
+            b = body_json()
+            f = {}
+            if "name" in b:
+                name = (b.get("name") or "").strip()
+                if not RULE_NAME.match(name):
+                    raise AInvalid("Name: 1–40 Zeichen")
+                f["name"] = name
+            if "enabled" in b:
+                if type(b["enabled"]) is not bool:
+                    raise AInvalid("enabled muss true/false sein")
+                f["enabled"] = b["enabled"]
+            if "config" in b:
+                f["config"] = validate(rule["kind"], b["config"], *known())
+                f["last_fired"] = None
+        except (Invalid, AInvalid) as e:
+            return bad(str(e))
+        auto.db.update(rid, **f)
+        return jsonify({"ok": True})
+
+    @bp.delete("/automations/<int:rid>")
+    def del_rule(rid):
+        if not auto.db.delete(rid):
+            return bad("unbekannte Regel", 404)
+        return jsonify({"ok": True})
+
+    @bp.post("/away")
+    def away():
+        try:
+            b = body_json()
+        except Invalid as e:
+            return bad(str(e))
+        if type(b.get("on")) is not bool or type(b.get("simulate", False)) is not bool:
+            return bad("on/simulate muessen true/false sein")
+        auto.set_away(b["on"], b.get("simulate", False))
+        return jsonify({"ok": True, "away": auto.db.get("away")})
 
 
 def sse(event, data):
@@ -363,8 +437,15 @@ def init(app, ip, key):
                                                  "msg": str(err)[:200], "at": time.time()}})
 
     cq = CommandQueue(lambda t, i, b: bridge.put(t, i, b), on_error=on_error)
-    app.register_blueprint(create_blueprint(state, cq, bridge))
+
+    from hue_automation import Automation, Store, start_pir
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "automations.db")
+    auto = Automation(Store(db_path), state, cq.submit, MOODS)
+
+    app.register_blueprint(create_blueprint(state, cq, bridge, auto))
     state.start()
     cq.start()
-    app.hue_state, app.hue_queue = state, cq
+    auto.start()
+    start_pir(auto)
+    app.hue_state, app.hue_queue, app.hue_automation = state, cq, auto
     return state, cq

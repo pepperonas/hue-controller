@@ -5313,25 +5313,10 @@ if __name__ == '__main__':
         power_logging_thread.start()
         print("⚡ Power logging thread started (5 min interval)")
         
-        # GPIO Manager initialisieren
-        try:
-            app.gpio_manager = GPIOManager(HUE_BRIDGE_IP, HUE_USERNAME, db_pool)
-            app.gpio_manager.start_monitoring()
-            print("🔘 GPIO Manager: Initialized and monitoring started")
-            add_debug_log('success', '🔘 GPIO Manager gestartet')
-        except Exception as e:
-            print(f"⚠️ GPIO Manager: Failed to initialize - {e}")
-            add_debug_log('error', f'❌ GPIO Manager Fehler: {str(e)}')
-            
-        # PIR Motion Sensor Manager initialisieren
-        try:
-            app.pir_manager = PIRManager(HUE_BRIDGE_IP, HUE_USERNAME, db_pool)
-            app.pir_manager.start_monitoring()
-            print("🔍 PIR Manager: Initialized and motion detection started")
-            add_debug_log('success', '🔍 PIR Bewegungsmelder gestartet')
-        except Exception as e:
-            print(f"⚠️ PIR Manager: Failed to initialize - {e}")
-            add_debug_log('error', f'❌ PIR Manager Fehler: {str(e)}')
+        # GPIO-Taster: vom Nutzer gestrichen (2026-10-11). Bewegungsmelder: liegt
+        # jetzt in hue_automation (Regeln dauerhaft, lgpio statt RPi.GPIO — das
+        # lief auf dem Pi 5 nie). Der alte PIRManager darf GPIO 26 NICHT mehr
+        # belegen, sonst bekommt die neue Automation den Pin nicht.
             
     else:
         print("🗄️ Database: Disabled - Running without logging")
@@ -5339,21 +5324,10 @@ if __name__ == '__main__':
         effect_builder = EffectBuilder(None)
         print("🎨 Effect Builder: Initialized (file-based storage)")
         
-        # GPIO Manager ohne Datenbank
-        try:
-            app.gpio_manager = GPIOManager(HUE_BRIDGE_IP, HUE_USERNAME, None)
-            app.gpio_manager.start_monitoring()
-            print("🔘 GPIO Manager: Initialized without database logging")
-        except Exception as e:
-            print(f"⚠️ GPIO Manager: Failed to initialize - {e}")
-            
-        # PIR Manager ohne Datenbank
-        try:
-            app.pir_manager = PIRManager(HUE_BRIDGE_IP, HUE_USERNAME, None)
-            app.pir_manager.start_monitoring()
-            print("🔍 PIR Manager: Initialized without database logging")
-        except Exception as e:
-            print(f"⚠️ PIR Manager: Failed to initialize - {e}")
+        # GPIO-Taster: vom Nutzer gestrichen (2026-10-11). Bewegungsmelder: liegt
+        # jetzt in hue_automation (Regeln dauerhaft, lgpio statt RPi.GPIO — das
+        # lief auf dem Pi 5 nie). Der alte PIRManager darf GPIO 26 NICHT mehr
+        # belegen, sonst bekommt die neue Automation den Pin nicht.
     
     # Debug-System initialisieren
     add_debug_log('info', '🚀 Hue Controller Pro gestartet')

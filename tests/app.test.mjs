@@ -184,3 +184,15 @@ test('Navigation ist kein direktes body-Kind (nav.js setzt dort width:100%)', ()
   const wrapEnd = body.indexOf('</div>', navAt);
   assert.ok(wrapStart > 0 && navAt > wrapStart && wrapEnd > navAt, 'nav muss in .wrap stehen');
 });
+
+test('Automation: Texte fuer Tage und Regeln', async () => {
+  const { daysText, ruleText } = await import('../static/app/views/automation.js');
+  assert.equal(daysText([0, 1, 2, 3, 4]), 'Mo–Fr');
+  assert.equal(daysText([6, 5]), 'Sa–So');
+  assert.equal(daysText([0, 2]), 'Mo, Mi');
+  assert.equal(ruleText({ kind: 'wakeup', config: { days: [0, 1, 2, 3, 4], time: '06:30', duration_min: 30 } }),
+    'Mo–Fr · wach um 06:30 · 30 min sanft heller');
+  assert.equal(ruleText({ kind: 'schedule', config: { days: [0, 1, 2, 3, 4, 5, 6], at: { type: 'sunset', offset: -15 },
+    action: { type: 'mood', mood: 'gemuetlich' } } }, { gemuetlich: 'Gemütlich' }),
+  'täglich · Sonnenuntergang −15 min · Gemütlich');
+});

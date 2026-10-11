@@ -53,3 +53,7 @@ hue-config.json
 CLAUDE.md
 CLAUDE.local.md
 .onboarding_completed
+
+# Laufzeitdaten der Automation
+automations.db
+automations.db-*
