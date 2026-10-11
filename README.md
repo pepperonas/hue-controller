@@ -20,6 +20,12 @@ und speist die Karte „Wohnung“ im Home-Dashboard.
 - **Automation:** Zeitpläne (Uhrzeit oder Sonnenauf-/-untergang ± Minuten,
   Sommerzeit korrekt), Lichtwecker, Bewegungsmelder (PIR an GPIO 26) und
   Abwesenheit mit optionalem „bewohnt wirken“.
+- **Anordnen per Drag-and-drop:** Alle Karten lassen sich ziehen: Räume, Lampen im Raum,
+  Szenen-, Automations-, Energie- und Status-Karten. SortableJS 1.15.6 (MIT) liegt lokal
+  unter `static/vendor/`, ohne CDN. Das Verhalten ist wie in ops und cue: frei schwebende
+  Vorschau, die anderen Karten machen Platz, die Maus startet nach 6 px, Touch nach 180 ms
+  Halten, Auto-Scroll, Alt + Pfeiltasten. Schalter und Regler starten keinen Zug.
+  Die Reihenfolge gilt je Gerät (localStorage `hue-order:*`).
 - **Energie:** Geschätzter Verbrauch (Helligkeit × 9 W je Lampe) mit Verlauf,
   Wochentagen und Monaten aus der MariaDB `hue_monitoring`.
 
