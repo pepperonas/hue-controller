@@ -42,7 +42,8 @@ def load_env():
 load_env()
 
 app = Flask(__name__, template_folder='public')
-CORS(app)
+from hue_api_v2 import CORS_RESOURCES  # noqa: E402
+CORS(app, resources=CORS_RESOURCES)
 
 # Konfiguration mit Umgebungsvariablen
 HUE_BRIDGE_IP = os.getenv('HUE_BRIDGE_IP', '192.168.178.29')

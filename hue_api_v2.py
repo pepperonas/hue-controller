@@ -15,7 +15,9 @@ Schreibende Aufrufe gehen durch die Queue (Koaleszenz + Bridge-Budget) und
 antworten sofort mit 202; das Ergebnis kommt als Event zurueck.
 """
 import json
+import os
 import queue as _queue
+import re
 import time
 
 from flask import Blueprint, Response, jsonify, request, stream_with_context
@@ -25,6 +27,18 @@ from hue_state import HueState
 from hue_v2 import Bridge
 
 HEARTBEAT_S = 25
+# Jede SSE-Verbindung haelt einen waitress-Thread (32). Ohne Deckel koennten
+# offene Verbindungen die ganze App aushungern (Security-Review 2026-10-11).
+MAX_SUBSCRIBERS = 12
+# Schreibende Aufrufe nur von hier. CORS ist in app_lite offen (CORS(app)) — eine
+# fremde Seite im Heimnetz koennte sonst per Browser Licht schalten.
+ALLOWED_ORIGINS = tuple(os.environ.get(
+    "HUE_ALLOWED_ORIGINS",
+    "https://home.celox.io:8443,https://192.168.178.105:8443,https://192.168.178.103:8443,"
+    "http://192.168.178.105:5000,http://localhost:5000,http://127.0.0.1:5000").split(","))
+# Szenennamen landen in fremden Oberflaechen (alte App, Philips-App): nur
+# harmlose Zeichen — keine spitzen Klammern, kein & und keine Anfuehrungszeichen.
+SCENE_NAME = re.compile(r"^[\w ÄÖÜäöüß.,!?:+()/-]{1,32}$")
 MAX_TRANSITION_MS = 3_600_000   # Lichtwecker braucht lange Uebergaenge
 
 # Eingebaute Raum-Stimmungen. Die Bridge hat praktisch keine eigenen Szenen,
@@ -37,6 +51,13 @@ MOODS = {
     "entspannen":    {"label": "Entspannen",    "brightness": 40,  "mirek": 447},
     "nachtlicht":    {"label": "Nachtlicht",    "brightness": 3,   "mirek": 500},
 }
+
+
+# CORS nur fuer die alten v1-Routen (Altbestand, wird in Phase 5 enger). /api/v2
+# bekommt KEINE Freigabe — fremde Seiten koennen weder lesen noch einen
+# Preflight bestehen. Ein Abziehen der Koepfe im Blueprint reicht NICHT: der
+# flask_cors-Hook laeuft danach und setzt sie wieder (per Test belegt).
+CORS_RESOURCES = {r"/api/(?!v2/).*": {"origins": "*"}}
 
 
 class Invalid(ValueError):
@@ -109,6 +130,20 @@ def create_blueprint(state, cq, bridge):
     def bad(msg, code=400):
         return jsonify({"ok": False, "error": msg}), code
 
+    @bp.before_request
+    def guard_writes():
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return None
+        ctype = (request.headers.get("Content-Type") or "").split(";")[0].strip().lower()
+        if ctype != "application/json":
+            # erzwingt beim Browser einen CORS-Preflight — ein Formular-POST kommt nie durch
+            return bad("nur application/json", 415)
+        origin = request.headers.get("Origin")
+        if origin is not None and origin not in ALLOWED_ORIGINS:
+            return bad("fremde Herkunft", 403)
+        return None
+
+
     def body_json():
         data = request.get_json(silent=True)
         if not isinstance(data, dict):
@@ -128,6 +163,8 @@ def create_blueprint(state, cq, bridge):
 
     @bp.get("/events")
     def events():
+        if len(state.subs) >= MAX_SUBSCRIBERS:
+            return bad("zu viele Live-Verbindungen", 503)
         q = state.subscribe()
 
         def gen():
@@ -197,8 +234,8 @@ def create_blueprint(state, cq, bridge):
             name = (body_json().get("name") or "").strip()
         except Invalid as e:
             return bad(str(e))
-        if not 1 <= len(name) <= 32:
-            return bad("Name 1..32 Zeichen")
+        if not SCENE_NAME.match(name):
+            return bad("Name: 1–32 Zeichen, nur Buchstaben, Ziffern, Leerzeichen und .,!?:+()/-")
         try:
             data = bridge.post("scene", {
                 "type": "scene", "metadata": {"name": name},

@@ -337,6 +337,44 @@ def client():
     return c
 
 
+def test_writes_need_json_and_house_origin(client):
+    # Formular-POST einer fremden Seite: kein JSON -> 415, nichts in der Queue
+    assert client.post("/api/v2/all", data="on=false",
+                       content_type="application/x-www-form-urlencoded").status_code == 415
+    assert client.post("/api/v2/scene/S1/recall").status_code == 415
+    r = client.put("/api/v2/light/L1", json={"on": True}, headers={"Origin": "https://evil.example"})
+    assert r.status_code == 403
+    assert client.submitted == []
+    ok = client.put("/api/v2/light/L1", json={"on": True},
+                    headers={"Origin": "https://home.celox.io:8443"})
+    assert ok.status_code == 202
+
+
+def test_v2_answers_carry_no_cors_allow(client):
+    CORS = pytest.importorskip("flask_cors").CORS
+    CORS(client.application, resources=api.CORS_RESOURCES)   # exakt wie app_lite
+    r = client.get("/api/v2/state", headers={"Origin": "https://evil.example"})
+    assert "Access-Control-Allow-Origin" not in r.headers
+
+
+def test_app_lite_uses_the_restricted_cors_config():
+    src = open(os.path.join(os.path.dirname(__file__), "..", "app_lite.py")).read()
+    assert "CORS(app, resources=CORS_RESOURCES)" in src
+    assert "\nCORS(app)\n" not in src
+
+
+def test_live_connections_are_capped(client):
+    for _ in range(api.MAX_SUBSCRIBERS):
+        client.state.subscribe()
+    assert client.get("/api/v2/events").status_code == 503
+
+
+@pytest.mark.parametrize("name", ["<img src=x onerror=alert(1)>", 'a"b', "a&b", "", "x" * 33])
+def test_scene_name_rejects_markup(client, name):
+    r = client.post("/api/v2/room/R1/scene", json={"name": name})
+    assert r.status_code == 400
+
+
 def test_put_light_queues_bridge_body(client):
     r = client.put("/api/v2/light/L1", json={"brightness": 30})
     assert r.status_code == 202
@@ -351,7 +389,7 @@ def test_put_room_targets_its_grouped_light(client):
 def test_invalid_and_unknown_never_reach_the_queue(client):
     assert client.put("/api/v2/light/L1", json={"brightness": 500}).status_code == 400
     assert client.put("/api/v2/light/NOPE", json={"on": True}).status_code == 404
-    assert client.put("/api/v2/room/R1", data="kein json").status_code == 400
+    assert client.put("/api/v2/room/R1", data="kein json").status_code == 415
     assert client.submitted == []
 
 
@@ -369,7 +407,7 @@ def test_all_off_uses_bridge_home(client):
 
 
 def test_scene_recall_is_queued(client):
-    assert client.post("/api/v2/scene/S1/recall").status_code == 202
+    assert client.post("/api/v2/scene/S1/recall", json={}).status_code == 202
     assert client.submitted == [("scene", "S1", {"recall": {"action": "active"}})]
 
 
