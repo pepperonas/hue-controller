@@ -196,3 +196,21 @@ test('Automation: Texte fuer Tage und Regeln', async () => {
     action: { type: 'mood', mood: 'gemuetlich' } } }, { gemuetlich: 'Gemütlich' }),
   'täglich · Sonnenuntergang −15 min · Gemütlich');
 });
+
+test('Dialoge und Toasts haengen NICHT direkt an body (nav.js setzt dort width:100%)', () => {
+  const code = strip(readFileSync(join(APP, 'dom.js'), 'utf8'));
+  assert.ok(!/document\.body\.append/.test(code), 'Ueberlagerung direkt an body');
+  assert.match(code, /overlayHost\(\)\.append\(dlg\)/);
+});
+
+test('replaceChildren bekommt nie null (wuerde als Text "null" erscheinen)', () => {
+  for (const f of appFiles()) {
+    const code = strip(readFileSync(f, 'utf8'));
+    for (const m of code.matchAll(/replaceChildren\(([\s\S]*?)\);\n/g)) {
+      const arg = m[1];
+      if (/: null\s*$|: null\s*,/.test(arg)) {
+        assert.match(arg, /\.filter\(Boolean\)/, f + ': null kann in replaceChildren landen');
+      }
+    }
+  }
+});

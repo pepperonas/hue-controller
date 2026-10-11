@@ -55,12 +55,20 @@ export function shSlider(label, value, { min = 1, max = 100, step = 1, onStart, 
   return el;
 }
 
+/* Ueberlagerungen (Dialog, Toast) NIE direkt an <body> haengen: nav.js gibt
+   jedem direkten body-Kind width:100% (Sticky-Footer-Regel, durch die IDs in
+   ihren :not() spezifischer als jede Klasse) — der Dialog wurde am Desktop
+   bildschirmbreit (Nutzerbefund 2026-10-11, dieselbe Falle wie die Leiste). */
+export function overlayHost() {
+  return document.querySelector('.wrap') || document.body;
+}
+
 let toastTimer = 0;
 export function toast(text, kind = '') {
   let t = document.getElementById('toast');
   if (!t) {
     t = h('div', { id: 'toast', role: 'status', 'aria-live': 'polite' });
-    document.body.append(t);
+    overlayHost().append(t);
   }
   t.textContent = text;
   t.className = 'show ' + kind;
@@ -74,7 +82,7 @@ export function sheet(title, build, onClose) {
   const closeBtn = h('button', { class: 'sh-icon-btn sheet-x', type: 'button', 'aria-label': 'Schließen' }, icon('close'));
   const head = h('div', { class: 'sheet-head' }, h('h2', { class: 'sheet-title', text: title }), closeBtn);
   const dlg = h('dialog', { class: 'sheet', 'aria-label': title }, h('div', { class: 'sheet-grip', 'aria-hidden': 'true' }), head, body);
-  document.body.append(dlg);
+  overlayHost().append(dlg);
   const close = () => dlg.close();
   closeBtn.addEventListener('click', close);
   dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });

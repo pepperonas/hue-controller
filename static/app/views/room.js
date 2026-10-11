@@ -110,10 +110,12 @@ export function openRoom(store, roomId) {
     const effRow = h('div', { class: 'chips' });
     function renderEffects() {
       const running = new Set(store.lightsOf(roomId).map((l) => l.effect).filter((e) => e && e !== 'no_effect'));
-      effRow.replaceChildren(
+      // replaceChildren schreibt null als TEXT "null" — Leeres vorher rausfiltern
+      effRow.replaceChildren(...[
         ...Object.entries(effectNames).filter(([k]) => available.has(k)).map(([k, label]) =>
           chip(label, { active: running.has(k), onclick: () => run(api.post('/v2/room/' + roomId + '/effect', { effect: k }), label) })),
-        running.size ? chip('Effekt aus', { onclick: () => run(api.post('/v2/room/' + roomId + '/effect', { effect: 'none' }), 'Effekt') }) : null);
+        running.size ? chip('Effekt aus', { onclick: () => run(api.post('/v2/room/' + roomId + '/effect', { effect: 'none' }), 'Effekt') }) : null,
+      ].filter(Boolean));
     }
     const strobe = h('div', { class: 'chips' },
       ...[5, 15, 30].map((s) => chip(`Strobo ${s} s`, { onclick: async () => {
