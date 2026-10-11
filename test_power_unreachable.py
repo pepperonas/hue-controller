@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """
 Test script to verify power consumption calculation includes unreachable lights
@@ -7,7 +8,7 @@ import json
 
 # Configuration
 HUE_BRIDGE_IP = '192.168.178.29'
-HUE_USERNAME = '***HUE-KEY-ENTFERNT***'
+HUE_USERNAME = os.environ['HUE_USERNAME']
 BASE_URL = f'http://{HUE_BRIDGE_IP}/api/{HUE_USERNAME}'
 
 def get_lights():

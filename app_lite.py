@@ -46,7 +46,12 @@ CORS(app)
 
 # Konfiguration mit Umgebungsvariablen
 HUE_BRIDGE_IP = os.getenv('HUE_BRIDGE_IP', '192.168.178.29')
-HUE_USERNAME = os.getenv('HUE_USERNAME', '***HUE-KEY-ENTFERNT***')
+# Der Bridge-Schluessel kommt AUSSCHLIESSLICH aus der Umgebung (.env) — bis
+# 2026-10-11 stand er als Standardwert hier im (oeffentlichen) Repo.
+HUE_USERNAME = os.getenv('HUE_USERNAME', '')
+if not HUE_USERNAME:
+    print('⚠️  HUE_USERNAME fehlt in der Umgebung (.env) — ohne Bridge-Schluessel '
+          'laeuft nur das Onboarding.', flush=True)
 
 # MySQL Konfiguration
 MYSQL_CONFIG = {
