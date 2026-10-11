@@ -27,3 +27,11 @@ def test_bridge_key_has_no_default():
 def test_monthly_cost_converts_decimal_before_multiplying():
     i = CODE.index("month['cost_eur'] = round(")
     assert "month['total_kwh'] = float(" in CODE[i - 200:i]
+
+
+def test_v1_list_routes_escape_bridge_names_for_the_legacy_ui():
+    for route, var in (("lights", "lights"), ("groups", "hue_request('groups')"),
+                       ("scenes", "hue_request('scenes')"), ("sensors", "hue_request('sensors')")):
+        assert "jsonify(_escape_names(%s))" % var in CODE, route
+    fn = re.search(r"def _escape_names\(items\):.*?return items", SRC, re.S).group(0)
+    assert "_html.escape(obj['name'], quote=True)" in fn

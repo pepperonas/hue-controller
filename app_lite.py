@@ -639,6 +639,20 @@ def site_webmanifest():
     }
     return jsonify(manifest)
 
+def _escape_names(items):
+    """Namen fuer die ALTE Oberflaeche (/alt/) maskieren: sie setzt Lampen-,
+    Gruppen-, Szenen- und Sensornamen an ueber zehn Stellen per innerHTML, und
+    diese Namen kann jeder mit Zugriff auf die Philips-App frei waehlen
+    (Security-Review 2026-10-11). Die neue App liest /api/v2 und setzt Namen
+    nur per textContent. Faellt mit der alten Oberflaeche weg."""
+    import html as _html
+    if isinstance(items, dict):
+        for obj in items.values():
+            if isinstance(obj, dict) and isinstance(obj.get('name'), str):
+                obj['name'] = _html.escape(obj['name'], quote=True)
+    return items
+
+
 @app.route('/api/lights', methods=['GET'])
 @smart_error_handler('lights_list')
 def get_lights():
@@ -652,7 +666,7 @@ def get_lights():
         else:
             light['state']['on_display'] = light['state'].get('on', False)
     
-    return jsonify(lights)
+    return jsonify(_escape_names(lights))
 
 @app.route('/api/lights/<light_id>/state', methods=['PUT'])
 @smart_error_handler('light_control')
@@ -673,7 +687,7 @@ def set_light_state(light_id):
 @app.route('/api/groups', methods=['GET'])
 @smart_error_handler('groups_list')
 def get_groups():
-    return jsonify(hue_request('groups'))
+    return jsonify(_escape_names(hue_request('groups')))
 
 @app.route('/api/groups/<group_id>/action', methods=['PUT'])
 @smart_error_handler('group_control')
@@ -694,7 +708,7 @@ def set_group_action(group_id):
 # === SZENEN ===
 @app.route('/api/scenes', methods=['GET'])
 def get_scenes():
-    return jsonify(hue_request('scenes'))
+    return jsonify(_escape_names(hue_request('scenes')))
 
 @app.route('/api/scenes/<scene_id>/recall', methods=['PUT'])
 def recall_scene(scene_id):
@@ -2759,7 +2773,7 @@ def get_active_timers():
 # === SENSOREN & SCHALTER ===
 @app.route('/api/sensors', methods=['GET'])
 def get_sensors():
-    return jsonify(hue_request('sensors'))
+    return jsonify(_escape_names(hue_request('sensors')))
 
 @app.route('/api/sensors/<sensor_id>/config', methods=['PUT'])
 def configure_sensor(sensor_id):
