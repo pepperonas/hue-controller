@@ -9,6 +9,7 @@ mysql-connector-python==9.6.0
 PyMySQL==1.2.0
 python-dotenv
 gpiozero==2.0.1             # PIR auf GPIO 26
+lgpio                       # Pin-Fabrik fuer gpiozero — RPi.GPIO laeuft auf dem Pi 5 nicht
 numpy==2.4.2                # Audio-/Effekt-Funktionen
 scipy==1.17.1
 PyAudio==0.2.14
