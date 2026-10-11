@@ -5310,9 +5310,24 @@ if __name__ == '__main__':
     add_debug_log('info', f'📡 Bridge IP: {HUE_BRIDGE_IP}')
     add_debug_log('success', '🎨 Effect Builder initialisiert')
     
+    # Neue Steuerung (2026-10-11): API v2 + Event-Stream + Befehls-Queue.
+    try:
+        import hue_api_v2
+        if hue_api_v2.init(app, HUE_BRIDGE_IP, HUE_USERNAME):
+            print("🔄 Hue v2: Zustand + Event-Stream + Queue gestartet (/api/v2)")
+    except Exception as e:
+        print(f"⚠️ Hue v2: Start fehlgeschlagen - {e}")
+
     print("🌐 Starting server...")
     add_debug_log('info', '🌐 Server wird gestartet...')
-    
+
     port = int(os.getenv('FLASK_PORT', 5000))
     debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
-    app.run(host='0.0.0.0', port=port, debug=debug)
+    try:
+        # waitress statt Werkzeug-Dev-Server: mehrere SSE-Verbindungen halten je
+        # einen Thread, dafuer ist ein echter WSGI-Server da.
+        from waitress import serve
+        print(f"🍽️ waitress auf :{port}")
+        serve(app, host='0.0.0.0', port=port, threads=32, channel_timeout=120)
+    except ImportError:
+        app.run(host='0.0.0.0', port=port, debug=debug, threaded=True)
