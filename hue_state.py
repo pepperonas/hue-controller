@@ -95,6 +95,10 @@ def light_view(l, room_of, reachable):
         "hex": shown,
         "room": room_of.get(owner),
         "reachable": reachable.get(owner, True),
+        # eingebaute Bridge-Effekte (laufen in der Lampe, keine Funk-Last)
+        "effects": [e for e in (l.get("effects") or {}).get("effect_values", []) if e != "no_effect"],
+        "effect": ((l.get("effects") or {}).get("status") or "no_effect"),
+        "signals": [x for x in (l.get("signaling") or {}).get("signal_values", []) if x != "no_signal"],
     }
 
 
@@ -226,9 +230,14 @@ class HueState:
         self._stop = threading.Event()
 
     # Abonnenten (SSE) ------------------------------------------------------
-    def subscribe(self):
+    def subscribe(self, limit=None):
+        """Neuer Abonnent; mit ``limit`` atomar gedeckelt (None = voll). Pruefen
+        und Eintragen unter EINER Sperre — getrennt liessen sich gleichzeitige
+        Anfragen am Deckel vorbeischieben (Security-Review 2026-10-11)."""
         q = queue.Queue(maxsize=500)
         with self.lock:
+            if limit is not None and len(self.subs) >= limit:
+                return None
             self.subs.append(q)
         return q
 

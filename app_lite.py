@@ -235,12 +235,28 @@ def emergency_strobe_stop():
     add_debug_log('warning', '🚨 Emergency strobo stop executed')
 
 # === DATENBANK FUNKTIONEN ===
+class ConnectionFactory:
+    """Ersatz fuer MySQLConnectionPool: ``get_connection()`` liefert je Aufruf eine
+    eigene Verbindung (ohne Pool-Schluessel). ``close()`` schliesst sie wirklich."""
+
+    def __init__(self, config):
+        self.config = {k: v for k, v in config.items() if not k.startswith('pool_')}
+
+    def get_connection(self):
+        return mysql.connector.connect(connection_timeout=5, **self.config)
+
+
 def init_db():
     """Initialisiere Datenbankverbindung und erstelle Tabellen"""
     global db_pool
     try:
-        # Connection Pool erstellen
-        db_pool = mysql.connector.pooling.MySQLConnectionPool(**MYSQL_CONFIG)
+        # Statt eines Pools (Groesse 2) eine Fabrik mit derselben Schnittstelle:
+        # 23 Aufrufstellen schliessen ihre Verbindung nur im Erfolgsfall — jede
+        # Ausnahme liess eine belegt zurueck, zwei davon und JEDE Abfrage
+        # scheiterte mit "pool exhausted" (live gesehen 2026-10-11). Eine
+        # frische Verbindung je Aufruf stirbt mit ihrem Objekt; MariaDB laeuft
+        # lokal, der Aufbau kostet Millisekunden.
+        db_pool = ConnectionFactory(MYSQL_CONFIG)
         
         # Tabellen erstellen falls nicht vorhanden
         conn = db_pool.get_connection()
@@ -3413,6 +3429,9 @@ def get_power_monthly():
         
         # Kostenberechnung pro Monat
         for month in monthly_data:
+            # SUM() liefert Decimal — Decimal * float wirft (bisher von der
+            # Pool-Erschoepfung verdeckt, die jede Abfrage vorher scheitern liess).
+            month['total_kwh'] = float(month['total_kwh'] or 0)
             month['cost_eur'] = round(month['total_kwh'] * 0.30, 2)
         
         cursor.close()

@@ -24,6 +24,14 @@ def _make_mock(name, **attrs):
     return m
 
 
+# Alles, was hier durch Attrappen ersetzt wird, merken — am Dateiende wird es
+# zurueckgestellt. Sonst bekamen spaeter gesammelte Testdateien (test_v2.py)
+# ein MagicMock statt Flask/requests und schlugen nur in der Gesamtsuite fehl.
+_STUBBED = ["flask", "flask_socketio", "flask_cors", "mysql", "mysql.connector",
+            "mysql.connector.pooling", "pymysql", "pyaudio", "scipy", "scipy.signal",
+            "scipy.fft", "requests", "dotenv", "python_dotenv", "gpiozero", "RPi", "RPi.GPIO"]
+_ORIGINAL = {k: sys.modules.get(k) for k in _STUBBED}
+
 # Flask and its ecosystem
 flask_mock = _make_mock("flask")
 flask_mock.Flask = MagicMock(return_value=MagicMock())
@@ -717,3 +725,13 @@ class TestCategorizeError:
         err = Exception("thread error occurred")
         cat = self.handler.categorize_error(err, context="effect playback")
         assert cat == "effect_system"
+
+
+# ---------------------------------------------------------------------------
+# Attrappen wieder entfernen (die geladenen Module behalten ihre Referenzen)
+# ---------------------------------------------------------------------------
+for _k, _v in _ORIGINAL.items():
+    if _v is None:
+        sys.modules.pop(_k, None)
+    else:
+        sys.modules[_k] = _v

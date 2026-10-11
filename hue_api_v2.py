@@ -60,6 +60,14 @@ MOODS = {
 CORS_RESOURCES = {r"/api/(?!v2/).*": {"origins": "*"}}
 
 
+EFFECT_LABELS = {
+    "candle": "Kerze", "fire": "Feuer", "prism": "Prisma", "sparkle": "Funkeln",
+    "opal": "Opal", "glisten": "Glitzern", "underwater": "Unterwasser",
+    "cosmos": "Kosmos", "sunbeam": "Sonnenstrahl", "enchant": "Zauber",
+}
+MAX_SIGNAL_MS = 60_000
+
+
 class Invalid(ValueError):
     pass
 
@@ -154,6 +162,7 @@ def create_blueprint(state, cq, bridge):
     def get_state():
         v = state.snapshot()
         v["moods"] = {k: m["label"] for k, m in MOODS.items()}
+        v["effects"] = EFFECT_LABELS
         v["status"] = state.status()
         return jsonify(v)
 
@@ -163,14 +172,15 @@ def create_blueprint(state, cq, bridge):
 
     @bp.get("/events")
     def events():
-        if len(state.subs) >= MAX_SUBSCRIBERS:
+        q = state.subscribe(limit=MAX_SUBSCRIBERS)
+        if q is None:
             return bad("zu viele Live-Verbindungen", 503)
-        q = state.subscribe()
 
         def gen():
             try:
                 snap = state.snapshot()
                 snap["moods"] = {k: m["label"] for k, m in MOODS.items()}
+                snap["effects"] = EFFECT_LABELS
                 yield sse("snapshot", snap)
                 yield sse("status", state.status())
                 while True:
@@ -245,6 +255,70 @@ def create_blueprint(state, cq, bridge):
             state.note_error("scene", e)
             return bad("Bridge: %s" % e, 502)
         return jsonify({"ok": True, "id": (data[0] if data else {}).get("rid")}), 201
+
+    @bp.post("/room/<rid>/effect")
+    def room_effect(rid):
+        """Eingebauter Effekt auf alle Lampen des Raums, die ihn koennen.
+        ``none`` beendet ihn. Lampen ohne den Effekt bleiben unberuehrt."""
+        view = state.view
+        room = view["rooms"].get(rid)
+        if not room:
+            return bad("unbekannter Raum", 404)
+        try:
+            eff = body_json().get("effect")
+        except Invalid as e:
+            return bad(str(e))
+        if eff != "none" and eff not in EFFECT_LABELS:
+            return bad("unbekannter Effekt")
+        hit = 0
+        for lid in room["lights"]:
+            l = view["lights"][lid]
+            if eff == "none":
+                if l.get("effect", "no_effect") != "no_effect":
+                    cq.submit("light", lid, {"effects": {"effect": "no_effect"}})
+                    hit += 1
+            elif eff in l.get("effects", []):
+                cq.submit("light", lid, {"on": {"on": True}, "effects": {"effect": eff}})
+                hit += 1
+        return jsonify({"ok": True, "lights": hit}), 202
+
+    @bp.post("/room/<rid>/signal")
+    def room_signal(rid):
+        """Strobo ueber das eingebaute Signaling der Lampen: blinkt in der Lampe
+        selbst (nicht per Befehlsflut), endet nach ``duration_ms`` von allein."""
+        view = state.view
+        room = view["rooms"].get(rid)
+        if not room:
+            return bad("unbekannter Raum", 404)
+        try:
+            b = body_json()
+        except Invalid as e:
+            return bad(str(e))
+        dur = b.get("duration_ms", 10_000)
+        if type(dur) is not int or not 0 <= dur <= MAX_SIGNAL_MS:
+            return bad("duration_ms 0..%d" % MAX_SIGNAL_MS)
+        xy = b.get("xy")
+        if xy is not None:
+            try:
+                xy = {"x": float(xy["x"]), "y": float(xy["y"])}
+            except (TypeError, KeyError, ValueError):
+                return bad("xy braucht x und y")
+            if not (0 <= xy["x"] <= 1 and 0 < xy["y"] <= 1):
+                return bad("xy ausserhalb 0..1")
+        hit = 0
+        for lid in room["lights"]:
+            sig = view["lights"][lid].get("signals", [])
+            if dur == 0:
+                body = {"signaling": {"signal": "no_signal"}}
+            elif xy and "on_off_color" in sig:
+                body = {"signaling": {"signal": "on_off_color", "duration": dur, "colors": [{"xy": xy}]}}
+            elif "on_off" in sig:
+                body = {"signaling": {"signal": "on_off", "duration": dur}}
+            else:
+                continue
+            cq.submit("light", lid, body)
+            hit += 1
+        return jsonify({"ok": True, "lights": hit}), 202
 
     @bp.post("/scene/<sid>/recall")
     def recall(sid):

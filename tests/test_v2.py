@@ -19,7 +19,10 @@ from hue_v2 import parse_sse  # noqa: E402
 def light(lid, dev, name, on, bri, xy=None, mirek=None, color=True, ct=True):
     l = {"id": lid, "type": "light", "owner": {"rid": dev, "rtype": "device"},
          "metadata": {"name": name, "archetype": "classic_bulb"},
-         "on": {"on": on}, "dimming": {"brightness": bri}}
+         "on": {"on": on}, "dimming": {"brightness": bri},
+         "effects": {"status": "no_effect",
+                     "effect_values": ["no_effect", "candle"] + (["fire", "prism"] if color else [])},
+         "signaling": {"signal_values": ["no_signal", "on_off"] + (["on_off_color"] if color else [])}}
     if color:
         l["color"] = {"xy": xy or {"x": 0.45, "y": 0.41},
                       "gamut": {"red": {"x": .69, "y": .31}, "green": {"x": .17, "y": .7},
@@ -363,6 +366,24 @@ def test_app_lite_uses_the_restricted_cors_config():
     assert "\nCORS(app)\n" not in src
 
 
+def test_cap_holds_under_concurrent_subscribe():
+    st = HueState(FakeBridge(fixture()))
+    got = []
+    barrier = threading.Barrier(40)
+
+    def grab():
+        barrier.wait()
+        got.append(st.subscribe(limit=12))
+
+    ts = [threading.Thread(target=grab) for _ in range(40)]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    assert sum(q is not None for q in got) == 12
+    assert len(st.subs) == 12
+
+
 def test_live_connections_are_capped(client):
     for _ in range(api.MAX_SUBSCRIBERS):
         client.state.subscribe()
@@ -435,3 +456,45 @@ def test_scene_actions_capture_current_state():
     assert acts["L1"]["color_temperature"] == {"mirek": 366}
     assert acts["L2"]["color"]["xy"] == {"x": .6, "y": .3}
     assert acts["L3"] == {"on": {"on": False}}
+
+
+# ---------------------------------------------------------------- Effekte
+
+def test_effect_only_hits_lights_that_support_it(client):
+    r = client.post("/api/v2/room/R1/effect", json={"effect": "fire"})
+    assert r.status_code == 202 and r.get_json()["lights"] == 3
+    assert all(b["effects"] == {"effect": "fire"} for t, i, b in client.submitted)
+    client.submitted.clear()
+    # Schlafzimmer: L4 kann nur Kerze
+    assert client.post("/api/v2/room/R2/effect", json={"effect": "fire"}).get_json()["lights"] == 0
+    assert client.post("/api/v2/room/R2/effect", json={"effect": "candle"}).get_json()["lights"] == 1
+    assert client.post("/api/v2/room/R1/effect", json={"effect": "rm -rf"}).status_code == 400
+
+
+def test_effect_none_stops_only_running_ones(client):
+    client.state.view["lights"]["L2"]["effect"] = "fire"
+    client.post("/api/v2/room/R1/effect", json={"effect": "none"})
+    assert client.submitted == [("light", "L2", {"effects": {"effect": "no_effect"}})]
+
+
+def test_strobe_uses_native_signaling_with_colour_where_possible(client):
+    r = client.post("/api/v2/room/R2/signal", json={"duration_ms": 5000, "xy": {"x": .6, "y": .3}})
+    assert r.status_code == 202
+    # L4 hat kein on_off_color -> faellt auf on_off zurueck
+    assert client.submitted == [("light", "L4", {"signaling": {"signal": "on_off", "duration": 5000}})]
+    client.submitted.clear()
+    client.post("/api/v2/room/R1/signal", json={"duration_ms": 5000, "xy": {"x": .6, "y": .3}})
+    assert client.submitted[0][2]["signaling"]["signal"] == "on_off_color"
+
+
+def test_strobe_limits(client):
+    assert client.post("/api/v2/room/R1/signal", json={"duration_ms": 999_999}).status_code == 400
+    assert client.post("/api/v2/room/R1/signal", json={"duration_ms": "5"}).status_code == 400
+    client.post("/api/v2/room/R1/signal", json={"duration_ms": 0})
+    assert all(b == {"signaling": {"signal": "no_signal"}} for t, i, b in client.submitted)
+
+
+def test_light_view_lists_effects_without_no_effect():
+    v = build_view(fixture())["lights"]
+    assert v["L1"]["effects"] == ["candle", "fire", "prism"]
+    assert v["L4"]["effects"] == ["candle"] and v["L1"]["effect"] == "no_effect"
