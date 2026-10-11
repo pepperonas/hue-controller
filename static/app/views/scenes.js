@@ -1,7 +1,8 @@
 // Szenen: alle Raeume mit ihren Stimmungen und Szenen auf einen Blick.
 import { h, toast } from '../dom.js';
 import { api } from '../api.js';
-import { orderRooms } from './home.js';
+import { orderRooms, roomOrder } from './home.js';
+import { makeSortable, isDragging } from '../sortable.js';
 
 const FAV_KEY = 'hue-scene-favs';
 const favs = () => { try { return new Set(JSON.parse(localStorage.getItem(FAV_KEY)) || []); } catch (e) { return new Set(); } };
@@ -16,8 +17,10 @@ export function scenesView(store) {
   }
 
   function render() {
+    if (isDragging()) return;
     const f = favs();
-    const rooms = orderRooms(store.list('rooms').filter((r) => r.lights.length && r.kind === 'room'), []);
+    // dieselbe Raumfolge wie auf "Zuhause" — ein Raum steht ueberall an seinem Platz
+    const rooms = orderRooms(store.list('rooms').filter((r) => r.lights.length && r.kind === 'room'), roomOrder());
     const favScenes = store.list('scenes').filter((s) => f.has(s.id));
     const blocks = [];
     if (favScenes.length) {
@@ -26,7 +29,7 @@ export function scenesView(store) {
     }
     for (const r of rooms) {
       const scenes = store.scenesOf(r.id).sort((a, b) => a.name.localeCompare(b.name, 'de'));
-      blocks.push(h('section', { class: 'card' },
+      blocks.push(h('section', { class: 'card sortable-card', 'data-sort-id': r.id },
         h('h2', { class: 'card-title', text: r.name }),
         h('div', { class: 'chips' },
           Object.entries(store.raw.moods || {}).map(([k, label]) =>
@@ -49,6 +52,7 @@ export function scenesView(store) {
         dots.length ? h('span', { class: 'chip-dots', 'aria-hidden': 'true' }, dots) : null, s.name), star);
   }
 
+  makeSortable(list, { key: 'rooms', draggable: '.sortable-card' });
   store.subscribe((c) => { if (c.all || c.scenes) render(); });
   const sec = h('section', { class: 'view', id: 'view-szenen', 'aria-labelledby': 'h-szenen' },
     h('h1', { id: 'h-szenen', class: 'view-title', text: 'Szenen' }),

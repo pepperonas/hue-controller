@@ -2,6 +2,7 @@
 import { h } from '../dom.js';
 import { api } from '../api.js';
 import { areaChart, barChart } from '../chart.js';
+import { makeSortable, applyOrder } from '../sortable.js';
 
 const DAYS = { Monday: 'Mo', Tuesday: 'Di', Wednesday: 'Mi', Thursday: 'Do', Friday: 'Fr', Saturday: 'Sa', Sunday: 'So' };
 const DAY_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -60,12 +61,14 @@ function energy() {
   }
 
   const el = h('div', { class: 'stack' },
-    h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Jetzt' }), now,
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'now' }, h('h2', { class: 'card-title', text: 'Jetzt' }), now,
       h('p', { class: 'muted small', text: 'Schätzung aus Helligkeit × 9 W je Lampe — kein Messgerät.' })),
-    h('section', { class: 'card' }, h('div', { class: 'card-head' }, h('h2', { class: 'card-title', text: 'Leistung' }), pills), chartBox,
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'power' }, h('div', { class: 'card-head' }, h('h2', { class: 'card-title', text: 'Leistung' }), pills), chartBox,
       h('h3', { class: 'sec-title', text: 'Größte Verbraucher' }), top),
-    h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Je Wochentag' }), weekdays),
-    h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Je Monat' }), months));
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'weekdays' }, h('h2', { class: 'card-title', text: 'Je Wochentag' }), weekdays),
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'months' }, h('h2', { class: 'card-title', text: 'Je Monat' }), months));
+  applyOrder(el, 'energy-cards', '.sortable-card');
+  makeSortable(el, { key: 'energy-cards', draggable: '.sortable-card' });
   el.load = () => { loadNow(); loadDetail(); loadWeekly(); loadMonthly(); };
   return el;
 }
@@ -105,10 +108,12 @@ function status(store) {
   }
   const errs = h('ul', { class: 'errs' });
   const el = h('div', { class: 'stack' },
-    h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Verbindung' }), box),
-    h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Befehls-Warteschlange' }), q,
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'link' }, h('h2', { class: 'card-title', text: 'Verbindung' }), box),
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'queue' }, h('h2', { class: 'card-title', text: 'Befehls-Warteschlange' }), q,
       h('p', { class: 'muted small', text: 'Die Bridge verträgt etwa 10 Befehle pro Sekunde. Beim Ziehen eines Reglers wird nur der jeweils letzte Wert gesendet.' })),
-    h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Letzte Fehler' }), errs));
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'errors' }, h('h2', { class: 'card-title', text: 'Letzte Fehler' }), errs));
+  applyOrder(el, 'status-cards', '.sortable-card');
+  makeSortable(el, { key: 'status-cards', draggable: '.sortable-card' });
   el.load = load;
   return el;
 }

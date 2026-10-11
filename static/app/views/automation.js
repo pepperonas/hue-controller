@@ -2,6 +2,7 @@
 import { h, icon, shSwitch, sheet, toast, confirmSheet } from '../dom.js';
 import { api } from '../api.js';
 import { orderRooms } from './home.js';
+import { makeSortable, applyOrder, isDragging, orderBy, loadOrder } from '../sortable.js';
 
 const DAY_NAMES = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const ACTIONS = { on: 'Einschalten', off: 'Ausschalten', brightness: 'Helligkeit', mood: 'Stimmung', scene: 'Szene' };
@@ -54,6 +55,7 @@ export function automationView(store) {
   function rooms() { return orderRooms(store.list('rooms').filter((r) => r.kind === 'room' && r.lights.length), []); }
 
   function render() {
+    if (isDragging()) return;
     // Abwesenheit
     const aw = data.away || {};
     const sim = h('label', { class: 'check' }, h('input', { type: 'checkbox', checked: !!aw.simulate, onchange: (e) => setAway(!!aw.on, e.target.checked) }),
@@ -72,7 +74,7 @@ export function automationView(store) {
       pir ? ruleRow(pir) : h('button', { class: 'sh-btn tonal', type: 'button', onclick: () => edit('motion') }, icon('plus'), 'Einrichten'));
 
     // Regeln
-    const rules = data.rules.filter((r) => r.kind !== 'motion');
+    const rules = orderBy(data.rules.filter((r) => r.kind !== 'motion'), loadOrder('rules'), (r) => String(r.id));
     list.replaceChildren(...(rules.length ? rules.map(ruleRow)
       : [h('p', { class: 'muted', text: 'Noch keine Zeitpläne oder Lichtwecker.' })]));
     logList.replaceChildren(...(data.log.length ? data.log.slice(0, 15).map((l) => h('li', null,
@@ -82,7 +84,7 @@ export function automationView(store) {
 
   function ruleRow(r) {
     const kindIcon = r.kind === 'wakeup' ? 'sunrise' : r.kind === 'motion' ? 'target' : 'clock';
-    return h('div', { class: 'rule' + (r.enabled ? '' : ' off') },
+    return h('div', { class: 'rule' + (r.enabled ? '' : ' off'), 'data-sort-id': String(r.id) },
       h('span', { class: 'rule-ic' }, icon(kindIcon)),
       h('div', { class: 'rule-text' },
         h('span', { class: 'rule-name', text: r.name + ' · ' + r.room_name }),
@@ -196,17 +198,21 @@ export function automationView(store) {
     });
   }
 
-  const sec = h('section', { class: 'view', id: 'view-automation', 'aria-labelledby': 'h-auto' },
-    h('h1', { id: 'h-auto', class: 'view-title', text: 'Automation' }),
-    h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Abwesenheit' }), awayBox),
-    h('section', { class: 'card' },
+  const cards = h('div', { class: 'stack' },
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'away' }, h('h2', { class: 'card-title', text: 'Abwesenheit' }), awayBox),
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'rules' },
       h('div', { class: 'card-head' }, h('h2', { class: 'card-title', text: 'Zeitpläne & Lichtwecker' }),
         h('div', { class: 'row' },
           h('button', { class: 'sh-btn tonal small', type: 'button', onclick: () => edit('schedule') }, icon('clock'), 'Zeitplan'),
           h('button', { class: 'sh-btn tonal small', type: 'button', onclick: () => edit('wakeup') }, icon('sunrise'), 'Lichtwecker'))),
       list),
-    h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Bewegungsmelder' }), pirBox),
-    h('section', { class: 'card' }, h('h2', { class: 'card-title', text: 'Verlauf' }), logList));
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'motion' }, h('h2', { class: 'card-title', text: 'Bewegungsmelder' }), pirBox),
+    h('section', { class: 'card sortable-card', 'data-sort-id': 'log' }, h('h2', { class: 'card-title', text: 'Verlauf' }), logList));
+  applyOrder(cards, 'auto-cards', '.sortable-card');
+  makeSortable(cards, { key: 'auto-cards', draggable: '.sortable-card' });
+  makeSortable(list, { key: 'rules', draggable: '.rule' });
+  const sec = h('section', { class: 'view', id: 'view-automation', 'aria-labelledby': 'h-auto' },
+    h('h1', { id: 'h-auto', class: 'view-title', text: 'Automation' }), cards);
   sec.render = () => {
     load();
     clearInterval(timer);

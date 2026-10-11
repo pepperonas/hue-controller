@@ -214,3 +214,62 @@ test('replaceChildren bekommt nie null (wuerde als Text "null" erscheinen)', () 
     }
   }
 });
+
+// ------------------------------------------------------------ Drag-and-drop
+
+test('orderBy: gespeichert zuerst, Neues hinten, Entferntes raus, Doppelte einmal', async () => {
+  const { orderBy } = await import('../static/app/sortable.js');
+  const items = [{ id: 'a' }, { id: 'b' }, { id: 'c' }, { id: 'd' }];
+  assert.deepEqual(orderBy(items, ['c', 'x', 'a', 'c']).map((x) => x.id), ['c', 'a', 'b', 'd']);
+  assert.deepEqual(orderBy(items, []).map((x) => x.id), ['a', 'b', 'c', 'd']);
+  assert.deepEqual(orderBy([{ id: 7 }, { id: 3 }], ['3']).map((x) => x.id), [3, 7]);   // Zahl vs. Text
+});
+
+test('Sortieren: Gefuehl wie ops/cue (Vorschau, Schwellen, Touch-Halten, Auto-Scroll)', () => {
+  const code = strip(readFileSync(join(APP, 'sortable.js'), 'utf8'));
+  for (const opt of ['forceFallback: true', 'fallbackTolerance: 6', 'delay: 180', 'delayOnTouchOnly: true',
+                     'touchStartThreshold: 6', 'scroll: true', 'animation: 220', 'preventOnFilter: false']) {
+    assert.ok(code.includes(opt), 'fehlt: ' + opt);
+  }
+  // Schalter und Regler duerfen keinen Zug starten
+  assert.match(code, /NO_DRAG = '[^']*\.sh-switch[^']*\.sh-slider/);
+  // nach dem Ablegen kein Klick auf die Karte (oeffnete sonst den Raum)
+  assert.match(code, /if \(justDropped\) \{ e\.preventDefault\(\); e\.stopPropagation\(\); \}/);
+  // Tastatur
+  assert.match(code, /e\.altKey/);
+});
+
+test('Sortieren ist in ALLEN Ansichten verdrahtet', () => {
+  const want = {
+    'views/home.js': "key: 'rooms', draggable: '.tile'",
+    'views/room.js': "key: 'lamps:' + roomId, draggable: '.lamp'",
+    'views/scenes.js': "key: 'rooms', draggable: '.sortable-card'",
+    'views/automation.js': "key: 'auto-cards', draggable: '.sortable-card'",
+    'views/more.js': "key: 'energy-cards', draggable: '.sortable-card'",
+  };
+  for (const [f, needle] of Object.entries(want)) {
+    assert.ok(readFileSync(join(APP, f), 'utf8').includes(needle), f + ': ' + needle);
+  }
+  assert.ok(readFileSync(join(APP, 'views/automation.js'), 'utf8').includes("key: 'rules', draggable: '.rule'"));
+  assert.ok(readFileSync(join(APP, 'views/more.js'), 'utf8').includes("key: 'status-cards'"));
+});
+
+test('waehrend eines Zugs wird nicht neu sortiert/gebaut', () => {
+  assert.match(readFileSync(join(APP, 'views/home.js'), 'utf8'), /if \(reorder && !isDragging\(\)\)/);
+  for (const f of ['views/scenes.js', 'views/automation.js']) {
+    assert.match(readFileSync(join(APP, f), 'utf8'), /if \(isDragging\(\)\) return;/, f);
+  }
+});
+
+test('Zuhause: die alte Hoch/Runter-Folge wird uebernommen', () => {
+  const code = readFileSync(join(APP, 'views/home.js'), 'utf8');
+  assert.match(code, /LEGACY_ORDER_KEY = 'hue-room-order'/);
+  assert.match(code, /if \(old\.length\) saveOrder\('rooms', old\)/);
+  assert.ok(!/editBtn|function move\(/.test(code), 'Hoch/Runter-Modus ist zurueck');
+});
+
+test('SortableJS ist lokal und versioniert eingebunden (kein CDN)', () => {
+  const v = readFileSync(join(HERE, '..', 'static', 'vendor', 'sortable.esm.js'), 'utf8');
+  assert.match(v.slice(0, 200), /Sortable 1\.15\.6/);
+  assert.match(readFileSync(join(APP, 'sortable.js'), 'utf8'), /from '\.\.\/vendor\/sortable\.esm\.js'/);
+});

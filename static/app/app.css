@@ -68,10 +68,20 @@ body {
 .tile-name { font-weight: 750; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile-sub { font-size: .82rem; color: var(--sh-text2); }
 .tile .sh-slider { width: 100%; }
-.mvs { display: none; gap: .25rem; }
-.editing .mvs { display: inline-flex; }
-.editing .tile .sh-switch, .editing .tile .sh-slider { opacity: .35; pointer-events: none; }
-.mv { font-weight: 800; }
+/* ---- Drag-and-drop (SortableJS, Gefuehl wie ops/cue) */
+.tile, .sortable-card, .lamp, .rule { touch-action: manipulation; }
+.hint-drag { align-self: center; }
+@media (hover: hover) and (pointer: fine) { .tile, .sortable-card, .lamp, .rule { cursor: grab; } }
+.sort-ghost { opacity: .35; outline: 2px dashed color-mix(in srgb, var(--sh-primary) 60%, transparent); outline-offset: -2px; }
+.sort-ghost > * { visibility: hidden; }
+.sort-chosen { transition: box-shadow .15s var(--sh-ease); }
+.sort-fallback {
+  opacity: 1 !important; cursor: grabbing;
+  box-shadow: 0 18px 40px rgb(0 0 0 / .45), 0 0 0 1px color-mix(in srgb, var(--sh-primary) 40%, transparent);
+  transform: rotate(1.2deg) scale(1.02);
+}
+body.sorting, body.sorting * { cursor: grabbing !important; user-select: none; }
+@media (prefers-reduced-motion: reduce) { .sort-fallback { transform: none; } }
 
 /* ---- Karten, Chips, Sektionen */
 .card {

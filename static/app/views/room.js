@@ -5,6 +5,7 @@ import { api } from '../api.js';
 import { throttle } from '../store.js';
 import { colorWheel, whiteSlider } from '../colorpick.js';
 import { clampToGamut } from '../color.js';
+import { makeSortable, loadOrder, orderBy } from '../sortable.js';
 
 const SCENE_NAME = /^[\p{L}\p{N} .,!?:+()/-]{1,32}$/u;
 let strobeConfirmed = false;   // Lichtblitz-Warnung einmal je Sitzung
@@ -149,7 +150,7 @@ export function openRoom(store, roomId) {
         onInput: (v) => { store.hold('lights', l.id, { brightness: v, on: true }); send(v); },
         onDone: (v) => { api.put('/v2/light/' + l.id, { brightness: v }); store.release('lights', l.id); },
       });
-      const el = h('div', { class: 'lamp', role: 'listitem' }, h('div', { class: 'lamp-top' }, dot, name, lsw), ls);
+      const el = h('div', { class: 'lamp', role: 'listitem', 'data-sort-id': l.id }, h('div', { class: 'lamp-top' }, dot, name, lsw), ls);
       el.update = (x) => {
         name.textContent = x.name.replace(/\s*(Color|Light|Lightstrip|White)\b.*$/i, '').trim() || x.name;
         name.title = x.reachable ? x.name : x.name + ' (nicht erreichbar)';
@@ -163,13 +164,14 @@ export function openRoom(store, roomId) {
       return el;
     }
     function renderLamps() {
-      for (const l of store.lightsOf(roomId)) {
+      for (const l of orderBy(store.lightsOf(roomId), loadOrder('lamps:' + roomId))) {
         let el = rows.get(l.id);
         if (!el) { el = lampRow(l); rows.set(l.id, el); lampList.append(el); }
         el.update(l);
       }
     }
     body.append(section('Lampen', lampList));
+    makeSortable(lampList, { key: 'lamps:' + roomId, draggable: '.lamp' });
 
     function update() {
       const r = store.get('rooms', roomId);

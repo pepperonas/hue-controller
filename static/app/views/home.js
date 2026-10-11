@@ -6,16 +6,22 @@ import { api } from '../api.js';
 import { throttle } from '../store.js';
 import { onColor } from '../color.js';
 import { openRoom } from './room.js';
+import { makeSortable, loadOrder, saveOrder, isDragging } from '../sortable.js';
 
-const ORDER_KEY = 'hue-room-order';
+const LEGACY_ORDER_KEY = 'hue-room-order';   // bis 2026-10-11 (Hoch/Runter-Knoepfe)
 const ARCH_ICON = { living_room: 'home', bedroom: 'sleep', kitchen: 'flame', bathroom: 'droplet',
   hallway: 'link', garden: 'leaf', office: 'laptop', dining: 'heart' };
 
-function loadOrder() {
-  try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch (e) { return []; }
-}
-function saveOrder(ids) {
-  try { localStorage.setItem(ORDER_KEY, JSON.stringify(ids)); } catch (e) { /* privat */ }
+/** Raumfolge (je Geraet). Uebernimmt einmalig die Folge der alten
+ *  Hoch/Runter-Knoepfe, damit niemand neu sortieren muss. */
+export function roomOrder() {
+  const now = loadOrder('rooms');
+  if (now.length) return now;
+  try {
+    const old = JSON.parse(localStorage.getItem(LEGACY_ORDER_KEY)) || [];
+    if (old.length) saveOrder('rooms', old);
+    return old;
+  } catch (e) { return []; }
 }
 
 /** Gespeicherte Folge zuerst, Neues hinten an (Raeume vor Zonen), Entferntes faellt raus. */
@@ -38,28 +44,13 @@ export function roomSummary(r) {
 export function homeView(store) {
   const grid = h('div', { class: 'tiles', role: 'list' });
   const tiles = new Map();
-  let editing = false;
 
   const allOff = h('button', { class: 'sh-btn tonal', type: 'button', onclick: async () => {
     const r = await api.post('/v2/all', { on: false });
     if (!r.ok) toast('Alles aus ging nicht: ' + r.error, 'err');
   } }, icon('power'), 'Alles aus');
-  const editBtn = h('button', { class: 'sh-btn tonal', type: 'button', 'aria-pressed': 'false', onclick: () => {
-    editing = !editing;
-    editBtn.setAttribute('aria-pressed', String(editing));
-    editBtn.lastChild.textContent = editing ? 'Fertig' : 'Reihenfolge';
-    grid.classList.toggle('editing', editing);
-  } }, icon('sliders'), h('span', { text: 'Reihenfolge' }));
-  const quick = h('div', { class: 'quick' }, allOff, editBtn);
-
-  function move(id, dir) {
-    const ids = orderRooms(store.list('rooms'), loadOrder()).map((r) => r.id);
-    const i = ids.indexOf(id), j = i + dir;
-    if (i < 0 || j < 0 || j >= ids.length) return;
-    [ids[i], ids[j]] = [ids[j], ids[i]];
-    saveOrder(ids);
-    render(true);
-  }
+  const quick = h('div', { class: 'quick' }, allOff,
+    h('span', { class: 'muted small hint-drag', text: 'Karten ziehen zum Anordnen' }));
 
   function buildTile(r) {
     const name = h('span', { class: 'tile-name' });
@@ -77,11 +68,10 @@ export function homeView(store) {
       onDone: (v) => { api.put('/v2/room/' + r.id, { brightness: v }); store.release('rooms', r.id); },
     });
     const open = h('button', { class: 'tile-open', type: 'button', 'aria-label': r.name + ' öffnen',
-      onclick: () => { if (!editing) openRoom(store, r.id); } }, ic, h('span', { class: 'tile-text' }, name, sub));
-    const up = h('button', { class: 'sh-icon-btn mv', type: 'button', 'aria-label': r.name + ' nach vorn', onclick: () => move(r.id, -1) }, '↑');
-    const down = h('button', { class: 'sh-icon-btn mv', type: 'button', 'aria-label': r.name + ' nach hinten', onclick: () => move(r.id, 1) }, '↓');
-    const el = h('div', { class: 'tile', role: 'listitem' },
-      h('div', { class: 'tile-top' }, open, h('span', { class: 'mvs' }, up, down), sw), slider);
+      onclick: () => openRoom(store, r.id) }, ic, h('span', { class: 'tile-text' }, name, sub));
+    const el = h('div', { class: 'tile', role: 'listitem', 'data-sort-id': r.id,
+      title: 'Ziehen zum Anordnen · Alt + Pfeiltasten' },
+      h('div', { class: 'tile-top' }, open, sw), slider);
     const t = { el, name, sub, sw, slider };
     t.update = (room) => {
       name.textContent = room.name;
@@ -99,7 +89,7 @@ export function homeView(store) {
   }
 
   function render(reorder) {
-    const rooms = orderRooms(store.list('rooms').filter((r) => r.lights.length), loadOrder());
+    const rooms = orderRooms(store.list('rooms').filter((r) => r.lights.length), roomOrder());
     const seen = new Set();
     for (const r of rooms) {
       let t = tiles.get(r.id);
@@ -108,8 +98,10 @@ export function homeView(store) {
       seen.add(r.id);
     }
     for (const [id, t] of tiles) if (!seen.has(id)) { t.el.remove(); tiles.delete(id); }
-    if (reorder) grid.replaceChildren(...rooms.map((r) => tiles.get(r.id).el));
+    // waehrend eines Zugs nicht umstellen — die Karte stuende sonst nicht mehr unter dem Finger
+    if (reorder && !isDragging()) grid.replaceChildren(...rooms.map((r) => tiles.get(r.id).el));
   }
+  makeSortable(grid, { key: 'rooms', draggable: '.tile' });
 
   store.subscribe((c) => {
     if (c.all) return render(true);
