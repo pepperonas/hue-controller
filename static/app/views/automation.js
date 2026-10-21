@@ -29,6 +29,21 @@ export function ruleText(r, moods = {}, scenes = {}) {
   return `${daysText(c.days)} · ${at} · ${what}${a.transition_min ? ` (über ${a.transition_min} min)` : ''}`;
 }
 
+export const OFF_AFTER_MIN = [1, 2, 3, 5, 10, 15, 30];
+
+const hm = (iso) => new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+export function pirState(p, rule) {
+  if (!p.available) return 'Sensor nicht verfügbar';
+  if (p.active_until) return 'Licht an bis ' + hm(p.active_until);
+  if (rule && rule.last_fired) {
+    const t = new Date(rule.last_fired);
+    const day = t.toDateString() === new Date().toDateString() ? 'heute' : t.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+    return `bereit · zuletzt ausgelöst ${day} ${hm(rule.last_fired)}`;
+  }
+  return 'bereit · noch nie ausgelöst';
+}
+
 function nextText(iso) {
   if (!iso) return 'aus';
   const t = new Date(iso), now = new Date();
@@ -68,10 +83,10 @@ export function automationView(store) {
 
     // Bewegungsmelder
     const pir = data.rules.find((r) => r.kind === 'motion');
-    const state = data.pir.available ? (data.pir.active_until ? 'Bewegung erkannt – Licht an' : 'bereit') : 'Sensor nicht verfügbar';
     pirBox.replaceChildren(
-      h('p', { class: 'muted small', text: 'Sensor an GPIO 26: ' + state }),
-      pir ? ruleRow(pir) : h('button', { class: 'sh-btn tonal', type: 'button', onclick: () => edit('motion') }, icon('plus'), 'Einrichten'));
+      h('p', { class: 'muted small', text: 'Sensor an GPIO 26: ' + pirState(data.pir, pir) }),
+      ...(pir ? [ruleRow(pir), offAfter(pir)]
+        : [h('button', { class: 'sh-btn tonal', type: 'button', onclick: () => edit('motion') }, icon('plus'), 'Einrichten')]));
 
     // Regeln
     const rules = orderBy(data.rules.filter((r) => r.kind !== 'motion'), loadOrder('rules'), (r) => String(r.id));
@@ -96,6 +111,27 @@ export function automationView(store) {
         if (!res.ok) toast(res.error, 'err');
         load();
       }));
+  }
+
+  // Abschaltzeit direkt in der Karte: ein Tipp speichert, ohne den Dialog
+  function offAfter(pir) {
+    const cur = pir.config.duration_min;
+    const opts = OFF_AFTER_MIN.includes(cur) ? OFF_AFTER_MIN : [...OFF_AFTER_MIN, cur].sort((a, b) => a - b);
+    return h('div', { class: 'stack' },
+      h('span', { class: 'lbl', text: 'Automatisch aus nach' }),
+      h('div', { class: 'chips', role: 'group', 'aria-label': 'Automatisch aus nach' },
+        ...opts.map((m) => h('button', {
+          class: 'sh-pill' + (m === cur ? ' on' : ''), type: 'button', 'aria-pressed': String(m === cur),
+          onclick: () => setOffAfter(pir, m),
+        }, m + ' min'))),
+      h('p', { class: 'muted small', text: 'Jede neue Bewegung startet die Zeit von vorn. Andere Werte (1–60 min) über „bearbeiten“.' }));
+  }
+
+  async function setOffAfter(pir, minutes) {
+    if (minutes === pir.config.duration_min) return;
+    const r = await api.put('/v2/automations/' + pir.id, { config: { ...pir.config, duration_min: minutes } });
+    toast(r.ok ? `Gartenlicht geht nach ${minutes} min aus` : r.error, r.ok ? 'ok' : 'err');
+    load();
   }
 
   async function setAway(on, simulate) {
@@ -137,7 +173,7 @@ export function automationView(store) {
         const win = h('select', { class: 'field', 'aria-label': 'Wann' },
           h('option', { value: 'dark', selected: c.window !== 'always', text: 'nur bei Dunkelheit' }),
           h('option', { value: 'always', selected: c.window === 'always', text: 'immer' }));
-        fields.push(field('Leuchtdauer (min)', dur), field('Helligkeit (%)', bri), field('Wann', win),
+        fields.push(field('Automatisch aus nach (min)', dur), field('Helligkeit (%)', bri), field('Wann', win),
           h('p', { class: 'muted small', text: 'War das Licht schon an oder hat es jemand verändert, schaltet der Melder es nicht aus.' }));
         collect = () => ({ room: room.value, duration_min: +dur.value, brightness: +bri.value, mirek: c.mirek || 370, window: win.value });
       } else {

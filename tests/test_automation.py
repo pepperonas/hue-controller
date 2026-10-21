@@ -221,6 +221,48 @@ def test_motion_retrigger_extends_without_resending(auto):
     assert len(auto.sent) == 1                               # noch nicht abgelaufen
 
 
+def test_motion_records_last_fired(auto):
+    motion(auto)
+    assert auto.on_motion() is True
+    r = auto.motion_rule()
+    assert r["last_fired"] == auto.clk.t.isoformat(timespec="seconds")
+
+
+def test_ignored_motion_is_logged_but_throttled(auto):
+    motion(auto, window="dark")
+    auto.clk.t = datetime(2026, 10, 12, 13, 0, tzinfo=TZ)
+    for _ in range(5):                                   # PIR pulst staendig
+        assert auto.on_motion() is False
+        auto.clk.t += timedelta(minutes=1)
+    hits = [l for l in auto.db.recent(50) if "ignoriert" in l["msg"]]
+    assert len(hits) == 1 and "hell" in hits[0]["msg"]
+    assert auto.motion_rule()["last_fired"] is None      # verworfen ist nicht ausgeloest
+    auto.clk.t += timedelta(minutes=15)
+    auto.on_motion()
+    assert len([l for l in auto.db.recent(50) if "ignoriert" in l["msg"]]) == 2
+
+
+def test_motion_logs_when_room_was_already_on(auto):
+    motion(auto)
+    auto.state.view["rooms"]["R2"].update(on=True, on_count=1, brightness=80.0)
+    auto.on_motion()
+    assert any("war schon an" in l["msg"] for l in auto.db.recent(10))
+
+
+def test_motion_light_survives_a_restart(auto):
+    motion(auto)
+    auto.on_motion()
+    auto.state.view["rooms"]["R2"].update(on=True, on_count=1, brightness=60.0)
+    # Neustart: neue Automation auf demselben Speicher
+    b = Automation(auto.db, auto.state, lambda t, i, x: auto.sent.append((t, i, x)), api.MOODS,
+                   clock=auto.clk, rng=random.Random(1), defer=lambda s, fn: fn())
+    assert b.motion_set == ("R2", 60.0)
+    auto.clk.t += timedelta(minutes=3, seconds=1)
+    b.tick()
+    assert auto.sent[-1][2]["on"] == {"on": False}
+    assert auto.db.get("motion_active") is None               # nach dem Aus wieder leer
+
+
 # ---------------------------------------------------------------- HTTP
 
 @pytest.fixture
@@ -281,3 +323,18 @@ def test_away_route(client):
     assert r.status_code == 200 and r.get_json()["away"]["simulate"] is True
     assert ("grouped_light", "G0", {"on": {"on": False}}) in client.sent
     assert client.post("/api/v2/away", json={"on": "ja"}).status_code == 400
+
+
+def test_motion_off_after_can_be_changed_and_keeps_last_fired(client):
+    rid = client.post("/api/v2/automations", json={"kind": "motion", "name": "Garten",
+                                                   "config": {"room": "R2", "duration_min": 3}}).get_json()["id"]
+    client.auto.db.update(rid, last_fired="2026-10-12T21:00:00+02:00")
+    rule = client.get("/api/v2/automations").get_json()["rules"][0]
+    r = client.put("/api/v2/automations/%d" % rid, json={"config": {**rule["config"], "duration_min": 10}})
+    assert r.status_code == 200
+    after = client.get("/api/v2/automations").get_json()["rules"][0]
+    assert after["config"]["duration_min"] == 10
+    assert after["last_fired"] == "2026-10-12T21:00:00+02:00"     # Abschaltzeit aendern loescht die Anzeige nicht
+    for bad_min in (0, 61, "5"):
+        assert client.put("/api/v2/automations/%d" % rid,
+                          json={"config": {**rule["config"], "duration_min": bad_min}}).status_code == 400

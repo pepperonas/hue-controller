@@ -394,7 +394,8 @@ def add_automation_routes(bp, auto, state, bad, body_json):
                 f["enabled"] = b["enabled"]
             if "config" in b:
                 f["config"] = validate(rule["kind"], b["config"], *known())
-                f["last_fired"] = None
+                if rule["kind"] != "motion":   # Zeitplan darf nach Aenderung erneut feuern; beim Melder ist es reine Anzeige
+                    f["last_fired"] = None
         except (Invalid, AInvalid) as e:
             return bad(str(e))
         auto.db.update(rid, **f)

@@ -28,6 +28,7 @@ FIRE_WINDOW_S = 120          # ein Termin gilt als "jetzt", bis zu 2 min danach
 TICK_S = 20
 MOODS = ("hell", "konzentration", "lesen", "gemuetlich", "entspannen", "nachtlicht")
 AWAY_END = (23, 30)
+MOTION_SKIP_LOG_S = 15 * 60  # verworfene Bewegung: je Grund hoechstens so oft ins Protokoll
 
 
 class Invalid(ValueError):
@@ -221,8 +222,16 @@ class Automation:
         self.moods = moods                       # {name: {brightness, mirek}}
         self.clock = clock or (lambda: datetime.now(TZ))
         self.rng = rng or random.Random()
+        # Was der Melder eingeschaltet hat, liegt zusaetzlich im kv-Speicher: ohne
+        # das vergass ein Neustart mitten in der Leuchtzeit, dass das Licht UNSER
+        # war — es blieb dann an, bis es jemand von Hand ausschaltete.
         self.motion_until = None                 # Zeitpunkt fuers Ausschalten
         self.motion_set = None                   # (room, brightness) wie WIR gesetzt haben
+        m = self.db.get("motion_active")
+        if m:
+            self.motion_set = (m["room"], float(m["brightness"]))
+            self.motion_until = datetime.fromisoformat(m["until"])
+        self._skip_logged = {}                   # Grund -> letzter Protokolleintrag
         self.away_visit = None                   # (room, until)
         self.away_next = None
         self.pir_ok = False
@@ -305,34 +314,55 @@ class Automation:
                 return r
         return None
 
+    def _motion_skip(self, now, reason, rule_id=None):
+        """Verworfene Bewegung protokollieren — sonst sieht niemand, ob der Sensor
+        ueberhaupt meldet (ein PIR pulst bei Bewegung staendig, daher je Grund
+        hoechstens einmal je MOTION_SKIP_LOG_S)."""
+        last = self._skip_logged.get(reason)
+        if last is not None and (now - last).total_seconds() < MOTION_SKIP_LOG_S:
+            return False
+        self._skip_logged[reason] = now
+        self.db.log("Bewegung erkannt, ignoriert: " + reason, rule_id)
+        return False
+
     def on_motion(self):
         now = self.clock()
         r = self.motion_rule()
-        if not r or not r["enabled"] or self.db.get("away", {"on": False}).get("on"):
+        if not r or not r["enabled"]:
             return False
+        if self.db.get("away", {"on": False}).get("on"):
+            return self._motion_skip(now, "Abwesend aktiv", r["id"])
         c = r["config"]
         if c["window"] == "dark":
             st = sun_times(now.date())
             if st["sunrise"] <= now < st["sunset"]:
-                return False
+                return self._motion_skip(now, "es ist hell", r["id"])
         room = self.state.view["rooms"].get(c["room"])
         if not room:
-            return False
+            return self._motion_skip(now, "Raum unbekannt", r["id"])
         if room["on"] and room["on_count"] and self.motion_set is None:
-            return False            # war schon an — nicht uebernehmen, nicht spaeter ausschalten
+            # war schon an — nicht uebernehmen, nicht spaeter ausschalten
+            return self._motion_skip(now, "%s war schon an" % self.room_name(c["room"]), r["id"])
         if self.motion_set is None:
             self.send_room(c["room"], {"on": {"on": True}, "dimming": {"brightness": float(c["brightness"])},
                                        "color_temperature": {"mirek": c["mirek"]}})
             self.motion_set = (c["room"], float(c["brightness"]))
             self.db.log("Bewegung: %s an" % self.room_name(c["room"]), r["id"])
+        self.db.update(r["id"], last_fired=now.isoformat(timespec="seconds"))
         self.motion_until = now + timedelta(minutes=c["duration_min"])
+        self._save_motion()
         return True
+
+    def _save_motion(self):
+        self.db.put("motion_active", None if not self.motion_set else {
+            "room": self.motion_set[0], "brightness": self.motion_set[1], "until": self.motion_until.isoformat()})
 
     def motion_tick(self, now):
         if not self.motion_set or not self.motion_until or now < self.motion_until:
             return
         room_id, bri = self.motion_set
         self.motion_set, self.motion_until = None, None
+        self._save_motion()
         room = self.state.view["rooms"].get(room_id)
         if not room or not room["on"]:
             return

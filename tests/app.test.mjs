@@ -273,3 +273,23 @@ test('SortableJS ist lokal und versioniert eingebunden (kein CDN)', () => {
   assert.match(v.slice(0, 200), /Sortable 1\.15\.6/);
   assert.match(readFileSync(join(APP, 'sortable.js'), 'utf8'), /from '\.\.\/vendor\/sortable\.esm\.js'/);
 });
+
+// ------------------------------------------------------------ Bewegungsmelder
+
+test('Bewegungsmelder: Zustandstext nennt letzte Ausloesung bzw. Abschaltzeit', async () => {
+  const { pirState, OFF_AFTER_MIN } = await import('../static/app/views/automation.js');
+  assert.equal(pirState({ available: false }), 'Sensor nicht verfügbar');
+  assert.equal(pirState({ available: true }, { last_fired: null }), 'bereit · noch nie ausgelöst');
+  const now = new Date();
+  now.setHours(21, 5, 0, 0);
+  assert.match(pirState({ available: true }, { last_fired: now.toISOString() }), /^bereit · zuletzt ausgelöst heute 21:05$/);
+  assert.match(pirState({ available: true, active_until: now.toISOString() }, null), /^Licht an bis 21:05$/);
+  // Direktwahl bleibt im Bereich, den der Server annimmt (1–60)
+  assert.ok(OFF_AFTER_MIN.every((m) => Number.isInteger(m) && m >= 1 && m <= 60));
+});
+
+test('Bewegungsmelder-Karte: Abschaltzeit direkt waehlbar und speichert die volle Konfiguration', () => {
+  const src = readFileSync(join(APP, 'views/automation.js'), 'utf8');
+  assert.match(src, /offAfter\(pir\)/);
+  assert.match(src, /config: \{ \.\.\.pir\.config, duration_min: minutes \}/);
+});
